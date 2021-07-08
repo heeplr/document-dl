@@ -1,4 +1,4 @@
-"""download bills from https://www.vodafone.de"""
+"""download documents from https://www.vodafone.de"""
 
 import docdl
 import itertools
