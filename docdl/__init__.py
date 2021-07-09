@@ -24,6 +24,8 @@ class WebPortal():
     def __init__(self, login_id, password):
         self.login_id = login_id
         self.password = password
+        # initialize requests HTTP session
+        self.session = requests.Session()
 
     def __repr__(self):
         return f"class {self.__class__.__name__}()"
@@ -31,6 +33,8 @@ class WebPortal():
     def __enter__(self):
         # login to service
         self.login()
+        if not self.is_logged_in():
+            raise AuthenticationError("login failed")
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -41,6 +45,12 @@ class WebPortal():
         """authenticate to service"""
         raise NotImplementedError(
             f"{ self.__class__} needs a login() method"
+        )
+
+    def is_logged_in(self):
+        """return True if logged in successfully, False otherwise"""
+        raise NotImplementedError(
+            f"{self.__class__} needs a is_logged_in() method"
         )
 
     def logout(self):
@@ -58,36 +68,6 @@ class WebPortal():
             f"{ self.__class__} needs a documents() generator"
         )
 
-    @staticmethod
-    def download_with_requests(session, document):
-        # fetch url
-        r = session.get(document.url, stream=True)
-        if r.status_code != 200:
-            raise DownloadError("status code: {r.status_code}")
-        # get filename from header
-        filename = re.findall(
-            "filename=(.+);",
-            r.headers['content-disposition']
-        )[0]
-        # protect against empty filenames
-        if not filename:
-            if 'title' in document.attributes:
-                filename = document.attributes['title']
-            elif 'id' in document.attributes:
-                filename = "document-dl.{document.attributes['id']}"
-            else:
-                raise RuntimeError("no suitable filename")
-
-        # massage filename
-        filename = filename.replace('"', '').strip()
-        # store filename for later
-        document.attributes['filename'] = filename
-        # instruct requests to decode content for us
-        r.raw.decode_content = True
-        # save file
-        with open(os.path.join(document.path,filename), 'wb') as f:
-            for chunk in r:
-                f.write(chunk)
 
 
 class SeleniumWebPortal(WebPortal):
@@ -190,36 +170,61 @@ class SeleniumWebPortal(WebPortal):
 
     def download(self, document):
         """download a document"""
-        # create requests session
-        session = requests.Session()
         # copy cookies from selenium to requests session
+        self.cookies_to_requests_session()
+        # fetch url
+        r = self.session.get(
+            document.url, stream=True, headers=document.headers
+        )
+        if not r.ok:
+            raise DownloadError("status code: {r.status_code}")
+
+        # filename not already set?
+        if "filename" in document.attributes:
+            filename = document.attributes['filename']
+        # get filename from header
+        elif 'content-disposition' in r.headers:
+            filename = re.findall(
+                "filename=(.+);",
+                r.headers['content-disposition']
+            )[0]
+        else:
+            filename = None
+
+        # protect against empty filenames
+        if not filename:
+            if 'title' in document.attributes:
+                filename = document.attributes['title']
+            elif 'id' in document.attributes:
+                filename = "document-dl.{document.attributes['id']}"
+            else:
+                raise RuntimeError("no suitable filename")
+
+        # massage filename
+        filename = filename.replace('"', '').strip()
+        # store filename for later
+        document.attributes['filename'] = filename
+        # save file
+        with open(os.path.join(document.path,filename), 'wb') as f:
+            for chunk in r.iter_content(chunk_size=4096):
+                f.write(chunk)
+
+    def cookies_to_requests_session(self):
+        """copy current cookies to requests session"""
         cookies = self.webdriver.get_cookies()
         for cookie in cookies:
-            session.cookies.set(cookie['name'], cookie['value'])
-        Portal.download_with_requests(session, document)
-
-
-class RequestsWebPortal(WebPortal):
-    """access portal using requests"""
-
-    def __init__(self, login_id, password, options):
-        """
-        plugins using RequestsPortal can use self.session for scraping
-        """
-        super(RequestsWebPortal, self).__init__(login_id, password)
-        # initialize requests HTTP session
-        self.session = requests.Session()
-
-    def download(self, document):
-        """download a document"""
-        WebPortal.download_with_requests(self.session, document)
+            self.session.cookies.set(cookie['name'], cookie['value'])
 
 
 class Document():
     """a document"""
 
-    def __init__(self, url, attributes={}):
+    def __init__(self, url, attributes={}, headers={}):
+        # default custom request headers
+        self.headers = headers
+        # target url
         self.url = url
+        # portal specific attributes
         self.attributes = attributes
         # default path is CWD
         self.path = os.getcwd()
