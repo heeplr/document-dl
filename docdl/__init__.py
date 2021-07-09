@@ -181,6 +181,7 @@ class SeleniumWebPortal(WebPortal):
             filename = document.attributes['filename']
         # get filename from header
         elif 'content-disposition' in r.headers:
+            # @todo properly parse rfc6266
             filename = re.findall(
                 "filename=(.+);",
                 r.headers['content-disposition']
