@@ -2,6 +2,7 @@
 
 import docdl
 import itertools
+import selenium.common.exceptions
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -20,6 +21,7 @@ class VodafoneKabel_DE(docdl.SeleniumWebPortal):
 
 
     def login(self):
+        """authenticate"""
         # load main page
         self.webdriver.get(self.URL_BASE)
         # press login button to show login form
@@ -41,18 +43,30 @@ class VodafoneKabel_DE(docdl.SeleniumWebPortal):
         password.send_keys(self.password)
         password.submit()
 
+    def is_logged_in(self):
+        """return True if logged in successfully, False otherwise"""
+        # wait for page to load
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(
+                lambda d: d.find_elements(By.CSS_SELECTOR, "a.logout-btn") or \
+                          d.find_elements(By.XPATH, "//input[@type='password']")
+        )
+        # if there's a password prompt, login failed
+        if len(self.webdriver.find_elements(By.CSS_SELECTOR, "a.logout-btn")) == 0:
+            return False
+        return True
+
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)
 
     def documents(self):
-        # fetch list of documents
-        for n, d in enumerate(itertools.chain(self._my_documents(), self._invoices())):
+        """fetch list of documents"""
+        for n, d in enumerate(itertools.chain(self.my_documents(), self.invoices())):
             # set an id
             d.attributes['id'] = n
             # return document
             yield d
 
-    def _my_documents(self):
+    def my_documents(self):
         """iterate "Meine Dokumente"""
         # go to documents site
         self.webdriver.get(self.URL_MY_DOCUMENTS)
@@ -82,7 +96,7 @@ class VodafoneKabel_DE(docdl.SeleniumWebPortal):
             )
 
 
-    def _invoices(self):
+    def invoices(self):
         # go to bills overview
         self.webdriver.get(self.URL_INVOICES)
         for table in self.webdriver.find_elements_by_css_selector("div.dataTable"):
