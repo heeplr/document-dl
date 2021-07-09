@@ -174,7 +174,7 @@ class SeleniumWebPortal(WebPortal):
         self.cookies_to_requests_session()
         # fetch url
         r = self.session.get(
-            document.url, stream=True, headers=document.headers
+            document.url, stream=True, headers=document.request_headers
         )
         if not r.ok:
             raise DownloadError("status code: {r.status_code}")
@@ -219,9 +219,9 @@ class SeleniumWebPortal(WebPortal):
 class Document():
     """a document"""
 
-    def __init__(self, url, attributes={}, headers={}):
+    def __init__(self, url, attributes={}, request_headers={}):
         # default custom request headers
-        self.headers = headers
+        self.request_headers = request_headers
         # target url
         self.url = url
         # portal specific attributes

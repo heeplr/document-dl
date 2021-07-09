@@ -78,7 +78,7 @@ class O2online_DE(docdl.SeleniumWebPortal):
         for year in years:
             yield docdl.Document(
                 url=f"{self.URL_INVOICE_OVERVIEW}?statementYear={year}",
-                headers={ "Accept": "application/pdf" },
+                request_headers={ "Accept": "application/pdf" },
                 attributes={
                     'category': "invoice_overview",
                     'year': year,
