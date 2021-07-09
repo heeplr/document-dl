@@ -194,7 +194,7 @@ class SeleniumWebPortal(WebPortal):
             if 'title' in document.attributes:
                 filename = document.attributes['title']
             elif 'id' in document.attributes:
-                filename = "document-dl.{document.attributes['id']}"
+                filename = f"document-dl.{document.attributes['id']}"
             else:
                 raise RuntimeError("no suitable filename")
 
