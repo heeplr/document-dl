@@ -242,7 +242,10 @@ class Document():
         if len(filters) == 0:
             return True
         # apply filter to an attribute of a document
-        _filter = lambda attribute, pattern: True if str(pattern) in str(self.attributes[attribute]) else False
+        _filter = lambda attribute, pattern: \
+            True if attribute in self.attributes and \
+                    str(pattern) in str(self.attributes[attribute]) \
+                 else False
         # apply all filters to this document
         if all([ _filter(attribute, pattern) for attribute, pattern in filters ]):
             return True
