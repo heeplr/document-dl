@@ -110,7 +110,7 @@ class O2online_DE(docdl.SeleniumWebPortal):
             currency = invoice['total']['currency']
             # collect attributes
             attributes = {
-                'amount': f"{amount} {currency}",
+                'amount': f"{amount}",
                 'date': f"{year}-{month}-{day}"
             }
             # iterate documents in this invoice
