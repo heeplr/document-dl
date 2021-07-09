@@ -174,7 +174,7 @@ class SeleniumWebPortal(WebPortal):
             document.url, stream=True, headers=document.request_headers
         )
         if not r.ok:
-            raise DownloadError("status code: {r.status_code}")
+            raise DownloadError(f"\"{document.url}\" status code: {r.status_code}")
 
         # filename not already set?
         if "filename" in document.attributes:
