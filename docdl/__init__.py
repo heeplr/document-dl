@@ -27,9 +27,6 @@ class WebPortal():
         # initialize requests HTTP session
         self.session = requests.Session()
 
-    def __repr__(self):
-        return f"class {self.__class__.__name__}()"
-
     def __enter__(self):
         # login to service
         self.login()
