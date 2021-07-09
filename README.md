@@ -1,18 +1,19 @@
 
-Plugin based utility to download documents (invoices, notifications, ...)
+Plugin based command-line utility to download documents (invoices, notifications, ...)
 from various web portals.
 
 
-= Dependencies =
+# Dependencies
 * python
+* click
 * selenium
 
-= Installation =
+# Installation
 ```
 $ pip install .
 ```
 
-= Usage =
+# Usage
 
 Display Help:
 
@@ -20,7 +21,7 @@ Display Help:
 $ document-dl -h
 ```
 
-= Examples =
+# Examples
 
 List all documents from Vodafone:
 ```
@@ -38,6 +39,6 @@ $ document-dl --plugin O2online_DE --filter doctype BILL download
 ```
 
 
-= TODO =
+# TODO
 * better filtering
 * better documentation
