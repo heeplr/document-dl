@@ -15,7 +15,8 @@ setup(
     py_modules=['docdl'],
     install_requires=[
         'click',
-        'requests'
+        'requests',
+        'selenium'
     ],
     packages=find_packages(exclude=['tests*']),
     entry_points={
