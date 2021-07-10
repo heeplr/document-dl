@@ -1,12 +1,11 @@
 """download documents from conrad.de"""
 
-import docdl
-import itertools
 import re
-import requests
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
+
+import docdl
 
 
 
@@ -64,9 +63,7 @@ class Conrad_DE(docdl.SeleniumWebPortal):
                 (By.CSS_SELECTOR, "div.vld-icon")
             )
         )
-        # ~ # get script with apikey
-        # ~ self.webdriver.get("https://api-cdn.conrad.com/user-spa/1-109-4/static/js/client.min.js")
-        # ~ apikey = re.match(r".*apikey:\"([^\"]*)\",.*", self.webdriver.page_source)[1]
+        # load list of invoices
         self.webdriver.get(self.URL_INVOICES)
         # wait for time period selection
         time_period = WebDriverWait(self.webdriver, self.TIMEOUT).until(

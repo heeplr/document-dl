@@ -1,11 +1,11 @@
 """download documents from o2online.de"""
 
-import docdl
 import itertools
-import requests
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+import docdl
 
 
 class O2online_DE(docdl.SeleniumWebPortal):
@@ -22,7 +22,8 @@ class O2online_DE(docdl.SeleniumWebPortal):
         """authenticate"""
         self.webdriver.get(self.URL_LOGIN)
         # find entry field
-        username = self.webdriver.find_element_by_xpath(
+        username = self.webdriver.find_element(
+            By.XPATH,
             "//input[@name='IDToken1']"
         )
         # wait for entry field
@@ -33,7 +34,8 @@ class O2online_DE(docdl.SeleniumWebPortal):
         username.send_keys(self.login_id)
         username.submit()
         # find entry field
-        password = self.webdriver.find_element_by_xpath(
+        password = self.webdriver.find_element(
+            By.XPATH,
             "//input[@name='IDToken1']"
         )
         # wait for entry field
@@ -107,7 +109,7 @@ class O2online_DE(docdl.SeleniumWebPortal):
             month = invoice['date'][1]
             day = invoice['date'][2]
             amount = invoice['total']['amount']
-            currency = invoice['total']['currency']
+            # ~ currency = invoice['total']['currency']
             # collect attributes
             attributes = {
                 'amount': f"{amount}",
@@ -116,7 +118,9 @@ class O2online_DE(docdl.SeleniumWebPortal):
             # iterate documents in this invoice
             for d in invoice['billDocuments']:
                 yield docdl.Document(
-                    url=f"{self.URL_INVOICE}?billNumber={d['billNumber']}&documentType={d['documentType']}",
+                    url=f"{self.URL_INVOICE}?" \
+                        f"billNumber={d['billNumber']}&" \
+                        f"documentType={d['documentType']}",
                     attributes={
                         **attributes,
                         'number': d['billNumber'],

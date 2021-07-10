@@ -1,11 +1,11 @@
-"""download documents from https://www.vodafone.de"""
+"""download documents from www.vodafone.de"""
 
-import docdl
 import itertools
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+import docdl
 
 
 class VodafoneKabel_DE(docdl.SeleniumWebPortal):
@@ -96,6 +96,7 @@ class VodafoneKabel_DE(docdl.SeleniumWebPortal):
 
 
     def invoices(self):
+        """iterate invoices"""
         # go to bills overview
         self.webdriver.get(self.URL_INVOICES)
         for table in self.webdriver.find_elements_by_css_selector("div.dataTable"):

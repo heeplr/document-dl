@@ -1,13 +1,12 @@
 """download documents from elster.de using certificate file + password"""
 
-import docdl
 import re
-import requests
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
+import docdl
 
 
 class Elster(docdl.SeleniumWebPortal):
@@ -45,10 +44,10 @@ class Elster(docdl.SeleniumWebPortal):
         # wait for either login error message box or success message
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.visibility_of_element_located((
-                By.XPATH, "//div[contains(@class,'messageBox--error')] | //*[contains(text(), 'Erfolgreich eingeloggt')]"
+                By.XPATH,
+                "//div[contains(@class,'messageBox--error')] | " \
+                "//*[contains(text(), 'Erfolgreich eingeloggt')]"
             ))
-            # ~ lambda d: d.find_element(By.CSS_SELECTOR, "div.messageBox--error").is_displayed() or \
-                      # ~ d.find_element(By.XPATH, "//*[contains(text(), 'Erfolgreich eingeloggt')]").is_displayed()
         )
         # login successful
         if "Mein ELSTER" in self.webdriver.title:
@@ -134,9 +133,8 @@ class Elster(docdl.SeleniumWebPortal):
             if not next_button.is_enabled():
                 # quit
                 break
-            else:
-                # load next page
-                next_button.click()
+            # load next page
+            next_button.click()
 
     def download(self, document):
         """
@@ -168,7 +166,7 @@ class Elster(docdl.SeleniumWebPortal):
         # store "save" button as new download_element
         document.download_element = savebutton
         # download file
-        super(Elster, self).download(document)
+        super().download(document)
         try:
             # try to get button to close dialog
             # (that sometimes disappears on itself)
@@ -179,4 +177,3 @@ class Elster(docdl.SeleniumWebPortal):
             closebutton.click()
         except NoSuchElementException:
             pass
-
