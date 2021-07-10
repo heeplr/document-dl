@@ -50,8 +50,8 @@ import docdl
     metavar="JQ_EXPRESSION",
     envvar="DOCDL_JQ",
     show_envvar=True,
-    help="process document only if json query matches attributes " \
-         "(see http://stedolan.github.io/jq/manual/ )"
+    help="process document only if json query matches document " \
+         "attributes (see http://stedolan.github.io/jq/manual/ )"
 )
 @click.option(
     "-H",
