@@ -64,14 +64,7 @@ class WebPortal():
     def download(self, document):
         """download document url"""
         filename = self.download_with_requests(document)
-        # got a predefined filename?
-        if "filename" in document.attributes:
-            # rename file to predefined name
-            os.rename(filename, document.attributes['filename'])
-        else:
-            # save new filename
-            document.attributes['filename'] = filename
-        return filename
+        return self.rename_after_download(document, filename)
 
     def download_with_requests(self, document):
         """download a file without the browser using requests"""
@@ -113,6 +106,15 @@ class WebPortal():
 
         return filename
 
+    def rename_after_download(self, document, filename):
+        # got a predefined filename?
+        if "filename" in document.attributes:
+            # rename file to predefined name
+            os.rename(filename, document.attributes['filename'])
+        else:
+            # save new filename
+            document.attributes['filename'] = filename
+        return filename
 
 class SeleniumWebPortal(WebPortal):
     """access portal using selenium"""
@@ -229,13 +231,7 @@ class SeleniumWebPortal(WebPortal):
             raise RuntimeError(
                 "Document has neither url or download_element"
             )
-        # got a predefined filename?
-        if "filename" in document.attributes:
-            # rename file to predefined name
-            os.rename(filename, document.attributes['filename'])
-        else:
-            # save new filename
-            document.attributes['filename'] = filename
+        return self.rename_after_download(document, filename)
 
     def download_with_selenium(self, document):
         """download a file using the selenium webdriver"""
