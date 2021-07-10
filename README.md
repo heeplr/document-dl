@@ -107,9 +107,9 @@ class MyPlugin(docdl.WebPortal):
     def download(self, document):
         """if you really need a custom download method"""
 
-        # ... download file to os.getcwd() ...
+        # ... save file to os.getcwd() ...
 
-        return filename
+        return self.rename_after_download(document, filename)
 
 ```
 
