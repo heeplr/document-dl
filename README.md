@@ -1,8 +1,12 @@
 
-Command line program to download documents from web portals.
+Plugin based command line program to download documents from web portals.
 
-Use specific plugins to download all kind of documents (invoices,
-notifications, ...) or write your own scraping plugin.
+List or download all kind of documents (invoices, notifications, ...) or
+write your own scraping plugin.
+
+Select specific documents using simple string search (**--filter**
+argument) or using complex [jq queries](http://stedolan.github.io/jq/manual/)
+(**--jq** argument).
 
 
 # Dependencies
