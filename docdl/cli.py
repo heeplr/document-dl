@@ -36,13 +36,22 @@ import docdl
 @click.option(
     "-f",
     "--filter",
-    "filt",
+    "filters",
     type=click.Tuple([str, str]),
     metavar="<ATTRIBUTE PATTERN>...",
     multiple=True,
     envvar="DOCDL_FILTER",
     show_envvar=True,
-    help="only process documents that match filter rule"
+    help="only process documents where attribute contains pattern"
+)
+@click.option(
+    "-j",
+    "--jq",
+    metavar="JQ_EXPRESSION",
+    envvar="DOCDL_JQ",
+    show_envvar=True,
+    help="process document only if json query matches attributes " \
+         "(see http://stedolan.github.io/jq/manual/ )"
 )
 @click.option(
     "-H",
@@ -79,7 +88,7 @@ import docdl
 )
 @click.pass_context
 def documentdl(
-    ctx, username, password, plugin, filt, headless, browser, timeout
+    ctx, username, password, plugin, filters, jq, headless, browser, timeout
 ):
     """download documents from web portals"""
     # set browser to use for SeleniumWebPortal class
@@ -96,7 +105,8 @@ def documentdl(
         username, password, { 'headless': headless }
     )
     # store options
-    ctx.obj['filter'] = filt
+    ctx.obj['filters'] = filters
+    ctx.obj['jq'] = jq
 
 @documentdl.command(name="list")
 @click.pass_context
@@ -106,7 +116,8 @@ def list_(ctx):
         # walk all documents found
         for document in service.documents():
             # list document if filters match
-            if document.filter(ctx.obj['filter']):
+            if document.filter(ctx.obj['filters']) and \
+               document.filter_jq(ctx.obj['jq']):
                 click.echo(f"{document.attributes}")
 
 @documentdl.command()
@@ -117,7 +128,8 @@ def download(ctx):
         # walk all documents found
         for document in service.documents():
             # list document if filters match
-            if document.filter(ctx.obj['filter']):
+            if document.filter(ctx.obj['filters']) and \
+               document.filter_jq(ctx.obj['jq']):
                 # download
                 service.download(document)
                 click.echo(f"downloaded \"{document.attributes['filename']}\"")

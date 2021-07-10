@@ -4,6 +4,7 @@ import re
 import os
 import requests
 import inotify.adapters
+import jq
 
 
 # ---------------------------------------------------------------------
@@ -311,3 +312,16 @@ class Document():
             str(pattern) in str(self.attributes[attribute])
         # apply all filters to this document
         return all(_filter(attribute, pattern) for attribute, pattern in filters)
+
+    def filter_jq(self, jq_string):
+        """
+        :param jq_string jq expression to output document on match
+        """
+        # null expression matches by default
+        if not jq_string:
+            return True
+        # compile jq expression
+        exp = jq.compile(jq_string)
+        # feed attributes to jq
+        return any(exp.input(self.attributes).all())
+

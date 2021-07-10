@@ -9,12 +9,15 @@ notifications, ...) or write your own scraping plugin.
 * python
 * click
 * inotify
+* jq
 * selenium (default webdriver is "chrome")
+
 
 # Installation
 ```
 $ pip install .
 ```
+
 
 # Usage
 
@@ -22,24 +25,73 @@ Display Help:
 
 ```
 $ document-dl -h
+Usage: document-dl [OPTIONS] COMMAND [ARGS]...
+
+  download documents from web portals
+
+Options:
+  -u, --username TEXT             login id  [env var: DOCDL_USERNAME]
+  -p, --password TEXT             secret password  [env var: DOCDL_PASSWORD]
+  -P, --plugin TEXT               plugin name  [env var: DOCDL_PLUGIN;
+                                  required]
+
+  -f, --filter <ATTRIBUTE PATTERN>...
+                                  only process documents where attribute
+                                  contains pattern  [env var: DOCDL_FILTER]
+
+  -j, --jq JQ_EXPRESSION          process document only if json query matches
+                                  attributes (see
+                                  http://stedolan.github.io/jq/manual/ )  [env
+                                  var: DOCDL_JQ]
+
+
+  -H, --headless BOOLEAN          show browser window if false  [env var:
+                                  DOCDL_HEADLESS; default: True]
+
+  -b, --browser [chrome|edge|firefox|ie|opera|safari|webkitgtk]
+                                  webdriver to use for selenium plugins  [env
+                                  var: DOCDL_BROWSER; default: chrome]
+
+  -t, --timeout INTEGER           seconds to wait for data before terminating
+                                  connection  [env var: DOCDL_TIMEOUT;
+                                  default: 15]
+
+  -h, --help                      Show this message and exit.
+
+Commands:
+  download  download documents
+  list      list documents
 ```
+
 
 # Examples
 
-List all documents from Vodafone:
+List all documents from vodafone.de:
 ```
 $ document-dl --username mylogin --password mypass --plugin VodafoneKabel_DE list
 ```
 
-Download all documents from Vodafone (and provide credentials using env vars):
+Download all documents from vodafone.de (and provide credentials using env vars):
 ```
 $ DOCDL_USERNAME="mylogin" DOCDL_PASSWORD="mypass" document-dl --plugin VodafoneKabel_DE download
 ```
 
-Download all invoices from o2 Online (and enter username/password at prompt):
+Download all invoices from o2online.de (and enter username/password at prompt):
 ```
 $ document-dl --plugin O2online_DE --filter doctype BILL download
 ```
+
+List all documents from o2online.de where year >= 2019:
+```
+$ document-dl --plugin O2online_DE --jq 'select(.year >= 2020)' list
+```
+
+Download all documents from elster.de where id = 15:
+```
+$ document-dl --plugin Elster --jq 'contains({id: 15})' download
+```
+
+
 
 # Writing a plugin
 
@@ -112,6 +164,7 @@ class MyPlugin(docdl.WebPortal):
         return self.rename_after_download(document, filename)
 
 ```
+
 
 # TODO
 * better filtering

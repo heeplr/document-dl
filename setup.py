@@ -16,6 +16,7 @@ setup(
     install_requires=[
         'click',
         'inotify',
+        'jq',
         'requests',
         'selenium'
     ],
