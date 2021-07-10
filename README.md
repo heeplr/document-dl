@@ -46,7 +46,7 @@ Options:
 
   -j, --jq JQ_EXPRESSION          process document only if json query matches
                                   document attributes (see
-                                  http://stedolan.github.io/jq/manual/ )  [env
+                                  https://stedolan.github.io/jq/manual/ )  [env
                                   var: DOCDL_JQ]
 
   -H, --headless BOOLEAN          show browser window if false  [env var:
@@ -70,17 +70,27 @@ Commands:
 
 # Examples
 
-List all documents from vodafone.de:
+List all documents from vodafone.de, prompt for username/password:
 ```
-$ document-dl --username mylogin --password mypass --plugin VodafoneKabel_DE list
-```
-
-Download all documents from vodafone.de (and provide credentials using env vars):
-```
-$ DOCDL_USERNAME="mylogin" DOCDL_PASSWORD="mypass" document-dl --plugin VodafoneKabel_DE download
+$ document-dl --plugin VodafoneKabel_DE download
 ```
 
-Download all invoices from o2online.de (and enter username/password at prompt):
+Same, but show browser window this time:
+```
+$ document-dl --headless=false --plugin VodafoneKabel_DE download
+```
+
+Download all documents from conrad.de, pass credentials as commandline arguments:
+```
+$ document-dl --username mylogin --password mypass --plugin Conrad_DE download
+```
+
+Download all documents from conrad.de, pass credentials  env vars:
+```
+$ DOCDL_USERNAME="mylogin" DOCDL_PASSWORD="mypass" document-dl --plugin Conrad_DE download
+```
+
+Download all documents from o2online.de where "doctype" attribute contains "BILL":
 ```
 $ document-dl --plugin O2online_DE --filter doctype BILL download
 ```
