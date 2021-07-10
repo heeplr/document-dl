@@ -103,5 +103,5 @@ def download(ctx):
             if document.filter(ctx.obj['filter']):
                 # download
                 service.download(document)
-                click.echo(f"Downloaded \"{document.attributes['filename']}\"")
+                click.echo(f"downloaded \"{document.attributes['filename']}\"")
 
