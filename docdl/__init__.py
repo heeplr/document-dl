@@ -2,6 +2,8 @@
 
 import re
 import requests
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import os
 
 
@@ -131,6 +133,13 @@ class SeleniumWebPortal(WebPortal):
         elif self.WEBDRIVER == "chrome":
             # enable incognito mode
             opts.add_argument("--incognito")
+            # set preference options
+            opts.add_experimental_option("prefs", {
+                # always save PDFs
+                "plugins.always_open_pdf_externally": True,
+                # set default download directory to CWD
+                "download.default_directory": os.getcwd()
+            })
             self.webdriver = webdriver.Chrome(options=opts)
 
         elif self.WEBDRIVER == "edge":
@@ -140,6 +149,13 @@ class SeleniumWebPortal(WebPortal):
             # enable private browsing
             firefox_profile = webdriver.FirefoxProfile()
             firefox_profile.set_preference("browser.privatebrowsing.autostart", True)
+            # set default download directory to CWD
+            firefox_profile.set_preference("browser.download.dir", os.getcwd())
+            # save PDFs by default (don't preview)
+            firefox_profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/pdf");
+            firefox_profile.set_preference("pdfjs.disabled", True);
+            firefox_profile.set_preference("plugin.scan.Acrobat", "999.0");
+            firefox_profile.set_preference("plugin.scan.plid.all", False);
             self.webdriver = webdriver.Firefox(options=opts)
 
         elif self.WEBDRIVER == "ie":
@@ -167,8 +183,77 @@ class SeleniumWebPortal(WebPortal):
 
     def download(self, document):
         """download a document"""
+        if document.download_element:
+            self.download_with_selenium(document)
+        elif document.url:
+            self.download_with_requests(document)
+        else:
+            raise ArgumentError(
+                "Document has neither url or download_element"
+            )
+
+    @staticmethod
+    def all_downloads_complete_chrome(driver):
+        from selenium.webdriver.common.keys import Keys
+        # open new tab
+        driver.execute_script("window.open();")
+        driver.switch_to.window(driver.window_handles[1])
+        driver.get("chrome://downloads/")
+        # wait for downloads tab
+        WebDriverWait(driver, 15).until(
+                EC.title_contains("Downloads")
+        )
+        # get all paths
+        paths = driver.execute_script(
+            """
+            var items = document.querySelector('downloads-manager')
+                .shadowRoot.getElementById('downloadsList').items;
+            if (items.every(e => e.state === "COMPLETE"))
+                return items.map(e => e.fileUrl || e.file_url);
+            """)
+        # close tab
+        driver.close()
+        # switch back to original tab
+        driver.switch_to.window(driver.window_handles[0])
+        return paths
+
+    def download_with_selenium(self, document):
+        # scroll to download element
+        self.webdriver.execute_script(
+            "arguments[0].scrollIntoView(true);",
+            document.download_element
+        )
+        # click element to start download
+        document.download_element.click()
+        # wait for download completed
+        if self.WEBDRIVER == "chrome":
+            # are we using chrome in headless mode?
+            if self.webdriver.options.headless:
+                # use inotify to watch download directory
+                paths = self.all_downloads_complete_inotify_chrome
+            # not in headless mode
+            else:
+                # watch chrome://downloads
+                paths = WebDriverWait(self.webdriver, self.TIMEOUT, 1).until(
+                    self.all_downloads_complete_chrome
+                )
+        else:
+            raise UnsupportedOperation(
+                f"download_with_selenium doesn't support {self.WEBDRIVER} webdriver"
+            )
+        # convert URI to path
+        filename = re.match(r"^file://(.*)$", paths[0])[1]
+        # got a filename ?
+        if "filename" in document.attributes:
+            # rename file
+            os.rename(filename, document.attributes['filename'])
+        else:
+            # save path
+            document.attributes['filename'] = filename
+
+    def download_with_requests(self, document):
         # copy cookies from selenium to requests session
-        self.cookies_to_requests_session()
+        self.copy_to_requests_session()
         # fetch url
         r = self.session.get(
             document.url, stream=True, headers=document.request_headers
@@ -203,29 +288,33 @@ class SeleniumWebPortal(WebPortal):
         # store filename for later
         document.attributes['filename'] = filename
         # save file
-        with open(os.path.join(document.path,filename), 'wb') as f:
+        with open(os.path.join(os.getcwd(), filename), 'wb') as f:
             for chunk in r.iter_content(chunk_size=4096):
                 f.write(chunk)
 
-    def cookies_to_requests_session(self):
-        """copy current cookies to requests session"""
+    def copy_to_requests_session(self):
+        """copy current session to requests session"""
+        # copy cookies
         cookies = self.webdriver.get_cookies()
         for cookie in cookies:
             self.session.cookies.set(cookie['name'], cookie['value'])
+        # copy user agent
+        user_agent = self.webdriver.execute_script("return navigator.userAgent;")
+        self.session.headers['User-Agent'] = user_agent
 
 
 class Document():
     """a document"""
 
-    def __init__(self, url, attributes={}, request_headers={}):
+    def __init__(self, url=None, attributes={}, request_headers={}, download_element=None):
         # default custom request headers
         self.request_headers = request_headers
-        # target url
+        # target url (if set, the url will be GET using requests)
         self.url = url
+        # if download_element is set, it will be click()ed for download
+        self.download_element = download_element
         # portal specific attributes
         self.attributes = attributes
-        # default path is CWD
-        self.path = os.getcwd()
 
     def __repr__(self):
         return f"class {self.__class__.__name__}(url=\"{self.url}\", attributes={self.attributes})"

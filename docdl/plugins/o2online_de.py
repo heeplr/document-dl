@@ -54,7 +54,7 @@ class O2online_DE(docdl.SeleniumWebPortal):
         if "Login" in self.webdriver.title:
             return False
         # copy cookies to requests session
-        self.cookies_to_requests_session()
+        self.copy_to_requests_session()
         return True
 
     def logout(self):
