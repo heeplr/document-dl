@@ -39,6 +39,75 @@ Download all invoices from o2 Online (and enter username/password at prompt):
 $ document-dl --plugin O2online_DE --filter doctype BILL download
 ```
 
+# Writing a plugin
+
+* name your module the lowercase version of your class name and put it
+  in *"docdl/plugins"* (e.g. "docdl/plugins/myplugin.py" for "class MyPlugin")
+
+* write your plugin class:
+  * if you just need requests, inherit from docdl.WebPortal and use
+    ```self.session``` that's initialized for you
+  * if you need selenium, inherit from docdl.SeleniumWebPortal and use
+    ```self.webdriver``` that's initialized for you
+
+```
+import docdl
+
+class MyPlugin(docdl.WebPortal):
+
+    def login(self):
+        """authenticate to web service with self.login_id"""
+
+        # ...
+
+        if not_logged_in:
+            return False
+
+        return True
+
+    def logout(self):
+        """sign off cleanly"""
+        # ...
+
+    def documents(self):
+        """generator to iterate all available documents"""
+
+        for count, document in enumerate(all_documents):
+
+            # scrape:
+            #  * document attributes
+            #    * it's recommended to use a sequential counting "id"
+            #      attribute (count) for filtering
+            #    * if "filename" attribute is set, it will be used to
+            #      rename the downloaded file
+            #
+            # and either:
+            #  * document file download URL
+            #
+            # or:
+            #  * the DOM element that triggers download. It is expected
+            #    that the download starts immediately after click() on
+            #    the DOM element
+            #    (otherwise override the download() method)
+
+            yield docdl.Document(
+                url = this_documents_url,
+                attributes = {
+                    "id": count,
+                    "category": "invoices",
+                    "title": this_documents_title,
+                    "filename": this_documents_target_filename
+                }
+            )
+
+
+    def download(self, document):
+        """if you really need a custom download method"""
+
+        # save downloaded file to os.getcwd()
+        return filename
+
+```
 
 # TODO
 * better filtering
