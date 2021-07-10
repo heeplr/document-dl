@@ -1,6 +1,8 @@
 
-Plugin based command-line utility to download documents (invoices, notifications, ...)
-from various web portals.
+Command line program to download documents web portals.
+
+Use specific plugins to download all kind of documents (invoices,
+notifications, ...) or write your own scraping plugin.
 
 
 # Dependencies
@@ -29,7 +31,7 @@ List all documents from Vodafone:
 $ document-dl --username mylogin --password mypass --plugin VodafoneKabel_DE list
 ```
 
-Download all documents from Vodafone:
+Download all documents from Vodafone (and provide credentials using env vars):
 ```
 $ DOCDL_USERNAME="mylogin" DOCDL_PASSWORD="mypass" document-dl --plugin VodafoneKabel_DE download
 ```
