@@ -1,0 +1,132 @@
+"""download documents from conrad.de"""
+
+import docdl
+import itertools
+import re
+import requests
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait, Select
+from selenium.webdriver.support import expected_conditions as EC
+
+
+
+class Conrad_DE(docdl.SeleniumWebPortal):
+
+    URL_LOGIN="https://www.conrad.de/de/account.html"
+    URL_LOGOUT="https://api.conrad.de/session/1/logout"
+    URL_INVOICES="https://www.conrad.de/de/account.html#/invoices"
+
+    def login(self):
+        # load login page
+        self.webdriver.get(self.URL_LOGIN)
+        # find fields
+        username = WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "input#username")
+            )
+        )
+        password = WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.presence_of_element_located(
+                (By.CSS_SELECTOR, "input#password")
+            )
+        )
+        # enter credentials
+        username.send_keys(self.login_id)
+        password.send_keys(self.password)
+        password.submit()
+
+    def is_logged_in(self):
+        """return True if logged in successfully, False otherwise"""
+        # wait for either login success or failure
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            lambda d: "Mein Konto" in d.title or \
+                      "Conrad" in d.title
+        )
+        # Login failed
+        if "Conrad" in self.webdriver.title:
+            return False
+        # close cookie notification
+        cookie_button = self.webdriver.find_element(
+            By.XPATH, "//*[contains(text(), 'Ablehnen')]"
+        )
+        cookie_button.click()
+
+        return True
+
+    def logout(self):
+        self.webdriver.get(self.URL_LOGOUT)
+
+
+    def documents(self):
+        # wait for loader icon to disappear
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.invisibility_of_element_located(
+                (By.CSS_SELECTOR, "div.vld-icon")
+            )
+        )
+        # ~ # get script with apikey
+        # ~ self.webdriver.get("https://api-cdn.conrad.com/user-spa/1-109-4/static/js/client.min.js")
+        # ~ apikey = re.match(r".*apikey:\"([^\"]*)\",.*", self.webdriver.page_source)[1]
+        self.webdriver.get(self.URL_INVOICES)
+        # wait for time period selection
+        time_period = WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//select[@name='timePeriodProperty']")
+            )
+        )
+        time_period_select = Select(time_period)
+        # show all invoices
+        time_period_select.select_by_visible_text("Alle Rechnungen")
+        # wait for loader icon to disappear
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.invisibility_of_element_located(
+                (By.CSS_SELECTOR, "div.vld-icon")
+            )
+        )
+        # iterate all invoices
+        for n, invoice in enumerate(self.webdriver.find_elements(
+            By.XPATH, "//a[@data-e2e='invoiceList-item']"
+        )):
+            # get attributes
+            title = invoice.find_element(
+                        By.XPATH,
+                        ".//div[@data-e2e='invoiceListItem-title']"
+                    ) \
+                    .get_attribute("textContent") \
+                    .strip()
+            date = re.match(r".*(\d{2}\.\d{2}\.\d{4})", title)[1]
+            number = invoice.find_element(
+                        By.XPATH,
+                        ".//div[@data-e2e='invoiceListItem-invoiceNumber']"
+                    ) \
+                    .get_attribute("textContent") \
+                    .strip()
+            doctype = invoice.find_element(
+                        By.XPATH,
+                        ".//div[@data-e2e='invoiceListItem-type']"
+                    ) \
+                    .get_attribute("textContent") \
+                    .strip() \
+                    .lower()
+            amount = invoice.find_element(
+                        By.XPATH,
+                        ".//div[@data-e2e='invoiceListItem-amount']"
+                    ) \
+                    .get_attribute("textContent") \
+                    .strip()
+            # strip currency symbol
+            amount = re.match(r"[^\d]*(\d+,\d+).*", amount)[1]
+            # ~ # get download url
+            # ~ url = f"https://api.conrad.de/crm/1/invoices/{number}/pdf?apikey={apikey}"
+            # create document
+            yield docdl.Document(
+                download_element=invoice,
+                attributes={
+                    'date': date,
+                    'number': number,
+                    'doctype': doctype,
+                    'amount': amount,
+                    'id': n,
+                    'filename': f"conrad-{date.replace('.','-')}-{doctype}-{number}.pdf"
+                }
+            )
