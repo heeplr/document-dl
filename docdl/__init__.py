@@ -30,9 +30,10 @@ class WebPortal():
 
     def __enter__(self):
         # login to service
-        self.login()
-        if not self.is_logged_in():
+        if not self.login():
             raise AuthenticationError("login failed")
+        # copy cookies to requests session
+        self.copy_to_requests_session()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -43,12 +44,6 @@ class WebPortal():
         """authenticate to service"""
         raise NotImplementedError(
             f"{ self.__class__} needs a login() method"
-        )
-
-    def is_logged_in(self):
-        """return True if logged in successfully, False otherwise"""
-        raise NotImplementedError(
-            f"{self.__class__} needs a is_logged_in() method"
         )
 
     def logout(self):
