@@ -58,31 +58,31 @@ class MyPlugin(docdl.WebPortal):
     def login(self):
         """authenticate to web service with self.login_id"""
 
-        # ...
+        # ... authenticate ...
 
         if not_logged_in:
             return False
-
         return True
 
     def logout(self):
         """sign off cleanly"""
-        # ...
+        # ... logout ...
 
     def documents(self):
         """generator to iterate all available documents"""
 
+        # do this for every available document
         for count, document in enumerate(all_documents):
 
             # scrape:
             #  * document attributes
-            #    * it's recommended to use a sequential counting "id"
-            #      attribute (count) for filtering
-            #    * if "filename" attribute is set, it will be used to
+            #    * it's recommended to assign an incremental "id"
+            #      attribute to every document
+            #    * if you set a "filename" attribute, it will be used to
             #      rename the downloaded file
             #
-            # and either:
-            #  * document file download URL
+            # also scrape either:
+            #  * the download URL
             #
             # or:
             #  * the DOM element that triggers download. It is expected
@@ -92,6 +92,7 @@ class MyPlugin(docdl.WebPortal):
 
             yield docdl.Document(
                 url = this_documents_url,
+                # download_element = <some selenium element to click>
                 attributes = {
                     "id": count,
                     "category": "invoices",
@@ -104,7 +105,8 @@ class MyPlugin(docdl.WebPortal):
     def download(self, document):
         """if you really need a custom download method"""
 
-        # save downloaded file to os.getcwd()
+        # ... download file to os.getcwd() ...
+
         return filename
 
 ```
