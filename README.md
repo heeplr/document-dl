@@ -10,6 +10,7 @@ notifications, ...) or write your own scraping plugin.
 * click
 * inotify
 * jq
+* python-dateutil
 * selenium (default webdriver is "chrome")
 
 
@@ -40,10 +41,9 @@ Options:
                                   contains pattern  [env var: DOCDL_FILTER]
 
   -j, --jq JQ_EXPRESSION          process document only if json query matches
-                                  attributes (see
+                                  document attributes (see
                                   http://stedolan.github.io/jq/manual/ )  [env
                                   var: DOCDL_JQ]
-
 
   -H, --headless BOOLEAN          show browser window if false  [env var:
                                   DOCDL_HEADLESS; default: True]
@@ -86,7 +86,7 @@ List all documents from o2online.de where year >= 2019:
 $ document-dl --plugin O2online_DE --jq 'select(.year >= 2020)' list
 ```
 
-Download all documents from elster.de where id = 15:
+Download document from elster.de with id == 15:
 ```
 $ document-dl --plugin Elster --jq 'contains({id: 15})' download
 ```
@@ -134,8 +134,10 @@ class MyPlugin(docdl.WebPortal):
             #      attribute to every document
             #    * if you set a "filename" attribute, it will be used to
             #      rename the downloaded file
+            #    * dates should be parsed to datetime.datetime objects
+            #      self.parse_date() should parse the most common strings
             #
-            # also scrape either:
+            # also you must scrape either:
             #  * the download URL
             #
             # or:
@@ -151,7 +153,8 @@ class MyPlugin(docdl.WebPortal):
                     "id": count,
                     "category": "invoices",
                     "title": this_documents_title,
-                    "filename": this_documents_target_filename
+                    "filename": this_documents_target_filename,
+                    "date": self.parse_date(some_date_string)
                 }
             )
 
@@ -167,5 +170,4 @@ class MyPlugin(docdl.WebPortal):
 
 
 # TODO
-* better filtering
 * better documentation

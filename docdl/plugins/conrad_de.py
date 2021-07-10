@@ -115,7 +115,7 @@ class Conrad_DE(docdl.SeleniumWebPortal):
             yield docdl.Document(
                 download_element=invoice,
                 attributes={
-                    'date': date,
+                    'date': self.parse_date(date),
                     'number': number,
                     'doctype': doctype,
                     'amount': amount,

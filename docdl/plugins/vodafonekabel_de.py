@@ -84,7 +84,7 @@ class VodafoneKabel_DE(docdl.SeleniumWebPortal):
                 url=url,
                 attributes={
                     'title': title,
-                    'date': date,
+                    'date': self.parse_date(date),
                     'category': "my_documents"
                 }
             )
@@ -127,7 +127,7 @@ class VodafoneKabel_DE(docdl.SeleniumWebPortal):
                     attributes={
                         'type': doctype,
                         'title': title,
-                        'date': date,
+                        'date': self.parse_date(date),
                         'category': "invoice"
                     }
                 )

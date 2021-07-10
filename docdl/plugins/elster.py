@@ -111,7 +111,7 @@ class Elster(docdl.SeleniumWebPortal):
                         'ordnungskriterium': ordnungskriterium,
                         'profil': profil,
                         'absender': absender,
-                        'datum': datum,
+                        'date': self.parse_date(datum),
                         'id': n
                     }
                 )

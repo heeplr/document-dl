@@ -76,6 +76,7 @@ class O2online_DE(docdl.SeleniumWebPortal):
                 attributes={
                     'category': "invoice_overview",
                     'year': year,
+                    'date': self.parse_date(f"{year}-01-01"),
                     'filename': f"o2-{year}-rechnungsübersicht.pdf"
                 }
             )
@@ -105,7 +106,7 @@ class O2online_DE(docdl.SeleniumWebPortal):
             # collect attributes
             attributes = {
                 'amount': f"{amount}",
-                'date': f"{year}-{month}-{day}"
+                'date': self.parse_date(f"{year}-{month}-{day}")
             }
             # iterate documents in this invoice
             for d in invoice['billDocuments']:
