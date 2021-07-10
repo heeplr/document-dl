@@ -7,7 +7,7 @@ from various web portals.
 * python
 * click
 * inotify
-* selenium
+* selenium (default webdriver is "chrome")
 
 # Installation
 ```
