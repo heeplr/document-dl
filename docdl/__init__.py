@@ -6,6 +6,8 @@ import requests
 import inotify.adapters
 import jq
 
+from docdl import dateparser
+
 
 # ---------------------------------------------------------------------
 class AuthenticationError(Exception):
@@ -116,6 +118,17 @@ class WebPortal():
             # save new filename
             document.attributes['filename'] = filename
         return filename
+
+    def parse_date(self, datestring, format=None):
+        """
+        helper to parse generic dates
+        :param date: either datetime string or datetime object
+        :param format: datetime.strptime() format string. If none is given,
+                       brute force will be used to parse the date
+        :result: datetime object or None
+        @todo: handle timezone
+        """
+        return dateparser.parse(datestring, format)
 
 class SeleniumWebPortal(WebPortal):
     """access portal using selenium"""
