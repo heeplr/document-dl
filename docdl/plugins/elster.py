@@ -160,7 +160,7 @@ class Elster(docdl.SeleniumWebPortal):
         # store "save" button as new download_element
         document.download_element = savebutton
         # download file
-        super().download(document)
+        filename = super().download(document)
         try:
             # try to get button to close dialog
             # (that sometimes disappears on itself)
@@ -169,5 +169,8 @@ class Elster(docdl.SeleniumWebPortal):
             )
             # close dialog
             closebutton.click()
+
         except NoSuchElementException:
             pass
+
+        return filename
