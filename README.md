@@ -1,5 +1,5 @@
 
-Plugin based command line program to download documents from web portals.
+Plugin based command line utility to download documents from web portals.
 
 List or download all kind of documents (invoices, notifications, ...) or
 write your own scraping plugin.
