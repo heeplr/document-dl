@@ -44,20 +44,12 @@ class O2online_DE(docdl.SeleniumWebPortal):
         )
         password.send_keys(self.password)
         password.submit()
-
-
-    def is_logged_in(self):
-        """return True if logged in successfully, False otherwise"""
         # wait for either login success or failure
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             lambda d: "Mein o2" in d.title or "Login" in d.title
         )
         # Login failed
-        if "Login" in self.webdriver.title:
-            return False
-        # copy cookies to requests session
-        self.copy_to_requests_session()
-        return True
+        return "Login" not in self.webdriver.title
 
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)

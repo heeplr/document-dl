@@ -33,9 +33,6 @@ class Conrad_DE(docdl.SeleniumWebPortal):
         username.send_keys(self.login_id)
         password.send_keys(self.password)
         password.submit()
-
-    def is_logged_in(self):
-        """return True if logged in successfully, False otherwise"""
         # wait for either login success or failure
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             lambda d: "Mein Konto" in d.title or \
@@ -49,7 +46,6 @@ class Conrad_DE(docdl.SeleniumWebPortal):
             By.XPATH, "//*[contains(text(), 'Ablehnen')]"
         )
         cookie_button.click()
-
         return True
 
     def logout(self):

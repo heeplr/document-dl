@@ -38,9 +38,6 @@ class Elster(docdl.SeleniumWebPortal):
             By.XPATH, "//button[@title='Login']"
         )
         loginbutton.click()
-
-    def is_logged_in(self):
-        """return True if logged in successfully, False otherwise"""
         # wait for either login error message box or success message
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.visibility_of_element_located((
@@ -50,10 +47,7 @@ class Elster(docdl.SeleniumWebPortal):
             ))
         )
         # login successful
-        if "Mein ELSTER" in self.webdriver.title:
-            return True
-        # login failed
-        return False
+        return "Mein ELSTER" in self.webdriver.title
 
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)

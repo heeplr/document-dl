@@ -41,18 +41,13 @@ class VodafoneKabel_DE(docdl.SeleniumWebPortal):
         username.send_keys(self.login_id)
         password.send_keys(self.password)
         password.submit()
-
-    def is_logged_in(self):
-        """return True if logged in successfully, False otherwise"""
         # wait for page to load
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
                 lambda d: d.find_elements(By.CSS_SELECTOR, "a.logout-btn") or \
                           d.find_elements(By.XPATH, "//input[@type='password']")
         )
-        # if there's a password prompt, login failed
-        if len(self.webdriver.find_elements(By.CSS_SELECTOR, "a.logout-btn")) == 0:
-            return False
-        return True
+        # if there's a password prompt element found, login failed
+        return len(self.webdriver.find_elements(By.CSS_SELECTOR, "a.logout-btn")) != 0
 
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)
