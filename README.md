@@ -1,5 +1,5 @@
 
-Command line program to download documents web portals.
+Command line program to download documents from web portals.
 
 Use specific plugins to download all kind of documents (invoices,
 notifications, ...) or write your own scraping plugin.
