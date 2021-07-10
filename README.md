@@ -5,7 +5,7 @@ List or download all kind of documents (invoices, notifications, ...) or
 write your own scraping plugin.
 
 Select specific documents using simple string search (**--filter**
-argument) or by using complex [jq queries](http://stedolan.github.io/jq/manual/)
+argument) or by using complex [jq queries](https://stedolan.github.io/jq/manual/)
 (**--jq** argument).
 
 
