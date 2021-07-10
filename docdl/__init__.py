@@ -1,9 +1,8 @@
 """download documents from web portals"""
 
+import inotify.adapters
 import re
 import requests
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 import os
 
 
@@ -184,38 +183,20 @@ class SeleniumWebPortal(WebPortal):
     def download(self, document):
         """download a document"""
         if document.download_element:
-            self.download_with_selenium(document)
+            filename = self.download_with_selenium(document)
         elif document.url:
-            self.download_with_requests(document)
+            filename = self.download_with_requests(document)
         else:
             raise ArgumentError(
                 "Document has neither url or download_element"
             )
-
-    @staticmethod
-    def all_downloads_complete_chrome(driver):
-        from selenium.webdriver.common.keys import Keys
-        # open new tab
-        driver.execute_script("window.open();")
-        driver.switch_to.window(driver.window_handles[1])
-        driver.get("chrome://downloads/")
-        # wait for downloads tab
-        WebDriverWait(driver, 15).until(
-                EC.title_contains("Downloads")
-        )
-        # get all paths
-        paths = driver.execute_script(
-            """
-            var items = document.querySelector('downloads-manager')
-                .shadowRoot.getElementById('downloadsList').items;
-            if (items.every(e => e.state === "COMPLETE"))
-                return items.map(e => e.fileUrl || e.file_url);
-            """)
-        # close tab
-        driver.close()
-        # switch back to original tab
-        driver.switch_to.window(driver.window_handles[0])
-        return paths
+        # got a predefined filename?
+        if "filename" in document.attributes:
+            # rename file to predefined name
+            os.rename(filename, document.attributes['filename'])
+        else:
+            # save new filename
+            document.attributes['filename'] = filename
 
     def download_with_selenium(self, document):
         # scroll to download element
@@ -223,33 +204,30 @@ class SeleniumWebPortal(WebPortal):
             "arguments[0].scrollIntoView(true);",
             document.download_element
         )
+        # setup inotify monitor to watch download
+        # directory for new files
+        notify = inotify.adapters.Inotify()
+        notify.add_watch(os.getcwd())
+
         # click element to start download
         document.download_element.click()
+
         # wait for download completed
-        if self.WEBDRIVER == "chrome":
-            # are we using chrome in headless mode?
-            if self.webdriver.options.headless:
-                # use inotify to watch download directory
-                paths = self.all_downloads_complete_inotify_chrome
-            # not in headless mode
-            else:
-                # watch chrome://downloads
-                paths = WebDriverWait(self.webdriver, self.TIMEOUT, 1).until(
-                    self.all_downloads_complete_chrome
-                )
-        else:
-            raise UnsupportedOperation(
-                f"download_with_selenium doesn't support {self.WEBDRIVER} webdriver"
-            )
-        # convert URI to path
-        filename = re.match(r"^file://(.*)$", paths[0])[1]
-        # got a filename ?
-        if "filename" in document.attributes:
-            # rename file
-            os.rename(filename, document.attributes['filename'])
-        else:
-            # save path
-            document.attributes['filename'] = filename
+        for event in notify.event_gen(yield_nones=False):
+            # unpack event
+            (_, type_names, path, filename) = event
+            # is this a chrome download file?
+            if filename.endswith(".crdownload"):
+                new_filename = filename.removesuffix(".crdownload")
+            # is this our finished download ?
+            if filename == new_filename:
+                # we're done
+                break
+
+        # remove inotify monitor
+        notify.remove_watch(os.getcwd())
+
+        return filename
 
     def download_with_requests(self, document):
         # copy cookies from selenium to requests session
@@ -285,12 +263,12 @@ class SeleniumWebPortal(WebPortal):
 
         # massage filename
         filename = filename.replace('"', '').strip()
-        # store filename for later
-        document.attributes['filename'] = filename
         # save file
         with open(os.path.join(os.getcwd(), filename), 'wb') as f:
             for chunk in r.iter_content(chunk_size=4096):
                 f.write(chunk)
+
+        return filename
 
     def copy_to_requests_session(self):
         """copy current session to requests session"""
