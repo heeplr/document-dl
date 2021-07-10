@@ -185,3 +185,4 @@ class MyPlugin(docdl.WebPortal):
 
 # TODO
 * better documentation
+* properly parse rfc6266

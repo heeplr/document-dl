@@ -85,7 +85,7 @@ class WebPortal():
         elif 'content-disposition' in r.headers:
             # @todo properly parse rfc6266
             filename = re.findall(
-                "filename=(.+);",
+                "filename=(.+)(?:;)?",
                 r.headers['content-disposition']
             )[0]
         else:
