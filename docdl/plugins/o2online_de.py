@@ -82,7 +82,7 @@ class O2online_DE(docdl.SeleniumWebPortal):
                 attributes={
                     'category': "invoice_overview",
                     'year': year,
-                    'filename': f"Rechnungsübersicht-{year}.pdf"
+                    'filename': f"o2-{year}-rechnungsübersicht.pdf"
                 }
             )
 
@@ -121,6 +121,6 @@ class O2online_DE(docdl.SeleniumWebPortal):
                         **attributes,
                         'number': d['billNumber'],
                         'doctype': d['documentType'],
-                        'filename': f"{year}-{month}-{day}-{d['documentType']}.pdf"
+                        'filename': f"o2-{year}-{month}-{day}-{d['documentType'].lower()}.pdf"
                     }
                 )
