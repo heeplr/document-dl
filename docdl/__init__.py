@@ -61,6 +61,57 @@ class WebPortal():
             f"{ self.__class__} needs a documents() generator"
         )
 
+    def download(self, document):
+        """download document url"""
+        filename = self.download_with_requests(document)
+        # got a predefined filename?
+        if "filename" in document.attributes:
+            # rename file to predefined name
+            os.rename(filename, document.attributes['filename'])
+        else:
+            # save new filename
+            document.attributes['filename'] = filename
+        return filename
+
+    def download_with_requests(self, document):
+        """download a file without the browser using requests"""
+        # fetch url
+        r = self.session.get(
+            document.url, stream=True, headers=document.request_headers
+        )
+        if not r.ok:
+            raise DownloadError(f"\"{document.url}\" status code: {r.status_code}")
+
+        # filename not already set?
+        if "filename" in document.attributes:
+            filename = document.attributes['filename']
+        # get filename from header
+        elif 'content-disposition' in r.headers:
+            # @todo properly parse rfc6266
+            filename = re.findall(
+                "filename=(.+);",
+                r.headers['content-disposition']
+            )[0]
+        else:
+            filename = None
+
+        # protect against empty filenames
+        if not filename:
+            if 'title' in document.attributes:
+                filename = document.attributes['title']
+            elif 'id' in document.attributes:
+                filename = f"document-dl.{document.attributes['id']}"
+            else:
+                raise RuntimeError("no suitable filename")
+
+        # massage filename
+        filename = filename.replace('"', '').strip()
+        # save file
+        with open(os.path.join(os.getcwd(), filename), 'wb') as f:
+            for chunk in r.iter_content(chunk_size=4096):
+                f.write(chunk)
+
+        return filename
 
 
 class SeleniumWebPortal(WebPortal):
@@ -171,6 +222,8 @@ class SeleniumWebPortal(WebPortal):
         if document.download_element:
             filename = self.download_with_selenium(document)
         elif document.url:
+            # copy cookies from selenium to requests session
+            self.copy_to_requests_session()
             filename = self.download_with_requests(document)
         else:
             raise RuntimeError(
@@ -213,48 +266,6 @@ class SeleniumWebPortal(WebPortal):
 
         # remove inotify monitor
         notify.remove_watch(os.getcwd())
-
-        return filename
-
-    def download_with_requests(self, document):
-        """download a file without the browser using requests"""
-        # copy cookies from selenium to requests session
-        self.copy_to_requests_session()
-        # fetch url
-        r = self.session.get(
-            document.url, stream=True, headers=document.request_headers
-        )
-        if not r.ok:
-            raise DownloadError(f"\"{document.url}\" status code: {r.status_code}")
-
-        # filename not already set?
-        if "filename" in document.attributes:
-            filename = document.attributes['filename']
-        # get filename from header
-        elif 'content-disposition' in r.headers:
-            # @todo properly parse rfc6266
-            filename = re.findall(
-                "filename=(.+);",
-                r.headers['content-disposition']
-            )[0]
-        else:
-            filename = None
-
-        # protect against empty filenames
-        if not filename:
-            if 'title' in document.attributes:
-                filename = document.attributes['title']
-            elif 'id' in document.attributes:
-                filename = f"document-dl.{document.attributes['id']}"
-            else:
-                raise RuntimeError("no suitable filename")
-
-        # massage filename
-        filename = filename.replace('"', '').strip()
-        # save file
-        with open(os.path.join(os.getcwd(), filename), 'wb') as f:
-            for chunk in r.iter_content(chunk_size=4096):
-                f.write(chunk)
 
         return filename
 
