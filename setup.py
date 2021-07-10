@@ -15,6 +15,7 @@ setup(
     py_modules=['docdl'],
     install_requires=[
         'click',
+        'inotify',
         'requests',
         'selenium'
     ],

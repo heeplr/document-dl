@@ -6,6 +6,7 @@ from various web portals.
 # Dependencies
 * python
 * click
+* inotify
 * selenium
 
 # Installation
