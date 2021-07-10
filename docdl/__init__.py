@@ -1,9 +1,9 @@
 """download documents from web portals"""
 
-import inotify.adapters
 import re
-import requests
 import os
+import requests
+import inotify.adapters
 
 
 # ---------------------------------------------------------------------
@@ -73,21 +73,28 @@ class SeleniumWebPortal(WebPortal):
 
     WEBDRIVER = "chrome"
 
-    def __init__(self, login_id, password, options={}):
+    def __init__(self, login_id, password, options=None):
         """
         plugins using SeleniumPortal can use self.webdriver for scraping
         """
-        super(SeleniumWebPortal, self).__init__(login_id, password)
+        if options is None:
+            options = {}
+
+        super().__init__(login_id, password)
+
         # initialize selenium
-        from selenium import webdriver
+        webdriver_opts = self._init_webdriver_options()
+        self._init_webdriver(webdriver_opts, options)
+
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        super().__exit__(exc_type, exc_val, exc_tb)
+        self.webdriver.close()
+        self.webdriver.quit()
+
+    def _init_webdriver_options(self):
         # choose webdriver options
-        if self.WEBDRIVER == "android":
-            from selenium.webdriver.android.options import Options
-
-        elif self.WEBDRIVER == "blackberry":
-            from selenium.webdriver.blackberry.options import Options
-
-        elif self.WEBDRIVER == "chrome":
+        if self.WEBDRIVER == "chrome":
             from selenium.webdriver.chrome.options import Options
 
         elif self.WEBDRIVER == "edge":
@@ -102,12 +109,6 @@ class SeleniumWebPortal(WebPortal):
         elif self.WEBDRIVER == "opera":
             from selenium.webdriver.opera.options import Options
 
-        elif self.WEBDRIVER == "phantomjs":
-            from selenium.webdriver.phantomjs.options import Options
-
-        elif self.WEBDRIVER == "remote":
-            from selenium.webdriver.remote.options import Options
-
         elif self.WEBDRIVER == "safari":
             from selenium.webdriver.safari.options import Options
 
@@ -118,31 +119,29 @@ class SeleniumWebPortal(WebPortal):
             raise AttributeError(
                 "unknown webdriver: \"{self.WEBDRIVER}\""
             )
+        return Options()
+
+    def _init_webdriver(self, webdriver_options, options):
+        from selenium import webdriver
         # selenium webdriver specific options
-        opts = Options()
         for opt, val in options.items():
-            setattr(opts, opt, val)
+            setattr(webdriver_options, opt, val)
+
         # init webdriver
-        if self.WEBDRIVER == "android":
-            self.webdriver = webdriver.Android(options=opts)
-
-        elif self.WEBDRIVER == "blackberry":
-            self.webdriver = webdriver.BlackBerry(options=opts)
-
-        elif self.WEBDRIVER == "chrome":
+        if self.WEBDRIVER == "chrome":
             # enable incognito mode
-            opts.add_argument("--incognito")
+            webdriver_options.add_argument("--incognito")
             # set preference options
-            opts.add_experimental_option("prefs", {
+            webdriver_options.add_experimental_option("prefs", {
                 # always save PDFs
                 "plugins.always_open_pdf_externally": True,
                 # set default download directory to CWD
                 "download.default_directory": os.getcwd()
             })
-            self.webdriver = webdriver.Chrome(options=opts)
+            self.webdriver = webdriver.Chrome(options=webdriver_options)
 
         elif self.WEBDRIVER == "edge":
-            self.webdriver = webdriver.Edge(options=opts)
+            self.webdriver = webdriver.Edge(options=webdriver_options)
 
         elif self.WEBDRIVER == "firefox":
             # enable private browsing
@@ -151,34 +150,26 @@ class SeleniumWebPortal(WebPortal):
             # set default download directory to CWD
             firefox_profile.set_preference("browser.download.dir", os.getcwd())
             # save PDFs by default (don't preview)
-            firefox_profile.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/pdf");
-            firefox_profile.set_preference("pdfjs.disabled", True);
-            firefox_profile.set_preference("plugin.scan.Acrobat", "999.0");
-            firefox_profile.set_preference("plugin.scan.plid.all", False);
-            self.webdriver = webdriver.Firefox(options=opts)
+            firefox_profile.set_preference(
+                "browser.helperApps.neverAsk.saveToDisk",
+                "application/pdf"
+            )
+            firefox_profile.set_preference("pdfjs.disabled", True)
+            firefox_profile.set_preference("plugin.scan.Acrobat", "999.0")
+            firefox_profile.set_preference("plugin.scan.plid.all", False)
+            self.webdriver = webdriver.Firefox(options=webdriver_options)
 
         elif self.WEBDRIVER == "ie":
-            self.webdriver = webdriver.Ie(options=opts)
+            self.webdriver = webdriver.Ie(options=webdriver_options)
 
         elif self.WEBDRIVER == "opera":
-            self.webdriver = webdriver.Opera(options=opts)
-
-        elif self.WEBDRIVER == "phantomjs":
-            self.webdriver = webdriver.PhantomJS(options=opts)
-
-        elif self.WEBDRIVER == "remote":
-            self.webdriver = webdriver.Remote(options=opts)
+            self.webdriver = webdriver.Opera(options=webdriver_options)
 
         elif self.WEBDRIVER == "safari":
-            self.webdriver = webdriver.Safari(options=opts)
+            self.webdriver = webdriver.Safari(options=webdriver_options)
 
         elif self.WEBDRIVER == "webkitgtk":
-            self.webdriver = webdriver.WebKitGTK(options=opts)
-
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        super(SeleniumWebPortal, self).__exit__(exc_type, exc_val, exc_tb)
-        self.webdriver.close()
-        self.webdriver.quit()
+            self.webdriver = webdriver.WebKitGTK(options=webdriver_options)
 
     def download(self, document):
         """download a document"""
@@ -187,7 +178,7 @@ class SeleniumWebPortal(WebPortal):
         elif document.url:
             filename = self.download_with_requests(document)
         else:
-            raise ArgumentError(
+            raise RuntimeError(
                 "Document has neither url or download_element"
             )
         # got a predefined filename?
@@ -199,6 +190,7 @@ class SeleniumWebPortal(WebPortal):
             document.attributes['filename'] = filename
 
     def download_with_selenium(self, document):
+        """download a file using the selenium webdriver"""
         # scroll to download element
         self.webdriver.execute_script(
             "arguments[0].scrollIntoView(true);",
@@ -230,6 +222,7 @@ class SeleniumWebPortal(WebPortal):
         return filename
 
     def download_with_requests(self, document):
+        """download a file without the browser using requests"""
         # copy cookies from selenium to requests session
         self.copy_to_requests_session()
         # fetch url
@@ -284,14 +277,18 @@ class SeleniumWebPortal(WebPortal):
 class Document():
     """a document"""
 
-    def __init__(self, url=None, attributes={}, request_headers={}, download_element=None):
+    def __init__(self, url=None, attributes=None, request_headers=None, download_element=None):
         # default custom request headers
+        if request_headers is None:
+            request_headers = {}
         self.request_headers = request_headers
         # target url (if set, the url will be GET using requests)
         self.url = url
         # if download_element is set, it will be click()ed for download
         self.download_element = download_element
         # portal specific attributes
+        if attributes is None:
+            attributes = {}
         self.attributes = attributes
 
     def __repr__(self):
@@ -308,11 +305,7 @@ class Document():
             return True
         # apply filter to an attribute of a document
         _filter = lambda attribute, pattern: \
-            True if attribute in self.attributes and \
-                    str(pattern) in str(self.attributes[attribute]) \
-                 else False
+            attribute in self.attributes and \
+            str(pattern) in str(self.attributes[attribute])
         # apply all filters to this document
-        if all([ _filter(attribute, pattern) for attribute, pattern in filters ]):
-            return True
-        # no match
-        return False
+        return all(_filter(attribute, pattern) for attribute, pattern in filters)
