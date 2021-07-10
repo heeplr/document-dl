@@ -17,6 +17,7 @@ setup(
         'click',
         'inotify',
         'jq',
+        'python-dateutil',
         'requests',
         'selenium'
     ],
