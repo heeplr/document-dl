@@ -34,6 +34,17 @@ import docdl
     help="plugin name"
 )
 @click.option(
+    "-a",
+    "--plugin-argument",
+    "plugin_arguments",
+    type=click.Tuple([str, str]),
+    metavar="<KEY VALUE>...",
+    multiple=True,
+    envvar="DOCDL_PLUGINARG",
+    show_envvar=True,
+    help="key/value argument passed to the plugin"
+)
+@click.option(
     "-f",
     "--filter",
     "filters",
@@ -88,7 +99,7 @@ import docdl
 )
 @click.pass_context
 def documentdl(
-    ctx, username, password, plugin, filters, jq, headless, browser, timeout
+    ctx, username, password, plugin, plugin_arguments, filters, jq, headless, browser, timeout
 ):
     """download documents from web portals"""
     # set browser to use for SeleniumWebPortal class
@@ -102,11 +113,17 @@ def documentdl(
     plugin = getattr(module, plugin)
     # initialize plugin
     ctx.obj['portal'] = plugin(
-        username, password, { 'headless': headless }
+        username,
+        password,
+        {
+            'webdriver': { 'headless': headless },
+            **dict(plugin_arguments)
+        }
     )
     # store options
     ctx.obj['filters'] = filters
     ctx.obj['jq'] = jq
+
 
 @documentdl.command(name="list")
 @click.pass_context
@@ -119,6 +136,7 @@ def list_(ctx):
             if document.filter(ctx.obj['filters']) and \
                document.filter_jq(ctx.obj['jq']):
                 click.echo(f"{document.attributes}")
+
 
 @documentdl.command()
 @click.pass_context

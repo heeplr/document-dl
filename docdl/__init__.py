@@ -25,7 +25,10 @@ class WebPortal():
     # default timeout (seconds)
     TIMEOUT = 15
 
-    def __init__(self, login_id, password):
+    def __init__(self, login_id, password, arguments=None):
+        if arguments is None:
+            arguments = {}
+        self.arguments = arguments
         self.login_id = login_id
         self.password = password
         # initialize requests HTTP session
@@ -135,18 +138,15 @@ class SeleniumWebPortal(WebPortal):
 
     WEBDRIVER = "chrome"
 
-    def __init__(self, login_id, password, options=None):
+    def __init__(self, login_id, password, arguments=None):
         """
         plugins using SeleniumPortal can use self.webdriver for scraping
         """
-        if options is None:
-            options = {}
-
-        super().__init__(login_id, password)
+        super().__init__(login_id, password, arguments)
 
         # initialize selenium
         webdriver_opts = self._init_webdriver_options()
-        self._init_webdriver(webdriver_opts, options)
+        self._init_webdriver(webdriver_opts, arguments['webdriver'])
 
 
     def __exit__(self, exc_type, exc_val, exc_tb):
