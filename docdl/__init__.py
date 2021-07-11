@@ -1,6 +1,7 @@
 """download documents from web portals"""
 
 import re
+import shutil
 import os
 import requests
 import inotify.adapters
@@ -193,6 +194,8 @@ class SeleniumWebPortal(WebPortal):
         if self.WEBDRIVER == "chrome":
             # enable incognito mode
             webdriver_options.add_argument("--incognito")
+            # ~ # debugging
+            # ~ webdriver_options.add_argument("--remote-debugging-port=9222")
             # set preference options
             webdriver_options.add_experimental_option("prefs", {
                 # always save PDFs
@@ -298,6 +301,28 @@ class SeleniumWebPortal(WebPortal):
         # copy user agent
         user_agent = self.webdriver.execute_script("return navigator.userAgent;")
         self.session.headers['User-Agent'] = user_agent
+
+    def captcha(self, image, entry):
+        """handle captcha"""
+        # save screenshot
+        image.screenshot("captcha.png")
+        # present image to the user
+        self.show_image(os.path.join(os.getcwd(), "captcha.png"))
+        # ask for interactive captcha input
+        captcha = input("please enter captcha: ")
+        # enter into field
+        entry.send_keys(captcha)
+        # submit
+        entry.submit()
+
+    def show_image(self, filename):
+        """attempt to show image"""
+        # find a way to show image
+        if app := shutil.which("xdg-open"):
+            os.system(f"{app} {filename} >/dev/null &")
+        # fallback
+        else:
+            print(f'{"image": "{filename}"}')
 
 
 class Document():
