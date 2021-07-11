@@ -1,4 +1,8 @@
-"""download documents from amazon.de"""
+"""
+download documents from amazon.de
+
+@todo handle "add mobile phone number?" dialog after login
+"""
 
 import re
 import os
@@ -33,14 +37,15 @@ class Amazon(docdl.SeleniumWebPortal):
             By.XPATH, "//input[@id='captchacharacters']"
         )
         if captcha_entry:
-            # find_elements returns list
+            # find_elements returns list, we need
+            # the last (and only) entry
             captcha_entry = captcha_entry[0]
-            # take screenshot
-            self.webdriver.get_screenshot_as_file("screenshot.png")
-            print(f"captcha saved to \"{os.path.join(os.getcwd(), 'screenshot.png')}\" ...")
-            captcha = input("please enter captcha: ")
-            captcha_entry.send_keys(captcha)
-            captcha_entry.submit()
+            # get image
+            captcha_img = self.webdriver.find_elements(
+                By.XPATH, "//img[contains(@src, 'captcha')]"
+            ).pop()
+            # handle captcha (@todo handle failure/wrong input)
+            self.captcha(captcha_img, captcha_entry)
 
         # get loginbutton
         loginbutton = WebDriverWait(self.webdriver, self.TIMEOUT).until(
