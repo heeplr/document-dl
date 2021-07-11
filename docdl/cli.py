@@ -45,15 +45,26 @@ import docdl
     help="key/value argument passed to the plugin"
 )
 @click.option(
-    "-f",
-    "--filter",
-    "filters",
+    "-m",
+    "--match",
+    "matches",
     type=click.Tuple([str, str]),
     metavar="<ATTRIBUTE PATTERN>...",
     multiple=True,
-    envvar="DOCDL_FILTER",
+    envvar="DOCDL_MATCH",
     show_envvar=True,
-    help="only process documents where attribute contains pattern"
+    help="only process documents where attribute contains pattern string"
+)
+@click.option(
+    "-r",
+    "--regex",
+    "regexes",
+    type=click.Tuple([str, str]),
+    metavar="<ATTRIBUTE REGEX>...",
+    multiple=True,
+    envvar="DOCDL_REGEX",
+    show_envvar=True,
+    help="only process documents where attribute value matches regex"
 )
 @click.option(
     "-j",
@@ -99,7 +110,8 @@ import docdl
 )
 @click.pass_context
 def documentdl(
-    ctx, username, password, plugin, plugin_arguments, filters, jq, headless, browser, timeout
+    ctx, username, password, plugin, plugin_arguments, matches,
+    regexes, jq, headless, browser, timeout
 ):
     """download documents from web portals"""
     # set browser to use for SeleniumWebPortal class
@@ -121,7 +133,8 @@ def documentdl(
         }
     )
     # store options
-    ctx.obj['filters'] = filters
+    ctx.obj['matches'] = matches
+    ctx.obj['regexes'] = regexes
     ctx.obj['jq'] = jq
 
 
@@ -133,8 +146,9 @@ def list_(ctx):
         # walk all documents found
         for document in service.documents():
             # list document if filters match
-            if document.filter(ctx.obj['filters']) and \
-               document.filter_jq(ctx.obj['jq']):
+            if document.match(ctx.obj['matches']) and \
+               document.regex(ctx.obj['regexes']) and \
+               document.jq(ctx.obj['jq']):
                 click.echo(f"{document.attributes}")
 
 
@@ -146,8 +160,9 @@ def download(ctx):
         # walk all documents found
         for document in service.documents():
             # list document if filters match
-            if document.filter(ctx.obj['filters']) and \
-               document.filter_jq(ctx.obj['jq']):
+            if document.match(ctx.obj['matches']) and \
+               document.regex(ctx.obj['regexes']) and \
+               document.jq(ctx.obj['jq']):
                 # download
                 service.download(document)
                 click.echo(f"downloaded \"{document.attributes['filename']}\"")

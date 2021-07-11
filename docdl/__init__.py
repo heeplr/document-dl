@@ -310,10 +310,10 @@ class Document():
     def __repr__(self):
         return f"class {self.__class__.__name__}(url=\"{self.url}\", attributes={self.attributes})"
 
-    def filter(self, filters):
+    def match(self, filters):
         """
         :param filters: list of (attribute_name, pattern) tuples
-        :result: True if document attribute contain pattern,
+        :result: True if all document attributes contain the pattern,
                  False otherwise
         """
         # null filter match by default
@@ -321,14 +321,15 @@ class Document():
             return True
         # apply filter to an attribute of a document
         _filter = lambda attribute, pattern: \
-            attribute in self.attributes and \
             str(pattern) in str(self.attributes[attribute])
         # apply all filters to this document
         return all(_filter(attribute, pattern) for attribute, pattern in filters)
 
-    def filter_jq(self, jq_string):
+    def jq(self, jq_string):
         """
-        :param jq_string jq expression to output document on match
+        :param jq_string: jq expression
+        :result: True if jq expression produces any True result,
+                 False otherwise
         """
         # null expression matches by default
         if not jq_string:
@@ -338,3 +339,17 @@ class Document():
         # feed attributes to jq
         return any(exp.input(self.attributes).all())
 
+    def regex(self, regexes):
+        """
+        :param regexes: list of (attribute, regex) tuples
+        :result: True if all attributes match their regex, False
+                 otherwise.
+        """
+        # always match if there are no regexes
+        if not regexes:
+            return True
+        _match = lambda attribute, regex: \
+            re.match(regex, self.attributes[attribute])
+        return all(
+            _match(attribute, regex) for attribute, regex in regexes
+        )
