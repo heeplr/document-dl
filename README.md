@@ -4,7 +4,7 @@ Plugin based command line utility to download documents from web portals.
 List or download all kind of documents (invoices, notifications, ...) or
 write your own scraping plugin.
 
-Select specific documents using simple string search (**--filter**),
+Select specific documents using simple string search (**--match**),
 regular expressions (**--regex**) or [jq queries](https://stedolan.github.io/jq/manual/)
 (**--jq**).
 
@@ -101,7 +101,7 @@ $ DOCDL_USERNAME="mylogin" DOCDL_PASSWORD="mypass" document-dl --plugin Conrad_D
 
 Download all documents from o2online.de where "doctype" attribute contains "BILL":
 ```
-$ document-dl --plugin O2online_DE --filter doctype BILL download
+$ document-dl --plugin O2online_DE --match doctype BILL download
 ```
 
 You can also use regular expressions to filter documents:
@@ -198,7 +198,6 @@ class MyPlugin(docdl.WebPortal):
 
 
 # TODO
-* regex filter
 * list of available plugins
 * plugin specific help
 * better documentation
