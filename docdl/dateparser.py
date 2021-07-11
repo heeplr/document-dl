@@ -1,6 +1,7 @@
 """parse any possible date/time string to datetime object"""
 
 import datetime
+import re
 import dateutil.parser
 
 
@@ -41,6 +42,10 @@ def parse(date, format=None):
         if date == "":
             raise ValueError("Failed to parse datetime: Empty string")
 
+        # replace month names
+        date = replace_months(date)
+        # remove whitespace before and after .
+        date = re.sub(r'\s*\.\s', '.', date)
         # check for keywords
         if date == "now":
             return datetime.datetime.now()
@@ -144,3 +149,29 @@ def parse(date, format=None):
         "Need <type 'datetime'>, <type 'str'> or <type 'unicode'>. "
         f"Got {type(i)}"
     )
+
+
+def replace_months(date):
+    """replace literal month names with numbers"""
+    MONTHS = {
+        1:  [ "jan", "januray", "januar" ],
+        2:  [ "feb", "february", "februar" ],
+        3:  [ "mar", "march", "märz" ],
+        4:  [ "apr", "april" ],
+        5:  [ "may", "mai" ],
+        6:  [ "jun", "june", "juni" ],
+        7:  [ "jul", "july", "juli" ],
+        8:  [ "aug", "august" ],
+        9:  [ "sep", "september" ],
+        10: [ "oct", "october", "oktober" ],
+        11: [ "nov", "november" ],
+        12: [ "dec", "december", "dezember" ],
+    }
+
+    # walk all months
+    for month, names in MONTHS.items():
+        # check for all names (sorted by length, longest first)
+        for name in reversed(sorted(names, key=lambda n: len(n))):
+            # replace on occurence
+            if name in date:
+                return date.replace(name, f"{month}.")
