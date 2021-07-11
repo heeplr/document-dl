@@ -87,6 +87,11 @@ class Elster(docdl.SeleniumWebPortal):
                             .get_attribute("textContent") \
                             .strip()
 
+                gelesen = row.find_element(
+                    By.CSS_SELECTOR, "span.icon"
+                )
+                gelesen = gelesen.get_attribute("title") == "gelesen"
+
                 ordnungskriterium = row.find_element(
                     By.XPATH, ".//td[@data-rwd='Ordnungskriterium']"
                 ).get_attribute("textContent").strip()
@@ -112,6 +117,7 @@ class Elster(docdl.SeleniumWebPortal):
                         'profil': profil,
                         'absender': absender,
                         'date': self.parse_date(datum),
+                        'unread': not gelesen,
                         'id': n
                     }
                 )
