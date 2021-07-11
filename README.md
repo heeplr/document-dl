@@ -44,9 +44,14 @@ Options:
                                   key/value argument passed to the plugin
                                   [env var: DOCDL_PLUGINARG]
 
-  -f, --filter <ATTRIBUTE PATTERN>...
+  -m, --match <ATTRIBUTE PATTERN>...
                                   only process documents where attribute
-                                  contains pattern  [env var: DOCDL_FILTER]
+                                  contains pattern string  [env var:
+                                  DOCDL_MATCH]
+
+  -r, --regex <ATTRIBUTE REGEX>...
+                                  only process documents where attribute value
+                                  matches regex  [env var: DOCDL_REGEX]
 
   -j, --jq JQ_EXPRESSION          process document only if json query matches
                                   document attributes (see
@@ -97,6 +102,11 @@ $ DOCDL_USERNAME="mylogin" DOCDL_PASSWORD="mypass" document-dl --plugin Conrad_D
 Download all documents from o2online.de where "doctype" attribute contains "BILL":
 ```
 $ document-dl --plugin O2online_DE --filter doctype BILL download
+```
+
+You can also use regular expressions to filter documents:
+```
+$ document-dl --plugin O2online_DE --regex date '^(2021-04|2021-05).*$'
 ```
 
 List all documents from o2online.de where year >= 2019:
