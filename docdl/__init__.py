@@ -201,7 +201,10 @@ class SeleniumWebPortal(WebPortal):
                 # always save PDFs
                 "plugins.always_open_pdf_externally": True,
                 # set default download directory to CWD
-                "download.default_directory": os.getcwd()
+                "download.default_directory": os.getcwd(),
+                # turn off image loading
+                "profile.default_content_settings.images": 2,
+                "profile.managed_default_content_settings.images": 2,
             })
             self.webdriver = webdriver.Chrome(options=webdriver_options)
 
@@ -227,6 +230,8 @@ class SeleniumWebPortal(WebPortal):
             firefox_profile.set_preference("pdfjs.disabled", True)
             firefox_profile.set_preference("plugin.scan.Acrobat", "999.0")
             firefox_profile.set_preference("plugin.scan.plid.all", False)
+            # turn off image loading by default
+            firefox_profile.set_preference("permissions.default.image", 2)
             # initialize driver
             self.webdriver = webdriver.Firefox(
                 firefox_profile=firefox_profile,
