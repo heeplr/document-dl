@@ -184,5 +184,6 @@ class MyPlugin(docdl.WebPortal):
 
 
 # TODO
+* regex filter
 * better documentation
 * properly parse rfc6266
