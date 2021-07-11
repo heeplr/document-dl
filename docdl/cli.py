@@ -1,6 +1,7 @@
 """download documents from web portals"""
 
 import importlib
+import json
 import click
 import docdl
 
@@ -149,7 +150,13 @@ def list_(ctx):
             if document.match(ctx.obj['matches']) and \
                document.regex(ctx.obj['regexes']) and \
                document.jq(ctx.obj['jq']):
-                click.echo(f"{document.attributes}")
+                click.echo(
+                    json.dumps(
+                        document.attributes,
+                        sort_keys=True,
+                        default=str
+                    )
+                )
 
 
 @documentdl.command()
@@ -165,4 +172,10 @@ def download(ctx):
                document.jq(ctx.obj['jq']):
                 # download
                 service.download(document)
-                click.echo(f"downloaded \"{document.attributes['filename']}\"")
+                click.echo(
+                    json.dumps(
+                        document.attributes,
+                        sort_keys=True,
+                        default=str
+                    )
+                )
