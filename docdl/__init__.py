@@ -326,7 +326,7 @@ class SeleniumWebPortal(WebPortal):
     def show_image(self, filename, name="image"):
         """attempt to show image"""
         # always print image filename
-        print(f'{"{name}": "{filename}"}')
+        print(f'{{"{name}": "{filename}"}}')
         # find a way to show image
         if app := shutil.which("xdg-open"):
             os.system(f"{app} {filename} >/dev/null &")
