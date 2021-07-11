@@ -175,3 +175,4 @@ def replace_months(date):
             # replace on occurence
             if name in date:
                 return date.replace(name, f"{month}.")
+    return date
