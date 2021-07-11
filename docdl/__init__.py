@@ -206,8 +206,13 @@ class SeleniumWebPortal(WebPortal):
             self.webdriver = webdriver.Edge(options=webdriver_options)
 
         elif self.WEBDRIVER == "firefox":
-            # enable private browsing
+            # work around "acceptInsecureCerts=true" bug
+            caps = {
+                'acceptInsecureCerts': False
+            }
+            # create custom profile
             firefox_profile = webdriver.FirefoxProfile()
+            # always enable private browsing
             firefox_profile.set_preference("browser.privatebrowsing.autostart", True)
             # set default download directory to CWD
             firefox_profile.set_preference("browser.download.dir", os.getcwd())
@@ -219,7 +224,12 @@ class SeleniumWebPortal(WebPortal):
             firefox_profile.set_preference("pdfjs.disabled", True)
             firefox_profile.set_preference("plugin.scan.Acrobat", "999.0")
             firefox_profile.set_preference("plugin.scan.plid.all", False)
-            self.webdriver = webdriver.Firefox(options=webdriver_options)
+            # initialize driver
+            self.webdriver = webdriver.Firefox(
+                firefox_profile=firefox_profile,
+                capabilities=caps,
+                options=webdriver_options
+            )
 
         elif self.WEBDRIVER == "ie":
             self.webdriver = webdriver.Ie(options=webdriver_options)
