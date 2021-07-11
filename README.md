@@ -127,9 +127,9 @@ $ document-dl --plugin Elster --jq 'contains({id: 15})' download
   in *"docdl/plugins"* (e.g. *"docdl/plugins/myplugin.py"* for ```class MyPlugin```)
 
 * write your plugin class:
-  * if you just need requests, inherit from docdl.WebPortal and use
+  * if you just need requests, inherit from ```docdl.WebPortal``` and use
     ```self.session``` that's initialized for you
-  * if you need selenium, inherit from docdl.SeleniumWebPortal and use
+  * if you need selenium, inherit from ```docdl.SeleniumWebPortal``` and use
     ```self.webdriver``` that's initialized for you
 
 ```
