@@ -312,7 +312,10 @@ class SeleniumWebPortal(WebPortal):
         # save screenshot
         image.screenshot("captcha.png")
         # present image to the user
-        self.show_image(os.path.join(os.getcwd(), "captcha.png"))
+        self.show_image(
+            os.path.join(os.getcwd(), "captcha.png"),
+            "captcha"
+        )
         # ask for interactive captcha input
         captcha = input("please enter captcha: ")
         # enter into field
@@ -320,14 +323,13 @@ class SeleniumWebPortal(WebPortal):
         # submit
         entry.submit()
 
-    def show_image(self, filename):
+    def show_image(self, filename, name="image"):
         """attempt to show image"""
+        # always print image filename
+        print(f'{"{name}": "{filename}"}')
         # find a way to show image
         if app := shutil.which("xdg-open"):
             os.system(f"{app} {filename} >/dev/null &")
-        # fallback
-        else:
-            print(f'{"image": "{filename}"}')
 
 
 class Document():
