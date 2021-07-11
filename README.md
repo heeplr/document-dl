@@ -40,14 +40,18 @@ Options:
   -P, --plugin TEXT               plugin name  [env var: DOCDL_PLUGIN;
                                   required]
 
+  -a, --plugin-argument <KEY VALUE>...
+                                  key/value argument passed to the plugin
+                                  [env var: DOCDL_PLUGINARG]
+
   -f, --filter <ATTRIBUTE PATTERN>...
                                   only process documents where attribute
                                   contains pattern  [env var: DOCDL_FILTER]
 
   -j, --jq JQ_EXPRESSION          process document only if json query matches
                                   document attributes (see
-                                  https://stedolan.github.io/jq/manual/ )  [env
-                                  var: DOCDL_JQ]
+                                  https://stedolan.github.io/jq/manual/ )
+                                  [env var: DOCDL_JQ]
 
   -H, --headless BOOLEAN          show browser window if false  [env var:
                                   DOCDL_HEADLESS; default: True]
