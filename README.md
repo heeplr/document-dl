@@ -62,8 +62,8 @@ Options:
                                   DOCDL_HEADLESS; default: True]
 
   -b, --browser [chrome|edge|firefox|ie|opera|safari|webkitgtk]
-                                  webdriver to use for selenium plugins  [env
-                                  var: DOCDL_BROWSER; default: chrome]
+                                  webdriver to use for selenium based plugins
+                                  [env var: DOCDL_BROWSER; default: chrome]
 
   -t, --timeout INTEGER           seconds to wait for data before terminating
                                   connection  [env var: DOCDL_TIMEOUT;

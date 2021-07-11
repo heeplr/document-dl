@@ -95,7 +95,7 @@ import docdl
     envvar="DOCDL_BROWSER",
     show_envvar=True,
     default="chrome",
-    help="webdriver to use for selenium plugins",
+    help="webdriver to use for selenium based plugins",
     show_default=True
 )
 @click.option(
