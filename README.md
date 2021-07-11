@@ -4,9 +4,9 @@ Plugin based command line utility to download documents from web portals.
 List or download all kind of documents (invoices, notifications, ...) or
 write your own scraping plugin.
 
-Select specific documents using simple string search (**--filter**
-argument) or by using complex [jq queries](https://stedolan.github.io/jq/manual/)
-(**--jq** argument).
+Select specific documents using simple string search (**--filter**),
+regular expressions (**--regex**) or [jq queries](https://stedolan.github.io/jq/manual/)
+(**--jq**).
 
 
 # Dependencies
