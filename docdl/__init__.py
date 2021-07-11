@@ -349,7 +349,7 @@ class Document():
         if not regexes:
             return True
         _match = lambda attribute, regex: \
-            re.match(regex, self.attributes[attribute])
+            re.match(regex, str(self.attributes[attribute]))
         return all(
             _match(attribute, regex) for attribute, regex in regexes
         )
