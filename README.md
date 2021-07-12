@@ -1,7 +1,11 @@
 
-> command line document download made easy
+----
+# command line document download made easy
+----
 
-Highlights:
+<br>
+
+## Highlights
 
 * plugin based web portal access
   (amazon, elster, vodafone, ...)
@@ -9,7 +13,7 @@ Highlights:
 * filter output using **string search**, **regular expressions** or
   **[jq queries](https://stedolan.github.io/jq/manual/)**
 
-
+<br><br>
 ## Dependencies
 * python
 * click
@@ -18,15 +22,15 @@ Highlights:
 * python-dateutil
 * selenium (default webdriver is "chrome")
 
-
+<br><br>
 ## Installation
 ```sh
 $ cd document-dl
 $ pip install .
 ```
 
-
-# Usage
+<br><br>
+## Usage
 
 Display Help:
 
@@ -78,8 +82,8 @@ Commands:
   list      list documents
 ```
 
-
-# Examples
+<br><br>
+## Examples
 
 List all documents from vodafone.de, prompt for username/password:
 ```sh
@@ -122,8 +126,8 @@ $ document-dl --plugin Elster --jq 'contains({id: 15})' download
 ```
 
 
-
-# Writing a plugin
+<br><br>
+## Writing a plugin
 
 * name your module the lowercase version of your class name and put it
   in *"docdl/plugins"* (e.g. *"docdl/plugins/myplugin.py"* for ```class MyPlugin```)
@@ -198,8 +202,8 @@ class MyPlugin(docdl.WebPortal):
 
 ```
 
-
-# TODO
+<br><br>
+## TODO
 * list of available plugins
 * plugin specific help
 * better documentation
