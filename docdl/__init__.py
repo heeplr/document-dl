@@ -1,5 +1,6 @@
 """download documents from web portals"""
 
+import getpass
 import re
 import shutil
 import os
@@ -89,7 +90,7 @@ class WebPortal():
         elif 'content-disposition' in r.headers:
             # @todo properly parse rfc6266
             filename = re.findall(
-                "filename=(.+)(?:;)?",
+                "filename=([^; ]+)[;]?.*",
                 r.headers['content-disposition']
             )[0]
         else:
@@ -133,6 +134,10 @@ class WebPortal():
         @todo: handle timezone
         """
         return dateparser.parse(datestring, format)
+
+    def prompt_password(self, prompt):
+        return getpass.getpass(prompt)
+
 
 class SeleniumWebPortal(WebPortal):
     """access portal using selenium"""
@@ -321,7 +326,7 @@ class SeleniumWebPortal(WebPortal):
         user_agent = self.webdriver.execute_script("return navigator.userAgent;")
         self.session.headers['User-Agent'] = user_agent
 
-    def captcha(self, image, entry):
+    def captcha(self, image, entry, prompt="please enter captcha: "):
         """handle captcha"""
         # scroll to ensure captcha is visible
         self.scroll_to_element(image)
@@ -333,11 +338,9 @@ class SeleniumWebPortal(WebPortal):
             "captcha"
         )
         # ask for interactive captcha input
-        captcha = input("please enter captcha: ")
+        captcha = input(prompt)
         # enter into field
         entry.send_keys(captcha)
-        # submit
-        entry.submit()
 
     def show_image(self, filename, name="image"):
         """attempt to show image"""
