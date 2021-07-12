@@ -98,7 +98,6 @@ class DKB_DE(docdl.SeleniumWebPortal):
         # login successful?
         return "financialstatus" in self.webdriver.current_url
 
-
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)
 
