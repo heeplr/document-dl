@@ -151,11 +151,13 @@ class SeleniumWebPortal(WebPortal):
 
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """cleanup selenium"""
         super().__exit__(exc_type, exc_val, exc_tb)
         self.webdriver.close()
         self.webdriver.quit()
 
     def _init_webdriver_options(self):
+        """init selenium options"""
         # choose webdriver options
         if self.WEBDRIVER == "chrome":
             from selenium.webdriver.chrome.options import Options
@@ -185,27 +187,42 @@ class SeleniumWebPortal(WebPortal):
         return Options()
 
     def _init_webdriver(self, webdriver_options, options):
+        """init selenium"""
         from selenium import webdriver
-        # selenium webdriver specific options
-        for opt, val in options.items():
-            setattr(webdriver_options, opt, val)
 
         # init webdriver
         if self.WEBDRIVER == "chrome":
+            # add prefs
+            # selenium webdriver specific options
+            if 'headless' in options:
+                # set headless mode
+                webdriver_options.headless = options['headless']
+            if 'load_images' in options and options['load_images']:
+                # disable image loading
+                webdriver_options.add_experimental_option(
+                    'prefs',
+                    {
+                        'profile.default_content_settings.images': 2,
+                        'profile.managed_default_content_settings.images': 2
+                    }
+                )
+
             # enable incognito mode
             webdriver_options.add_argument("--incognito")
+            # set preferences
+            webdriver_options.add_experimental_option(
+                "prefs",
+                {
+                    # always save PDFs
+                    "plugins.always_open_pdf_externally": True,
+                    # set default download directory to CWD
+                    "download.default_directory": os.getcwd(),
+                }
+            )
             # ~ # debugging
             # ~ webdriver_options.add_argument("--remote-debugging-port=9222")
             # set preference options
-            webdriver_options.add_experimental_option("prefs", {
-                # always save PDFs
-                "plugins.always_open_pdf_externally": True,
-                # set default download directory to CWD
-                "download.default_directory": os.getcwd(),
-                # turn off image loading
-                "profile.default_content_settings.images": 2,
-                "profile.managed_default_content_settings.images": 2,
-            })
+            # init webdriver
             self.webdriver = webdriver.Chrome(options=webdriver_options)
 
         elif self.WEBDRIVER == "edge":
@@ -268,10 +285,7 @@ class SeleniumWebPortal(WebPortal):
     def download_with_selenium(self, document):
         """download a file using the selenium webdriver"""
         # scroll to download element
-        self.webdriver.execute_script(
-            "arguments[0].scrollIntoView(true);",
-            document.download_element
-        )
+        self.scroll_to_element(document.download_element)
         # setup inotify monitor to watch download
         # directory for new files
         notify = inotify.adapters.Inotify()
@@ -309,6 +323,8 @@ class SeleniumWebPortal(WebPortal):
 
     def captcha(self, image, entry):
         """handle captcha"""
+        # scroll to ensure captcha is visible
+        self.scroll_to_element(image)
         # save screenshot
         image.screenshot("captcha.png")
         # present image to the user
@@ -331,6 +347,10 @@ class SeleniumWebPortal(WebPortal):
         if app := shutil.which("xdg-open"):
             os.system(f"{app} {filename} >/dev/null &")
 
+    def scroll_to_element(self, element):
+        self.webdriver.execute_script(
+            "arguments[0].scrollIntoView(true);", element
+        )
 
 class Document():
     """a document"""
