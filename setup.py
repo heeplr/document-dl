@@ -1,4 +1,5 @@
 import sys
+import fastentrypoints
 from setuptools import setup, find_packages
 
 
