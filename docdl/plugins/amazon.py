@@ -46,6 +46,8 @@ class Amazon(docdl.SeleniumWebPortal):
             ).pop()
             # handle captcha (@todo handle failure/wrong input)
             self.captcha(captcha_img, captcha_entry)
+            # submit
+            captcha_entry.submit()
 
         # get loginbutton
         loginbutton = WebDriverWait(self.webdriver, self.TIMEOUT).until(
