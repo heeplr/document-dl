@@ -109,10 +109,20 @@ import docdl
     help="seconds to wait for data before terminating connection",
     show_default=True
 )
+@click.option(
+    "-i",
+    "--image-loading",
+    type=bool,
+    default=False,
+    envvar="DOCDL_IMAGE_LOADING",
+    show_envvar=True,
+    help="Turn off image loading when False",
+    show_default=True
+)
 @click.pass_context
 def documentdl(
     ctx, username, password, plugin, plugin_arguments, matches,
-    regexes, jq, headless, browser, timeout
+    regexes, jq, headless, browser, timeout, image_loading
 ):
     """download documents from web portals"""
     # set browser to use for SeleniumWebPortal class
@@ -129,7 +139,10 @@ def documentdl(
         username,
         password,
         {
-            'webdriver': { 'headless': headless },
+            'webdriver': {
+                'headless': headless,
+                'load_images': image_loading
+            },
             **dict(plugin_arguments)
         }
     )
