@@ -1,15 +1,16 @@
 
-Plugin based command line utility to download documents from web portals.
+> command line document download made easy
 
-List or download all kind of documents (invoices, notifications, ...) or
-write your own scraping plugin.
+Highlights:
 
-Select specific documents using simple string search (**--match**),
-regular expressions (**--regex**) or [jq queries](https://stedolan.github.io/jq/manual/)
-(**--jq**).
+* plugin based web portal access
+  (amazon, elster, vodafone, ...)
+* list available documents in json format or download them
+* filter output using **string search**, **regular expressions** or
+  **[jq queries](https://stedolan.github.io/jq/manual/)**
 
 
-# Dependencies
+## Dependencies
 * python
 * click
 * inotify
@@ -18,8 +19,9 @@ regular expressions (**--regex**) or [jq queries](https://stedolan.github.io/jq/
 * selenium (default webdriver is "chrome")
 
 
-# Installation
-```
+## Installation
+```sh
+$ cd document-dl
 $ pip install .
 ```
 
@@ -28,7 +30,7 @@ $ pip install .
 
 Display Help:
 
-```
+```sh
 $ document-dl -h
 Usage: document-dl [OPTIONS] COMMAND [ARGS]...
 
@@ -80,42 +82,42 @@ Commands:
 # Examples
 
 List all documents from vodafone.de, prompt for username/password:
-```
+```sh
 $ document-dl --plugin VodafoneKabel_DE download
 ```
 
 Same, but show browser window this time:
-```
+```sh
 $ document-dl --headless=false --plugin VodafoneKabel_DE download
 ```
 
 Download all documents from conrad.de, pass credentials as commandline arguments:
-```
+```sh
 $ document-dl --username mylogin --password mypass --plugin Conrad_DE download
 ```
 
 Download all documents from conrad.de, pass credentials  env vars:
-```
+```sh
 $ DOCDL_USERNAME="mylogin" DOCDL_PASSWORD="mypass" document-dl --plugin Conrad_DE download
 ```
 
 Download all documents from o2online.de where "doctype" attribute contains "BILL":
-```
+```sh
 $ document-dl --plugin O2online_DE --match doctype BILL download
 ```
 
 You can also use regular expressions to filter documents:
-```
+```sh
 $ document-dl --plugin O2online_DE --regex date '^(2021-04|2021-05).*$'
 ```
 
 List all documents from o2online.de where year >= 2019:
-```
+```sh
 $ document-dl --plugin O2online_DE --jq 'select(.year >= 2020)' list
 ```
 
 Download document from elster.de with id == 15:
-```
+```sh
 $ document-dl --plugin Elster --jq 'contains({id: 15})' download
 ```
 
@@ -132,7 +134,7 @@ $ document-dl --plugin Elster --jq 'contains({id: 15})' download
   * if you need selenium, inherit from ```docdl.SeleniumWebPortal``` and use
     ```self.webdriver``` that's initialized for you
 
-```
+```python
 import docdl
 
 class MyPlugin(docdl.WebPortal):
