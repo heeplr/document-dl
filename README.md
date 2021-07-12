@@ -34,6 +34,7 @@
 <br><br>
 ## Installation
 ```sh
+$ git clone --recursive https://github.com/heeplr/document-dl
 $ cd document-dl
 $ pip install .
 ```
