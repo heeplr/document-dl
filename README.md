@@ -75,6 +75,9 @@ Options:
                                   connection  [env var: DOCDL_TIMEOUT;
                                   default: 15]
 
+  -i, --image-loading BOOLEAN     Turn off image loading when False  [env var:
+                                  DOCDL_IMAGE_LOADING; default: False]
+
   -h, --help                      Show this message and exit.
 
 Commands:
