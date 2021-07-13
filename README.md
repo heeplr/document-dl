@@ -211,8 +211,23 @@ class MyPlugin(docdl.WebPortal):
 ```
 
 <br><br>
+## Security
+Beware that your login credentials are most probably saved in your shell history. You can use the input prompt to avoid that.
+
+
+<br><br>
+## Bugs
+document-dl is still in a very early state of development and a lot of thing don't work, yet. 
+If you find a bug, please [open an issue](https://github.com/heeplr/document-dl/issues) or send a pull request.
+
+* --browser settings beside **chrome** probably don't work unless you help to test them
+* some services offer more documents/data than currently scraped
+
+
+<br><br>
 ## TODO
 * list of available plugins
 * plugin specific help / better plugin mechanism - [click-plugins](https://pypi.org/project/click-plugins/)?
 * better documentation
 * properly parse rfc6266
+* delete operation
