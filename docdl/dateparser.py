@@ -36,13 +36,12 @@ def parse(date, date_format=None):
 
     # got a string?
     if isinstance(date, str):
-        # massage string
-        date = date.lower().strip()
-
         # empty string ?
         if date == "":
             raise ValueError("Failed to parse datetime: Empty string")
 
+        # massage string
+        date = date.lower().strip()
         # replace month names
         date = replace_months(date)
         # remove whitespace before and after .
