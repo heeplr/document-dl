@@ -148,7 +148,7 @@ def parse(date, date_format=None):
     # unknown type
     raise TypeError(
         "Need <type 'datetime'>, <type 'str'> or <type 'unicode'>. "
-        f"Got {type(i)}"
+        f"Got {type(date)}"
     )
 
 
