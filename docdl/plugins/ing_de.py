@@ -1,6 +1,5 @@
 """download documents from ing.de"""
 
-import re
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -134,4 +133,3 @@ class ING_DE(docdl.SeleniumWebPortal):
                     'id': n
                 }
             )
-
