@@ -5,6 +5,7 @@ import re
 import shutil
 import time
 import os
+import platform
 import requests
 import jq
 import watchdog.events
@@ -355,9 +356,19 @@ class SeleniumWebPortal(WebPortal):
         """attempt to show image"""
         # always print image filename
         print(f'{{"{name}": "{filename}"}}')
-        # find a way to show image
-        if app := shutil.which("xdg-open"):
-            os.system(f"{app} {filename} >/dev/null &")
+        # linux
+        if platform.system() == 'Linux':
+            if shutil.which("xdg-open") and os.environ['DISPLAY']:
+                os.system(f"xdg-open {filename} >/dev/null &")
+
+        # macintosh
+        elif platform.system() == 'Darwin':
+            if shutil.which("open"):
+                os.system(f"open {filename} >/dev/null &")
+
+        # windows
+        elif platform.system() == 'Windows':
+            os.system(f"start filename")
 
     def scroll_to_element(self, element):
         self.webdriver.execute_script(
