@@ -89,6 +89,7 @@ class DKB_DE(docdl.SeleniumWebPortal):
             f"bestätigen Sie mit der Taste OK."
         )
         self.captcha(qrcode, tan)
+        tan.submit()
         # wait for logout button
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             lambda d: "financialstatus" in d.current_url or \
