@@ -3,10 +3,12 @@
 import getpass
 import re
 import shutil
+import time
 import os
 import requests
-import inotify.adapters
 import jq
+import watchdog.events
+import watchdog.observers
 
 from docdl import dateparser
 
@@ -289,32 +291,39 @@ class SeleniumWebPortal(WebPortal):
 
     def download_with_selenium(self, document):
         """download a file using the selenium webdriver"""
+        class DownloadFileCreatedHandler(
+            watchdog.events.PatternMatchingEventHandler
+        ):
+            """
+            directory watchdog to store filename of newly created file
+            """
+            filename = None
+
+            def on_created(self, event):
+                self.filename = os.path.basename(event.src_path)
+
         # scroll to download element
         self.scroll_to_element(document.download_element)
-        # setup inotify monitor to watch download
-        # directory for new files
-        notify = inotify.adapters.Inotify()
-        notify.add_watch(os.getcwd())
+
+        # setup download directory watchdog
+        OBSERVER = watchdog.observers.Observer()
+        # ignore temporary download files
+        handler = DownloadFileCreatedHandler(ignore_patterns=['*.crdownload'])
+        OBSERVER.schedule(handler, os.getcwd(), recursive=False)
 
         # click element to start download
         document.download_element.click()
 
         # wait for download completed
-        for event in notify.event_gen(yield_nones=False):
-            # unpack event
-            (_, type_names, path, filename) = event
-            # is this a chrome download file?
-            if filename.endswith(".crdownload"):
-                new_filename = filename.removesuffix(".crdownload")
-            # is this our finished download ?
-            if filename == new_filename:
-                # we're done
-                break
+        OBSERVER.start()
+        try:
+            while not handler.filename:
+                time.sleep(0.1)
+        finally:
+            OBSERVER.stop()
+        OBSERVER.join()
 
-        # remove inotify monitor
-        notify.remove_watch(os.getcwd())
-
-        return filename
+        return handler.filename
 
     def copy_to_requests_session(self):
         """copy current session to requests session"""

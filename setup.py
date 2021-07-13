@@ -16,11 +16,11 @@ setup(
     py_modules=['docdl'],
     install_requires=[
         'click',
-        'inotify',
         'jq',
         'python-dateutil',
         'requests',
-        'selenium'
+        'selenium',
+        'watchdog'
     ],
     packages=find_packages(exclude=['tests*']),
     entry_points={

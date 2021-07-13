@@ -26,7 +26,7 @@
 ## Dependencies
 * python
 * click
-* inotify
+* watchdog
 * jq
 * python-dateutil
 * selenium (default webdriver is "chrome")
@@ -143,7 +143,7 @@ $ document-dl --plugin Elster --jq 'contains({id: 15})' download
 ## Writing a plugin
 
 * name your module the lowercase version of your class name and put it
-  in *"docdl/plugins"* 
+  in *"docdl/plugins"*
   * e.g. *"docdl/plugins/myplugin.py"* for ```class MyPlugin```
 
 * write your plugin class:
@@ -158,7 +158,7 @@ import docdl
 class MyPlugin(docdl.WebPortal):
 
     URL_LOGIN = "https://myservice.com/login"
-    
+
     def login(self):
         request = self.session.get(self.URL_LOGIN)
         # ... authenticate ...
