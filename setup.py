@@ -11,7 +11,7 @@ setup(
     url='',
     author='Daniel Hiepler',
     author_email='d-docdl@coderdu.de',
-    license='MIT',
+    license='unlicense',
     keywords='scrape office documents bills',
     py_modules=['docdl'],
     install_requires=[
