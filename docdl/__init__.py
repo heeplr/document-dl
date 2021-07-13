@@ -127,16 +127,17 @@ class WebPortal():
             document.attributes['filename'] = filename
         return filename
 
-    def parse_date(self, datestring, format=None):
+    def parse_date(self, datestring, date_format=None):
         """
         helper to parse generic dates
         :param date: either datetime string or datetime object
-        :param format: datetime.strptime() format string. If none is given,
-                       brute force will be used to parse the date
+        :param date_format: datetime.strptime() format string. If none
+                            is given, fuzzy matching will be used to
+                            parse the date
         :result: datetime object or None
         @todo: handle timezone
         """
-        return dateparser.parse(datestring, format)
+        return dateparser.parse(datestring, date_format)
 
     def prompt_password(self, prompt):
         return getpass.getpass(prompt)
