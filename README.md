@@ -24,12 +24,12 @@
 
 <br><br>
 ## Dependencies
-* python
-* click
-* watchdog
-* jq
-* python-dateutil
-* selenium (default webdriver is "chrome")
+* [python](https://python.org)
+* [click](https://github.com/pallets/click)
+* [watchdog](https://github.com/gorakhargosh/watchdog)
+* [jq](https://github.com/mwilliamson/jq.py)
+* [python-dateutil](https://dateutil.readthedocs.io/en/stable/)
+* [selenium](https://selenium-python.readthedocs.io/) (default webdriver is "chrome")
 
 <br><br>
 ## Installation
