@@ -12,7 +12,7 @@
   **[jq queries](https://stedolan.github.io/jq/manual/)**
 * display captcha or QR codes for interactive input
 * writing new plugins is easy
-* existing plugins (somewhat working):
+* existing plugins (some of them even work):
   * amazon.de
   * ing.de
   * dkb.de
