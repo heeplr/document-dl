@@ -30,12 +30,12 @@ def parse(date, date_format=None):
         return None
 
     # already got a datetime object?
-    elif isinstance(date, datetime.datetime):
+    if isinstance(date, datetime.datetime):
         # remove timezone info
         return date.replace(tzinfo=None)
 
     # got a string?
-    elif isinstance(date, str):
+    if isinstance(date, str):
         # massage string
         date = date.lower().strip()
 
@@ -50,18 +50,18 @@ def parse(date, date_format=None):
         # check for keywords
         if date == "now":
             return datetime.datetime.now()
-        elif date == "today":
+        if date == "today":
             return datetime.datetime.today()
-        elif date == "yesterday":
+        if date == "yesterday":
             return datetime.datetime.today() - datetime.timedelta(1)
-        elif date == "tomorrow":
+        if date == "tomorrow":
             return datetime.datetime.today() + datetime.timedelta(1)
-        elif date == "last week" or date == "lastweek":
+        if date in ("last week", "lastweek"):
             return datetime.datetime.today() - datetime.timedelta(7)
-        elif date == "last month" or date == "lastmonth":
+        if date in ("last month", "lastmonth"):
             return datetime.datetime.today() - datetime.timedelta(30)
         # got a pattern?
-        elif date_format:
+        if date_format:
             # use it to interpret date string
             return datetime.datetime.strptime(date, date_format)
 
