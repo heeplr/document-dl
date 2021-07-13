@@ -369,7 +369,7 @@ class SeleniumWebPortal(WebPortal):
 
         # windows
         elif platform.system() == 'Windows':
-            os.system(f"start filename")
+            os.system(f"start {filename}")
 
     def scroll_to_element(self, element):
         self.webdriver.execute_script(
