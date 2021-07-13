@@ -16,11 +16,12 @@ class Date(datetime.datetime):
 datetime.datetime = Date
 
 
-def parse(date, format=None):
+def parse(date, date_format=None):
     """convert input to datetime object
        :param date: either datetime string or datetime object
-       :param format: datetime.strptime() format string. If none is given,
-                       brute force will be used to parse the date
+       :param date_format: datetime.strptime() format string.
+                           If none is given, fuzzy matching will be used
+                           to parse the date
        :result: datetime object or None
        @todo: handle timezone"""
 
@@ -60,9 +61,9 @@ def parse(date, format=None):
         elif date == "last month" or date == "lastmonth":
             return datetime.datetime.today() - datetime.timedelta(30)
         # got a pattern?
-        elif format:
+        elif date_format:
             # use it to interpret date string
-            return datetime.datetime.strptime(date, format)
+            return datetime.datetime.strptime(date, date_format)
 
         # try american date format MM/DD/YYYY
         try:
