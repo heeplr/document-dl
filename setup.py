@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='document-dl',
-    version='0.1.0',
+    version='0.1.1',
     description='download documents from web portals',
     long_description=open("README.md").read(),
     url='',
