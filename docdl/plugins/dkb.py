@@ -28,10 +28,23 @@ class DKB(docdl.SeleniumWebPortal):
         # load login page
         self.webdriver.get(self.URL_LOGIN)
         # wait for username entry
-        username = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH, "//input[@id='loginInputSelector']"
-            ))
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            lambda d: \
+                d.find_elements(
+                    By.XPATH, "//input[@id='loginInputSelector']"
+                ) or \
+                d.find_elements(
+                    By.XPATH, "//button[contains(text(), 'annehmen')]"
+                )
+        )
+        # cookiebanner?
+        if cookiebutton := self.webdriver.find_elements(
+            By.XPATH, "//button[contains(text(), 'annehmen')]"
+        ):
+            cookiebutton[0].click()
+        # get username entry
+        username = self.webdriver.find_element(
+            By.XPATH, "//input[@id='loginInputSelector']"
         )
         # password entry
         password = self.webdriver.find_element(
@@ -89,7 +102,7 @@ class DKB(docdl.SeleniumWebPortal):
             f"Überprüfen Sie den Startcode {startcode} "
             f"bestätigen Sie mit der Taste OK."
         )
-        self.captcha(qrcode, tan)
+        self.captcha(qrcode, tan, prompt="please enter chipTAN: ")
         tan.submit()
         # wait for logout button
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
@@ -188,5 +201,5 @@ class DKB(docdl.SeleniumWebPortal):
 @click.command()
 @click.pass_context
 def dkb(ctx):
-    """dkb.de with photoTAN (postbox)"""
+    """dkb.de with chipTAN QR (postbox)"""
     docdl.cli.run(ctx, DKB)
