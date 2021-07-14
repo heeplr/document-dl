@@ -1,5 +1,5 @@
 """
-download documents from amazon.de
+download documents from Amazon
 
 @todo handle "add mobile phone number?" dialog after login
 @todo handle different toplevel domains
@@ -17,17 +17,17 @@ import docdl
 
 class Amazon(docdl.SeleniumWebPortal):
     """
-    download documents from amazon.de
-    note: you will probably need to enter a captcha when in headless mode
+    download documents from Amazon
+    note: you will probably need to enter a captcha when in headless
+          mode for the first times. For me it went away after some
+          runs.
     """
 
-    URL_BASE="https://amazon.de"
-    URL_LOGOUT="https://www.amazon.de/gp/flex/sign-out.html"
-    URL_ORDERS="https://www.amazon.de/gp/your-account/order-history"
-
     def login(self):
+        # use this toplevel domain
+        tld = self.arguments['tld']
         # load homepage
-        self.webdriver.get(self.URL_BASE)
+        self.webdriver.get(f"https://amazon.{tld}")
         # wait for account-link or captcha request
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.presence_of_element_located((
@@ -68,33 +68,55 @@ class Amazon(docdl.SeleniumWebPortal):
         # send username
         email.send_keys(self.login_id)
         email.submit()
-        # wait for password page
-        password = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located((
-                By.CSS_SELECTOR, "input#ap_password"
-            ))
+        # wait for password or error page
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            lambda d: \
+                d.find_elements(
+                    By.CSS_SELECTOR, "input#ap_password"
+                ) or \
+                d.find_elements(
+                    By.CSS_SELECTOR, "div#auth-error-message-box"
+                )
         )
+        # error ?
+        if self.webdriver.find_elements(
+            By.CSS_SELECTOR, "div#auth-error-message-box"
+        ):
+            return False
         # send password
+        password = self.webdriver.find_element(
+            By.CSS_SELECTOR, "input#ap_password"
+        )
         password.send_keys(self.password)
         password.submit()
         # wait for either login success or failure
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: "Anmelden" in d.title or \
-                      "Amazon.de" in d.title
+            lambda d: \
+                d.find_elements(
+                    By.CSS_SELECTOR, "div#auth-error-message-box"
+                ) or \
+                d.find_elements(
+                    By.CSS_SELECTOR, "a#nav-item-signout"
+                )
         )
-        # Login failed
-        if "Anmelden" in self.webdriver.title:
+        # Login failed ?
+        if self.webdriver.find_elements(
+            By.CSS_SELECTOR, "div#auth-error-message-box"
+        ):
             return False
         return True
 
     def logout(self):
-        self.webdriver.get(self.URL_LOGOUT)
+        tld = self.arguments['tld']
+        self.webdriver.get(f"https://www.amazon.{tld}/gp/flex/sign-out.html")
 
     def documents(self):
         # count all documents
         count = 0
+        # use this toplevel domain
+        tld = self.arguments['tld']
         # load page with orders
-        self.webdriver.get(self.URL_ORDERS)
+        self.webdriver.get(f"https://www.amazon.{tld}/gp/your-account/order-history")
 
         orderfilter = WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.presence_of_element_located((
@@ -107,9 +129,12 @@ class Amazon(docdl.SeleniumWebPortal):
                 By.XPATH, ".//option[contains(@value, 'year')]"
             )
         ]
-        # add "archived" option
-        options += [ "archived" ]
-
+        # got "archived" order filter option?
+        if orderfilter.find_elements(
+            By.XPATH, ".//option[contains(@value, 'archived')]"
+        ):
+            # add "archived" option
+            options += [ "archived" ]
         # collect all "order-details" links
         order_detail_links = []
         # iterate all years + archived orders
@@ -212,7 +237,15 @@ class Amazon(docdl.SeleniumWebPortal):
                     count += 1
 
 @click.command()
+@click.option(
+    "-t",
+    "--tld",
+    default="de",
+    envvar="DOCDL_AMAZON_TLD",
+    show_envvar=True,
+    help="toplevel domain to use"
+)
 @click.pass_context
-def amazon(ctx):
-    """amazon.de (invoices)"""
+def amazon(ctx, tld):
+    """Amazon (invoices)"""
     docdl.cli.run(ctx, Amazon)

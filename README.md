@@ -13,7 +13,7 @@
 * display captcha or QR codes for interactive input
 * writing new plugins is easy
 * existing plugins (some of them even work):
-  * amazon.de
+  * amazon
   * ing.de
   * dkb.de
   * o2.de
