@@ -23,11 +23,20 @@ class VodafoneKabel_DE(docdl.SeleniumWebPortal):
         """authenticate"""
         # load main page
         self.webdriver.get(self.URL_BASE)
+        # wait for cookie banner or login button
+
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            lambda d: d.find_elements(By.CSS_SELECTOR, "div.login-btn") or \
+                      d.find_elements(By.CSS_SELECTOR, "div.red-btn")
+        )
+        # cookie banner?
+        if cookiebutton := self.webdriver.find_elements(
+            By.CSS_SELECTOR, "div.red-btn"
+        ):
+            # accept
+            cookiebutton[0].click()
         # press login button to show login form
         loginbutton = self.webdriver.find_element_by_css_selector("div.login-btn")
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of(loginbutton)
-        )
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "div.login-btn"))
         )
