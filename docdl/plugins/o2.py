@@ -1,6 +1,7 @@
 """download documents from o2online.de"""
 
 import itertools
+import click
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -8,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import docdl
 
 
-class O2online_DE(docdl.SeleniumWebPortal):
+class O2(docdl.SeleniumWebPortal):
 
     URL_LOGIN="https://login.o2online.de/auth/login"
     URL_LOGOUT="https://login.o2online.de/auth/logout"
@@ -121,3 +122,9 @@ class O2online_DE(docdl.SeleniumWebPortal):
                         'filename': f"o2-{year}-{month}-{day}-{d['documentType'].lower()}.pdf"
                     }
                 )
+
+@click.command()
+@click.pass_context
+def o2(ctx):
+    """o2online.de (invoices/postbox)"""
+    docdl.cli.run(ctx, O2)

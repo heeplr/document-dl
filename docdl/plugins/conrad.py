@@ -1,6 +1,7 @@
 """download documents from conrad.de"""
 
 import re
+import click
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
@@ -8,8 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import docdl
 
 
-
-class Conrad_DE(docdl.SeleniumWebPortal):
+class Conrad(docdl.SeleniumWebPortal):
 
     URL_LOGIN="https://www.conrad.de/de/account.html"
     URL_LOGOUT="https://api.conrad.de/session/1/logout"
@@ -123,3 +123,10 @@ class Conrad_DE(docdl.SeleniumWebPortal):
                     'filename': f"conrad-{date.replace('.','-')}-{doctype}-{number}.pdf"
                 }
             )
+
+
+@click.command()
+@click.pass_context
+def conrad(ctx):
+    """conrad.de (invoices)"""
+    docdl.cli.run(ctx, Conrad)

@@ -53,24 +53,17 @@ Usage: document-dl [OPTIONS] COMMAND [ARGS]...
 Options:
   -u, --username TEXT             login id  [env var: DOCDL_USERNAME]
   -p, --password TEXT             secret password  [env var: DOCDL_PASSWORD]
-  -P, --plugin TEXT               plugin name  [env var: DOCDL_PLUGIN;
-                                  required]
-
-  -a, --plugin-argument <KEY VALUE>...
-                                  key/value argument passed to the plugin
-                                  [env var: DOCDL_PLUGINARG]
-
   -m, --match <ATTRIBUTE PATTERN>...
-                                  only process documents where attribute
+                                  only output documents where attribute
                                   contains pattern string  [env var:
                                   DOCDL_MATCH]
 
   -r, --regex <ATTRIBUTE REGEX>...
-                                  only process documents where attribute value
+                                  only output documents where attribute value
                                   matches regex  [env var: DOCDL_REGEX]
 
-  -j, --jq JQ_EXPRESSION          process document only if json query matches
-                                  document attributes (see
+  -j, --jq JQ_EXPRESSION          only output documents if json query matches
+                                  document's attributes (see
                                   https://stedolan.github.io/jq/manual/ )
                                   [env var: DOCDL_JQ]
 
@@ -88,11 +81,34 @@ Options:
   -i, --image-loading BOOLEAN     Turn off image loading when False  [env var:
                                   DOCDL_IMAGE_LOADING; default: False]
 
+  -a, --action [download|list]    download or just list documents  [env var:
+                                  DOCDL_ACTION; default: list]
+
   -h, --help                      Show this message and exit.
 
 Commands:
-  download  download documents
-  list      list documents
+  amazon    amazon.de (invoices)
+  conrad    conrad.de (invoices)
+  dkb       dkb.de with photoTAN (postbox)
+  elster    elster.de with path to .pfx certfile as username (postbox)
+  ing       banking.ing.de with photoTAN (postbox)
+  o2        o2online.de (invoices/postbox)
+  vodafone  kabel.vodafone.de (postbox, invoices)
+```
+
+Display plugin-specific help:
+(**currently there is a [bug in click](https://github.com/pallets/click/issues/1369)
+that prompts for username and password before displaying the help**)
+
+```
+$ document-dl ing --help
+Usage: document-dl ing [OPTIONS]
+
+  banking.ing.de with photoTAN (postbox)
+
+Options:
+  -k, --diba-key TEXT  DiBa Key  [env var: DOCDL_DIBA_KEY]
+  -h, --help           Show this message and exit.
 ```
 
 <br><br>
@@ -100,57 +116,60 @@ Commands:
 
 List all documents from vodafone.de, prompt for username/password:
 ```sh
-$ document-dl --plugin VodafoneKabel_DE list
+$ document-dl vodafone
 ```
 
 Same, but show browser window this time:
 ```sh
-$ document-dl --headless=false --plugin VodafoneKabel_DE list
+$ document-dl --headless=false vodafone
 ```
 
 Download all documents from conrad.de, pass credentials as commandline arguments:
 ```sh
-$ document-dl --username mylogin --password mypass --plugin Conrad_DE download
+$ document-dl --username mylogin --password mypass --action download conrad
 ```
 
 Download all documents from conrad.de, pass credentials as env vars:
 ```sh
-$ DOCDL_USERNAME="mylogin" DOCDL_PASSWORD="mypass" document-dl --plugin Conrad_DE download
+$ DOCDL_USERNAME='mylogin' DOCDL_PASSWORD='mypass' document-dl --action download conrad
 ```
 
 Download all documents from o2online.de where "doctype" attribute contains "BILL":
 ```sh
-$ document-dl --plugin O2online_DE --match doctype BILL download
+$ document-dl --match doctype BILL --action download o2
 ```
 
 You can also use regular expressions to filter documents:
 ```sh
-$ document-dl --plugin O2online_DE --regex date '^(2021-04|2021-05).*$'
+$ document-dl --regex date '^(2021-04|2021-05).*$' o2
 ```
 
 List all documents from o2online.de where year >= 2019:
 ```sh
-$ document-dl --plugin O2online_DE --jq 'select(.year >= 2019)' list
+$ document-dl --jq 'select(.year >= 2019)' o2
 ```
 
 Download document from elster.de with id == 15:
 ```sh
-$ document-dl --plugin Elster --jq 'contains({id: 15})' download
+$ document-dl --jq 'contains({id: 15})' --action download elster
 ```
 
 
 <br><br>
 ## Writing a plugin
 
-* name your module the lowercase version of your class name and put it
-  in *"docdl/plugins"*
-  * e.g. *"docdl/plugins/myplugin.py"* for ```class MyPlugin```
+Plugins are [click-plugins](https://github.com/click-contrib/click-plugins) which
+in turn are normal @click.command's registered in setup.py
+
+* put your plugin into *"docdl/plugins"*
 
 * write your plugin class:
   * if you just need requests, inherit from ```docdl.WebPortal``` and use
     ```self.session``` that's initialized for you
   * if you need selenium, inherit from ```docdl.SeleniumWebPortal``` and use
     ```self.webdriver``` that's initialized for you
+  * add click glue code
+  * add your plugin to setup.py docdl_plugins registry
 
 ```python
 import docdl
@@ -205,20 +224,51 @@ class MyPlugin(docdl.WebPortal):
 
 
     def download(self, document):
+        """you shouldn't need this for most web portals"""
         # ... save file to os.getcwd() ...
         return self.rename_after_download(document, filename)
 
+
+@click.command()
+@click.pass_context
+def myplugin(ctx):
+    """plugin description (what, documents, are, scraped)"""
+    docdl.cli.run(ctx, MyPlugin)
+
 ```
+
+and in setup.py:
+
+```
+# ...
+setup(
+    # ...
+    packages=find_packages(
+        # ...
+        entry_points={
+            'docdl_plugins': [
+                # ...
+                'myplugin=docdl.plugins.myplugin:myplugin',
+                # ...
+            ],
+            # ...
+        }
+)
+```
+
 
 <br><br>
 ## Security
-Beware that your login credentials are most probably saved in your shell history. You can use the input prompt to avoid that.
+Beware that your login credentials are most probably saved in your shell
+history. You can use the input prompt to avoid that.
 
 
 <br><br>
 ## Bugs
-document-dl is still in a very early state of development and a lot of thing don't work, yet. 
-If you find a bug, please [open an issue](https://github.com/heeplr/document-dl/issues) or send a pull request.
+document-dl is still in a very early state of development and a lot of
+things don't work, yet.
+If you find a bug, please [open an issue](https://github.com/heeplr/document-dl/issues)
+or send a pull request.
 
 * --browser settings beside **chrome** probably don't work unless you help to test them
 * some services offer more documents/data than currently scraped
@@ -226,8 +276,6 @@ If you find a bug, please [open an issue](https://github.com/heeplr/document-dl/
 
 <br><br>
 ## TODO
-* list of available plugins
-* plugin specific help / better plugin mechanism - [click-plugins](https://pypi.org/project/click-plugins/)?
 * better documentation
 * properly parse rfc6266
-* delete operation
+* delete action

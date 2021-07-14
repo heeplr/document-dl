@@ -1,5 +1,6 @@
 """download documents from ing.de"""
 
+import click
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -8,7 +9,7 @@ import docdl
 
 
 
-class ING_DE(docdl.SeleniumWebPortal):
+class ING(docdl.SeleniumWebPortal):
     """download documents from ing.de"""
 
     URL_LOGIN = "https://banking.ing.de"
@@ -16,11 +17,6 @@ class ING_DE(docdl.SeleniumWebPortal):
     URL_POSTBOX = "https://banking.ing.de/app/postbox"
 
     def login(self):
-        # ask for diba key if argument not set
-        if 'diba_key' not in self.arguments:
-            self.arguments['diba_key'] = self.prompt_password(
-                "enter DiBa-Key: "
-            )
         # load login page
         self.webdriver.get(self.URL_LOGIN)
         # wait for cookie accept button
@@ -136,3 +132,18 @@ class ING_DE(docdl.SeleniumWebPortal):
                     'id': n
                 }
             )
+
+@click.command()
+@click.option(
+    "-k",
+    "--diba-key",
+    prompt=True,
+    hide_input=True,
+    envvar="DOCDL_DIBA_KEY",
+    show_envvar=True,
+    help="DiBa Key"
+)
+@click.pass_context
+def ing(ctx, diba_key):
+    """banking.ing.de with photoTAN (postbox)"""
+    docdl.cli.run(ctx, ING)

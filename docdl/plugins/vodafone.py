@@ -1,6 +1,7 @@
 """download documents from www.vodafone.de"""
 
 import itertools
+import click
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -8,7 +9,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import docdl
 
 
-class VodafoneKabel_DE(docdl.SeleniumWebPortal):
+class Vodafone(docdl.SeleniumWebPortal):
     """
     download documents from https://kabel.vodafone.de
     """
@@ -140,3 +141,9 @@ class VodafoneKabel_DE(docdl.SeleniumWebPortal):
                         'category': "invoice"
                     }
                 )
+
+@click.command()
+@click.pass_context
+def vodafone(ctx):
+    """kabel.vodafone.de (postbox, invoices)"""
+    docdl.cli.run(ctx, Vodafone)

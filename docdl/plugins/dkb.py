@@ -1,6 +1,7 @@
 """download documents from dkb.de"""
 
 import re
+import click
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -9,7 +10,7 @@ import docdl
 
 
 
-class DKB_DE(docdl.SeleniumWebPortal):
+class DKB(docdl.SeleniumWebPortal):
     """download documents from dkb.de"""
 
     URL_LOGIN = "https://www.dkb.de/banking"
@@ -183,3 +184,9 @@ class DKB_DE(docdl.SeleniumWebPortal):
                 else:
                     # quit
                     break
+
+@click.command()
+@click.pass_context
+def dkb(ctx):
+    """dkb.de with photoTAN (postbox)"""
+    docdl.cli.run(ctx, DKB)

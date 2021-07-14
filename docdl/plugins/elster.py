@@ -1,6 +1,7 @@
 """download documents from elster.de using certificate file + password"""
 
 import re
+import click
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -180,3 +181,9 @@ class Elster(docdl.SeleniumWebPortal):
             pass
 
         return filename
+
+@click.command()
+@click.pass_context
+def elster(ctx):
+    """elster.de with path to .pfx certfile as username (postbox)"""
+    docdl.cli.run(ctx, Elster)

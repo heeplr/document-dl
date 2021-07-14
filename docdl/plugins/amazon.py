@@ -2,10 +2,12 @@
 download documents from amazon.de
 
 @todo handle "add mobile phone number?" dialog after login
+@todo handle different toplevel domains
 """
 
 import re
 import os
+import click
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
@@ -208,3 +210,9 @@ class Amazon(docdl.SeleniumWebPortal):
                     )
                     # increment counter
                     count += 1
+
+@click.command()
+@click.pass_context
+def amazon(ctx):
+    """amazon.de (invoices)"""
+    docdl.cli.run(ctx, Amazon)

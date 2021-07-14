@@ -16,16 +16,27 @@ setup(
     py_modules=['docdl'],
     install_requires=[
         'click',
+        'click-plugins',
         'jq',
         'python-dateutil',
         'requests',
         'selenium',
         'watchdog'
     ],
-    packages=find_packages(exclude=['tests*']),
-    entry_points={
-        'console_scripts': [
-            'document-dl=docdl.cli:documentdl',
-        ]
-    }
+    packages=find_packages(
+        exclude=['tests*']),
+        entry_points={
+            'docdl_plugins': [
+                'amazon=docdl.plugins.amazon:amazon',
+                'conrad=docdl.plugins.conrad:conrad',
+                'dkb=docdl.plugins.dkb:dkb',
+                'elster=docdl.plugins.elster:elster',
+                'ing=docdl.plugins.ing:ing',
+                'o2=docdl.plugins.o2:o2',
+                'vodafone=docdl.plugins.vodafone:vodafone'
+            ],
+            'console_scripts': [
+                'document-dl=docdl.cli:documentdl',
+            ]
+        }
 )

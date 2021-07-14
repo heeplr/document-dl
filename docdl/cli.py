@@ -1,11 +1,15 @@
 """download documents from web portals"""
 
-import importlib
 import json
+import pkg_resources
 import click
+import click_plugins
 import docdl
 
 
+@click_plugins.with_plugins(
+    pkg_resources.iter_entry_points('docdl_plugins')
+)
 @click.group(
     context_settings=dict(help_option_names=['-h', '--help'])
 )
@@ -25,25 +29,6 @@ import docdl
     envvar="DOCDL_PASSWORD",
     show_envvar=True,
     help="secret password"
-)
-@click.option(
-    "-P",
-    "--plugin",
-    envvar="DOCDL_PLUGIN",
-    show_envvar=True,
-    required=True,
-    help="plugin name"
-)
-@click.option(
-    "-a",
-    "--plugin-argument",
-    "plugin_arguments",
-    type=click.Tuple([str, str]),
-    metavar="<KEY VALUE>...",
-    multiple=True,
-    envvar="DOCDL_PLUGINARG",
-    show_envvar=True,
-    help="key/value argument passed to the plugin"
 )
 @click.option(
     "-m",
@@ -119,10 +104,20 @@ import docdl
     help="Turn off image loading when False",
     show_default=True
 )
+@click.option(
+    "-a",
+    "--action",
+    type=click.Choice(["download", "list"]),
+    default="list",
+    envvar="DOCDL_ACTION",
+    show_envvar=True,
+    help="download or just list documents",
+    show_default=True
+)
 @click.pass_context
 def documentdl(
-    ctx, username, password, plugin, plugin_arguments, matches,
-    regexes, jq, headless, browser, timeout, image_loading
+    ctx, username, password, matches, regexes, jq, headless, browser,
+    timeout, image_loading, action
 ):
     """download documents from web portals"""
     # set browser that SeleniumWebPortal plugins should use
@@ -130,66 +125,50 @@ def documentdl(
     # set default request timeout
     docdl.WebPortal.TIMEOUT = timeout
 
-    # create context
-    ctx.obj = {}
-    # load plugin
-    module = importlib.import_module(f"docdl.plugins.{plugin.lower()}")
-    plugin = getattr(module, plugin)
+
+def run(ctx, plugin_class):
+    """this gets called by plugins with their click context"""
+    # get our root context
+    root_ctx = ctx.find_root()
+    root_params = root_ctx.params
+    params = ctx.params
+
     # initialize plugin
-    ctx.obj['portal'] = plugin(
-        username,
-        password,
-        {
+    plugin = plugin_class(
+        login_id=root_params['username'],
+        password=root_params['password'],
+        arguments={
+            # set webdriver specific params
             'webdriver': {
-                'headless': headless,
-                'load_images': image_loading
+                'headless': root_params['headless'],
+                'load_images': root_params['image_loading']
             },
-            **dict(plugin_arguments)
+            # pass plugin params directly to plugin
+            **params
         }
     )
-    # store options
-    ctx.obj['matches'] = matches
-    ctx.obj['regexes'] = regexes
-    ctx.obj['jq'] = jq
 
-
-@documentdl.command(name="list")
-@click.pass_context
-def list_(ctx):
-    """list documents"""
-    with ctx.obj['portal'] as service:
+    # let's go
+    with plugin as portal:
         # walk all documents found
-        for document in service.documents():
-            # list document if filters match
-            if document.match(ctx.obj['matches']) and \
-               document.regex(ctx.obj['regexes']) and \
-               document.jq(ctx.obj['jq']):
-                click.echo(
-                    json.dumps(
-                        document.attributes,
-                        sort_keys=True,
-                        default=str
-                    )
+        for document in portal.documents():
+            # filter document
+            filtered = (
+                document.match(root_params['matches']) and \
+                document.regex(root_params['regexes']) and \
+                document.jq(root_params['jq'])
+            )
+            # skip filtered documents
+            if not filtered:
+                continue
+            # always output as json dict
+            click.echo(
+                json.dumps(
+                    document.attributes,
+                    sort_keys=True,
+                    default=str
                 )
-
-
-@documentdl.command()
-@click.pass_context
-def download(ctx):
-    """download documents"""
-    with ctx.obj['portal'] as service:
-        # walk all documents found
-        for document in service.documents():
-            # list document if filters match
-            if document.match(ctx.obj['matches']) and \
-               document.regex(ctx.obj['regexes']) and \
-               document.jq(ctx.obj['jq']):
-                # download
-                service.download(document)
-                click.echo(
-                    json.dumps(
-                        document.attributes,
-                        sort_keys=True,
-                        default=str
-                    )
-                )
+            )
+            # download ?
+            if root_params['action'] == "download":
+                portal.download(document)
