@@ -54,7 +54,7 @@ import docdl
     multiple=True,
     envvar="DOCDL_MATCH",
     show_envvar=True,
-    help="only process documents where attribute contains pattern string"
+    help="only output documents where attribute contains pattern string"
 )
 @click.option(
     "-r",
@@ -65,7 +65,7 @@ import docdl
     multiple=True,
     envvar="DOCDL_REGEX",
     show_envvar=True,
-    help="only process documents where attribute value matches regex"
+    help="only output documents where attribute value matches regex"
 )
 @click.option(
     "-j",
@@ -73,7 +73,7 @@ import docdl
     metavar="JQ_EXPRESSION",
     envvar="DOCDL_JQ",
     show_envvar=True,
-    help="process document only if json query matches document " \
+    help="only output documents if json query matches document's " \
          "attributes (see https://stedolan.github.io/jq/manual/ )"
 )
 @click.option(
@@ -125,10 +125,11 @@ def documentdl(
     regexes, jq, headless, browser, timeout, image_loading
 ):
     """download documents from web portals"""
-    # set browser to use for SeleniumWebPortal class
+    # set browser that SeleniumWebPortal plugins should use
     docdl.SeleniumWebPortal.WEBDRIVER = browser
     # set default request timeout
     docdl.WebPortal.TIMEOUT = timeout
+
     # create context
     ctx.obj = {}
     # load plugin
