@@ -241,6 +241,7 @@ class Amazon(docdl.SeleniumWebPortal):
     "-t",
     "--tld",
     default="de",
+    show_default=True,
     envvar="DOCDL_AMAZON_TLD",
     show_envvar=True,
     help="toplevel domain to use"
