@@ -260,7 +260,9 @@ setup(
 <br><br>
 ## Security
 Beware that your login credentials are most probably saved in your shell
-history. You can use the input prompt to avoid that.
+history when you pass them as commandline arguments.
+You can use the input prompt to avoid that or set environment variables
+safely.
 
 
 <br><br>
