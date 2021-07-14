@@ -106,13 +106,15 @@ class ING_DE(docdl.SeleniumWebPortal):
             By.CSS_SELECTOR, "div.ibbr-table-row"
         )):
             # the next spans contain our document data
-            spans = row.find_elements(
-                By.XPATH, ".//span[contains(@class,'ibbr-table-cell')]/span"
+            cell = row.find_element(
+                By.XPATH, ".//span[contains(@class,'ibbr-table-cell')]"
             )
+            # read status
+            unread = "unread" in cell.get_attribute("class")
+            # get fields inside cell
+            spans = cell.find_elements(By.XPATH, ".//span")
             # date
             date = spans[0].get_attribute("textContent").strip()
-            # read status
-            # ~ unread = "-read" in spans[0].get_attribute("class")
             # category
             category = spans[2].get_attribute("textContent").strip()
             # subject
@@ -130,6 +132,7 @@ class ING_DE(docdl.SeleniumWebPortal):
                     'date': self.parse_date(date),
                     'category': category,
                     'subject': subject,
+                    'unread': unread,
                     'id': n
                 }
             )
