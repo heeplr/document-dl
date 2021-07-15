@@ -177,6 +177,7 @@ in turn are normal @click.command's registered in setup.py
 
 ```python
 import docdl
+import docdl.util
 
 class MyPlugin(docdl.WebPortal):
 
@@ -203,7 +204,7 @@ class MyPlugin(docdl.WebPortal):
             #    * if you set a "filename" attribute, it will be used to
             #      rename the downloaded file
             #    * dates should be parsed to datetime.datetime objects
-            #      WebPortal.parse_date() should parse the most common strings
+            #      docdl.util.parse_date() should parse the most common strings
             #
             # also you must scrape either:
             #  * the download URL
@@ -222,7 +223,7 @@ class MyPlugin(docdl.WebPortal):
                     "category": "invoices",
                     "title": this_documents_title,
                     "filename": this_documents_target_filename,
-                    "date": self.parse_date(some_date_string)
+                    "date": docdl.util.parse_date(some_date_string)
                 }
             )
 
