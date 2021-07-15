@@ -77,21 +77,21 @@ class WebPortal():
     def download_with_requests(self, document):
         """download a file without the browser using requests"""
         # fetch url
-        r = self.session.get(
+        req = self.session.get(
             document.url, stream=True, headers=document.request_headers
         )
-        if not r.ok:
-            raise DownloadError(f"\"{document.url}\" status code: {r.status_code}")
+        if not req.ok:
+            raise DownloadError(f"\"{document.url}\" status code: {req.status_code}")
 
         # filename not already set?
         if "filename" in document.attributes:
             filename = document.attributes['filename']
         # get filename from header
-        elif 'content-disposition' in r.headers:
+        elif 'content-disposition' in req.headers:
             # @todo properly parse rfc6266
             filename = re.findall(
                 "filename=([^; ]+)[;]?.*",
-                r.headers['content-disposition']
+                req.headers['content-disposition']
             )[0]
         else:
             filename = None
@@ -108,20 +108,10 @@ class WebPortal():
         # massage filename
         filename = filename.replace('"', '').strip()
         # save file
-        with open(os.path.join(os.getcwd(), filename), 'wb') as f:
-            for chunk in r.iter_content(chunk_size=4096):
-                f.write(chunk)
+        with open(os.path.join(os.getcwd(), filename), 'wb') as doc:
+            for chunk in req.iter_content(chunk_size=4096):
+                doc.write(chunk)
 
-        return filename
-
-    def rename_after_download(self, document, filename):
-        # got a predefined filename?
-        if "filename" in document.attributes:
-            # rename file to predefined name
-            os.rename(filename, document.attributes['filename'])
-        else:
-            # save new filename
-            document.attributes['filename'] = filename
         return filename
 
     def parse_date(self, datestring, date_format=None):
@@ -393,6 +383,21 @@ class Document():
 
     def __repr__(self):
         return f"class {self.__class__.__name__}(url=\"{self.url}\", attributes={self.attributes})"
+
+    def rename_after_download(self, filename):
+        """
+        called after file was downloaded - checks if there's a filename
+        the newly downloaded file should be renamed to. Rename file if
+        so.
+        """
+        # got a predefined filename?
+        if "filename" in self.attributes:
+            # rename file to predefined name
+            os.rename(filename, self.attributes['filename'])
+        else:
+            # save new filename
+            self.attributes['filename'] = filename
+        return filename
 
     def match(self, filters):
         """
