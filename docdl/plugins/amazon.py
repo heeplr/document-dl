@@ -262,6 +262,7 @@ class Amazon(docdl.SeleniumWebPortal):
     help="toplevel domain to use"
 )
 @click.pass_context
+# pylint: disable=W0613
 def amazon(ctx, *args, **kwargs):
     """Amazon (invoices)"""
     docdl.cli.run(ctx, Amazon)
