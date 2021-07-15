@@ -272,7 +272,8 @@ safely.
 <br><br>
 ## Bugs
 document-dl is still in a very early state of development and a lot of
-things don't work, yet.
+things don't work, yet. Especially a ton of edge cases need to be
+covered.
 If you find a bug, please [open an issue](https://github.com/heeplr/document-dl/issues)
 or send a pull request.
 
