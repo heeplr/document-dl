@@ -42,7 +42,9 @@ class ING(docdl.SeleniumWebPortal):
         # get DiBa Key digits
         digits = self.webdriver.find_elements(
             By.XPATH,
-            "//div[contains(@class, 'diba-keypad')]/div[contains(@class, 'notification')]/p[@role='heading']/b/span"
+            "//div[contains(@class, 'diba-keypad')]/"
+            "div[contains(@class, 'notification')]/"
+            "p[@role='heading']/b/span"
         )
         digits = [ e.get_attribute('textContent').strip() for e in digits ]
         # click numbers on keypad
@@ -144,6 +146,7 @@ class ING(docdl.SeleniumWebPortal):
     help="DiBa Key"
 )
 @click.pass_context
+# pylint: disable=W0613
 def ing(ctx, *args, **kwargs):
     """banking.ing.de with photoTAN (postbox)"""
     docdl.cli.run(ctx, ING)
