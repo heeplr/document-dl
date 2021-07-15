@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 
 import docdl
+import docdl.util
 
 
 class Conrad(docdl.SeleniumWebPortal):
@@ -115,7 +116,7 @@ class Conrad(docdl.SeleniumWebPortal):
             yield docdl.Document(
                 download_element=invoice,
                 attributes={
-                    'date': self.parse_date(date),
+                    'date': docdl.util.parse_date(date),
                     'number': number,
                     'doctype': doctype,
                     'amount': amount,

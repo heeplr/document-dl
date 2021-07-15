@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 import docdl
+import docdl.util
 
 
 class Vodafone(docdl.SeleniumWebPortal):
@@ -94,7 +95,7 @@ class Vodafone(docdl.SeleniumWebPortal):
                 url=url,
                 attributes={
                     'title': title,
-                    'date': self.parse_date(date),
+                    'date': docdl.util.parse_date(date),
                     'category': "my_documents"
                 }
             )
@@ -137,7 +138,7 @@ class Vodafone(docdl.SeleniumWebPortal):
                     attributes={
                         'type': doctype,
                         'title': title,
-                        'date': self.parse_date(date),
+                        'date': docdl.util.parse_date(date),
                         'category': "invoice"
                     }
                 )

@@ -7,7 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 import docdl
-
+import docdl.util
 
 
 class DKB(docdl.SeleniumWebPortal):
@@ -160,7 +160,7 @@ class DKB(docdl.SeleniumWebPortal):
                     yield docdl.Document(
                         url = url,
                         attributes = {
-                            "date": self.parse_date(date),
+                            "date": docdl.util.parse_date(date),
                             "category": category,
                             "subject": topic,
                             "unread": unread,

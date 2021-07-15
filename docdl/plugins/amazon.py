@@ -2,7 +2,6 @@
 download documents from Amazon
 
 @todo handle "add mobile phone number?" dialog after login
-@todo handle different toplevel domains
 """
 
 import re
@@ -12,6 +11,7 @@ from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
 
 import docdl
+import docdl.util
 
 
 class Amazon(docdl.SeleniumWebPortal):
@@ -139,7 +139,7 @@ class Amazon(docdl.SeleniumWebPortal):
                     yield docdl.Document(
                         url=url,
                         attributes={
-                            'date': self.parse_date(date),
+                            'date': docdl.util.parse_date(date),
                             'order': order_nr,
                             'id': i,
                             'filename': f"amazon-invoice-{order_nr}.pdf"

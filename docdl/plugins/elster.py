@@ -8,6 +8,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 import docdl
+import docdl.util
 
 
 class Elster(docdl.SeleniumWebPortal):
@@ -117,7 +118,7 @@ class Elster(docdl.SeleniumWebPortal):
                         'ordnungskriterium': ordnungskriterium,
                         'profil': profil,
                         'absender': absender,
-                        'date': self.parse_date(datum),
+                        'date': docdl.util.parse_date(datum),
                         'unread': not gelesen,
                         'id': i
                     }

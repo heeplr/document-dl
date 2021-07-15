@@ -7,6 +7,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
 import docdl
+import docdl.util
 
 
 class O2(docdl.SeleniumWebPortal):
@@ -77,7 +78,7 @@ class O2(docdl.SeleniumWebPortal):
                 attributes={
                     'category': "invoice_overview",
                     'year': year,
-                    'date': self.parse_date(f"{year}-01-01"),
+                    'date': docdl.util.parse_date(f"{year}-01-01"),
                     'filename': f"o2-{year}-rechnungsübersicht.pdf"
                 }
             )
@@ -107,7 +108,7 @@ class O2(docdl.SeleniumWebPortal):
             # collect attributes
             attributes = {
                 'amount': f"{amount}",
-                'date': self.parse_date(f"{year}-{month}-{day}")
+                'date': docdl.util.parse_date(f"{year}-{month}-{day}")
             }
             # iterate documents in this invoice
             for document in invoice['billDocuments']:
