@@ -57,7 +57,9 @@ class DKB(docdl.SeleniumWebPortal):
         # wait for photoTAN or "confirm with TAN" button
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.visibility_of_element_located((
-                By.XPATH, "//img[@alt='QR-Code'] | //button[@id='next'] | //div[contains(@class, 'errorMessage')]"
+                By.XPATH, "//img[@alt='QR-Code'] | "
+                          "//button[@id='next'] | "
+                          "//div[contains(@class, 'errorMessage')]"
             ))
         )
         # wrong password?
@@ -126,20 +128,10 @@ class DKB(docdl.SeleniumWebPortal):
             ))
         )
         # iterate all category rows and collect links to categories
-        catlinks = []
-        for row in table.find_elements(
-            By.XPATH, "//table[@id='welcomeMboTable']/tbody/tr"
-        ):
-            # get category
-            category = row.get_attribute("id").lower()
-            # get link to open category
-            subject = row.find_element(By.CSS_SELECTOR, "td.subject")
-            catlink = subject.find_element(By.CSS_SELECTOR, "a")
-            url = catlink.get_attribute("href")
-            catlinks += [ ( category, url) ]
+        catlinks = self._get_catlinks(table)
 
         # count all documents
-        n = 0
+        i = 0
         # iterate all categories
         for category, catlink in catlinks:
             self.webdriver.get(catlink)
@@ -172,31 +164,47 @@ class DKB(docdl.SeleniumWebPortal):
                             "category": category,
                             "subject": topic,
                             "unread": unread,
-                            "id": n
+                            "id": i
                         }
                     )
                     # increment document counter
-                    n += 1
+                    i += 1
 
                 # is there a next-button for pagination?
-                if nextspan := self.webdriver.find_elements(
-                    By.CSS_SELECTOR, "span.pager-navigator-next"
-                ):
-                    # click next button
-                    nextbutton = nextspan[0].find_element(By.XPATH, "a")
-                    self.webdriver.get(nextbutton.get_attribute("href"))
-                    # ~ nextbutton.click()
-                    # wait for new folderview
-                    WebDriverWait(self.webdriver, self.TIMEOUT).until(
-                        EC.visibility_of_element_located((
-                            By.CSS_SELECTOR, "table.expandableTable tbody"
-                        ))
-                    )
-
-                # no next button ?
-                else:
+                if not self._nextbutton():
                     # quit
                     break
+
+    def _get_catlinks(self, table):
+        catlinks = []
+        for row in table.find_elements(
+            By.XPATH, "//table[@id='welcomeMboTable']/tbody/tr"
+        ):
+            # get category
+            category = row.get_attribute("id").lower()
+            # get link to open category
+            subject = row.find_element(By.CSS_SELECTOR, "td.subject")
+            catlink = subject.find_element(By.CSS_SELECTOR, "a")
+            url = catlink.get_attribute("href")
+            catlinks += [ ( category, url) ]
+        return catlinks
+
+    def _nextbutton(self):
+        if nextspan := self.webdriver.find_elements(
+            By.CSS_SELECTOR, "span.pager-navigator-next"
+        ):
+            # click next button
+            nextbutton = nextspan[0].find_element(By.XPATH, "a")
+            self.webdriver.get(nextbutton.get_attribute("href"))
+            # wait for new folderview
+            WebDriverWait(self.webdriver, self.TIMEOUT).until(
+                EC.visibility_of_element_located((
+                    By.CSS_SELECTOR, "table.expandableTable tbody"
+                ))
+            )
+            return True
+        return False
+
 
 @click.command()
 @click.pass_context
