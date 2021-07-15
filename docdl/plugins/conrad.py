@@ -10,7 +10,7 @@ import docdl
 
 
 class Conrad(docdl.SeleniumWebPortal):
-
+    """download documents from conrad.de"""
     URL_LOGIN="https://www.conrad.de/de/account.html"
     URL_LOGOUT="https://api.conrad.de/session/1/logout"
     URL_INVOICES="https://www.conrad.de/de/account.html#/invoices"
@@ -77,7 +77,7 @@ class Conrad(docdl.SeleniumWebPortal):
             )
         )
         # iterate all invoices
-        for n, invoice in enumerate(self.webdriver.find_elements(
+        for i, invoice in enumerate(self.webdriver.find_elements(
             By.XPATH, "//a[@data-e2e='invoiceList-item']"
         )):
             # get attributes
@@ -119,7 +119,7 @@ class Conrad(docdl.SeleniumWebPortal):
                     'number': number,
                     'doctype': doctype,
                     'amount': amount,
-                    'id': n,
+                    'id': i,
                     'filename': f"conrad-{date.replace('.','-')}-{doctype}-{number}.pdf"
                 }
             )
