@@ -140,7 +140,7 @@ class Amazon(docdl.SeleniumWebPortal):
                         url=url,
                         attributes={
                             'date': self.parse_date(date),
-                            'nr': order_nr,
+                            'order': order_nr,
                             'id': i,
                             'filename': f"amazon-invoice-{order_nr}.pdf"
                         }
