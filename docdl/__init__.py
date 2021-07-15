@@ -62,8 +62,7 @@ class WebPortal():
 
     def documents(self):
         """
-        generate a list of documents of certain category
-        (None for all categories)
+        generator that iterates all available and yields docdl.Documents()
         """
         raise NotImplementedError(
             f"{ self.__class__} needs a documents() generator"
@@ -72,7 +71,7 @@ class WebPortal():
     def download(self, document):
         """download document url"""
         filename = self.download_with_requests(document)
-        return self.rename_after_download(document, filename)
+        return document.rename_after_download(filename)
 
     def download_with_requests(self, document):
         """download a file without the browser using requests"""
@@ -157,24 +156,31 @@ class SeleniumWebPortal(WebPortal):
         """init selenium options"""
         # choose webdriver options
         if self.WEBDRIVER == "chrome":
+            # pylint: disable=C0415
             from selenium.webdriver.chrome.options import Options
 
         elif self.WEBDRIVER == "edge":
+            # pylint: disable=C0415
             from selenium.webdriver.edge.options import Options
 
         elif self.WEBDRIVER == "firefox":
+            # pylint: disable=C0415
             from selenium.webdriver.firefox.options import Options
 
         elif self.WEBDRIVER == "ie":
+            # pylint: disable=C0415
             from selenium.webdriver.ie.options import Options
 
         elif self.WEBDRIVER == "opera":
+            # pylint: disable=C0415,E0611,E0401
             from selenium.webdriver.opera.options import Options
 
         elif self.WEBDRIVER == "safari":
+            # pylint: disable=C0415,E0611,E0401
             from selenium.webdriver.safari.options import Options
 
         elif self.WEBDRIVER == "webkitgtk":
+            # pylint: disable=C0415
             from selenium.webdriver.webkitgtk.options import Options
 
         else:
@@ -185,6 +191,7 @@ class SeleniumWebPortal(WebPortal):
 
     def _init_webdriver(self, webdriver_options, options):
         """init selenium"""
+        # pylint: disable=C0415
         from selenium import webdriver
 
         # init webdriver
@@ -223,6 +230,7 @@ class SeleniumWebPortal(WebPortal):
             self.webdriver = webdriver.Chrome(options=webdriver_options)
 
         elif self.WEBDRIVER == "edge":
+            # pylint: disable=E1123
             self.webdriver = webdriver.Edge(options=webdriver_options)
 
         elif self.WEBDRIVER == "firefox":
@@ -257,13 +265,23 @@ class SeleniumWebPortal(WebPortal):
             self.webdriver = webdriver.Ie(options=webdriver_options)
 
         elif self.WEBDRIVER == "opera":
+            # pylint: disable=E0611
             self.webdriver = webdriver.Opera(options=webdriver_options)
 
         elif self.WEBDRIVER == "safari":
+            # pylint: disable=E1123
             self.webdriver = webdriver.Safari(options=webdriver_options)
 
         elif self.WEBDRIVER == "webkitgtk":
             self.webdriver = webdriver.WebKitGTK(options=webdriver_options)
+
+    def documents(self):
+        """
+        generator that iterates all available and yields docdl.Documents()
+        """
+        raise NotImplementedError(
+            f"{ self.__class__} needs a documents() generator"
+        )
 
     def download(self, document):
         """download a document"""
@@ -275,9 +293,9 @@ class SeleniumWebPortal(WebPortal):
             filename = self.download_with_requests(document)
         else:
             raise RuntimeError(
-                "Document has neither url or download_element"
+                "can't download: document has neither url or download_element"
             )
-        return self.rename_after_download(document, filename)
+        return document.rename_after_download(filename)
 
     def download_with_selenium(self, document):
         """download a file using the selenium webdriver"""
@@ -296,6 +314,7 @@ class SeleniumWebPortal(WebPortal):
         self.scroll_to_element(document.download_element)
 
         # setup download directory watchdog
+        # pylint: disable=C0103
         OBSERVER = watchdog.observers.Observer()
         # ignore temporary download files
         handler = DownloadFileCreatedHandler(ignore_patterns=['*.crdownload'])
@@ -360,6 +379,7 @@ class SeleniumWebPortal(WebPortal):
             os.system(f"start {filename}")
 
     def scroll_to_element(self, element):
+        """scroll WebElement into view"""
         self.webdriver.execute_script(
             "arguments[0].scrollIntoView(true);", element
         )
@@ -399,7 +419,7 @@ class Document():
             self.attributes['filename'] = filename
         return filename
 
-    def match(self, filters):
+    def match_string(self, filters):
         """
         :param filters: list of (attribute_name, pattern) tuples
         :result: True if all document attributes contain the pattern,
@@ -414,7 +434,7 @@ class Document():
         # apply all filters to this document
         return all(_filter(attribute, pattern) for attribute, pattern in filters)
 
-    def jq(self, jq_string):
+    def match_jq(self, jq_string):
         """
         :param jq_string: jq expression
         :result: True if jq expression produces any True result,
@@ -428,7 +448,7 @@ class Document():
         # feed attributes to jq
         return any(exp.input(self.attributes).all())
 
-    def regex(self, regexes):
+    def match_regex(self, regexes):
         """
         :param regexes: list of (attribute, regex) tuples
         :result: True if all attributes match their regex, False
