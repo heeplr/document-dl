@@ -1,17 +1,14 @@
 """download documents from web portals"""
 
 import re
-import shutil
 import time
 import os
-import platform
 import requests
 import jq
 import watchdog.events
 import watchdog.observers
 
-from docdl import dateparser
-
+import docdl.util
 
 # ---------------------------------------------------------------------
 class AuthenticationError(Exception):
@@ -112,18 +109,6 @@ class WebPortal():
                 doc.write(chunk)
 
         return filename
-
-    def parse_date(self, datestring, date_format=None):
-        """
-        helper to parse generic dates
-        :param date: either datetime string or datetime object
-        :param date_format: datetime.strptime() format string. If none
-                            is given, fuzzy matching will be used to
-                            parse the date
-        :result: datetime object or None
-        @todo: handle timezone
-        """
-        return dateparser.parse(datestring, date_format)
 
 
 class SeleniumWebPortal(WebPortal):
@@ -352,7 +337,7 @@ class SeleniumWebPortal(WebPortal):
         # save screenshot
         image.screenshot("captcha.png")
         # present image to the user
-        self.show_image(
+        docdl.util.show_image(
             os.path.join(os.getcwd(), "captcha.png"),
             "captcha"
         )
@@ -360,24 +345,6 @@ class SeleniumWebPortal(WebPortal):
         captcha = input(prompt)
         # enter into field
         entry.send_keys(captcha)
-
-    def show_image(self, filename, name="image"):
-        """attempt to show image"""
-        # always print image filename
-        print(f'{{"{name}": "{filename}"}}')
-        # linux
-        if platform.system() == 'Linux':
-            if shutil.which("xdg-open") and os.environ['DISPLAY']:
-                os.system(f"xdg-open {filename} >/dev/null &")
-
-        # macintosh
-        elif platform.system() == 'Darwin':
-            if shutil.which("open"):
-                os.system(f"open {filename} >/dev/null &")
-
-        # windows
-        elif platform.system() == 'Windows':
-            os.system(f"start {filename}")
 
     def scroll_to_element(self, element):
         """scroll WebElement into view"""
