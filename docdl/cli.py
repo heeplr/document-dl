@@ -116,6 +116,7 @@ import docdl
     show_default=True
 )
 @click.pass_context
+# pylint: disable=W0613
 def documentdl(browser, timeout, *args, **kwargs):
     """download documents from web portals"""
     # set browser that SeleniumWebPortal plugins should use
