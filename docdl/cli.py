@@ -33,7 +33,7 @@ import docdl
 @click.option(
     "-m",
     "--match",
-    "matches",
+    "string_matches",
     type=click.Tuple([str, str]),
     metavar="<ATTRIBUTE PATTERN>...",
     multiple=True,
@@ -44,7 +44,7 @@ import docdl
 @click.option(
     "-r",
     "--regex",
-    "regexes",
+    "regex_matches",
     type=click.Tuple([str, str]),
     metavar="<ATTRIBUTE REGEX>...",
     multiple=True,
@@ -55,6 +55,7 @@ import docdl
 @click.option(
     "-j",
     "--jq",
+    "jq_matches",
     metavar="JQ_EXPRESSION",
     envvar="DOCDL_JQ",
     show_envvar=True,
@@ -115,10 +116,7 @@ import docdl
     show_default=True
 )
 @click.pass_context
-def documentdl(
-    ctx, username, password, matches, regexes, jq, headless, browser,
-    timeout, image_loading, action
-):
+def documentdl(browser, timeout, *args, **kwargs):
     """download documents from web portals"""
     # set browser that SeleniumWebPortal plugins should use
     docdl.SeleniumWebPortal.WEBDRIVER = browser
@@ -154,9 +152,9 @@ def run(ctx, plugin_class):
         for document in portal.documents():
             # filter document
             filtered = (
-                document.match(root_params['matches']) and \
-                document.regex(root_params['regexes']) and \
-                document.jq(root_params['jq'])
+                document.match_string(root_params['matches']) and \
+                document.match_regex(root_params['regexes']) and \
+                document.match_jq(root_params['jq'])
             )
             # skip filtered documents
             if not filtered:
