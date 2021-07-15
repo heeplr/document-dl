@@ -8,8 +8,10 @@
 ## Highlights
 
 * list available documents in json format or download them
-* filter documents using **string matching**, **regular expressions** or
-  **[jq queries](https://stedolan.github.io/jq/manual/)**
+* filter documents using
+  * **string matching**
+  * **regular expressions** or
+  * **[jq queries](https://stedolan.github.io/jq/manual/)**
 * display captcha or QR codes for interactive input
 * writing new plugins is easy
 * existing plugins (some of them even work):
@@ -26,6 +28,7 @@
 ## Dependencies
 * [python](https://python.org)
 * [click](https://github.com/pallets/click)
+* [click-plugins](https://github.com/click-contrib/click-plugins)
 * [watchdog](https://github.com/gorakhargosh/watchdog)
 * [jq](https://github.com/mwilliamson/jq.py)
 * [python-dateutil](https://dateutil.readthedocs.io/en/stable/)
