@@ -32,6 +32,7 @@
 * [watchdog](https://github.com/gorakhargosh/watchdog)
 * [jq](https://github.com/mwilliamson/jq.py)
 * [python-dateutil](https://dateutil.readthedocs.io/en/stable/)
+* [requests](https://docs.python-requests.org/en/master/)
 * [selenium](https://selenium-python.readthedocs.io/) (default webdriver is "chrome")
 
 <br><br>
