@@ -57,11 +57,11 @@ class Elster(docdl.SeleniumWebPortal):
         # fetch inbox
         self.webdriver.get(self.URL_INBOX)
         # count all extracted documents
-        n = 0
+        i = 0
         # iterate all pages
         while True:
             # count elements on this page
-            n_page = 0
+            i_page = 0
             # iterate all rows of table
             while True:
                 # wait for table
@@ -73,11 +73,11 @@ class Elster(docdl.SeleniumWebPortal):
                 # find all rows on this page
                 rows = posteingang.find_elements(By.CSS_SELECTOR, "tr")
                 # last row?
-                if n_page >= len(rows):
+                if i_page >= len(rows):
                     # done
                     break
                 # get current row
-                row = rows[n_page]
+                row = rows[i_page]
                 # get columns
                 downloadbutton = WebDriverWait(row, self.TIMEOUT).until(
                     EC.presence_of_element_located((
@@ -119,12 +119,12 @@ class Elster(docdl.SeleniumWebPortal):
                         'absender': absender,
                         'date': self.parse_date(datum),
                         'unread': not gelesen,
-                        'id': n
+                        'id': i
                     }
                 )
                 # increase counter
-                n += 1
-                n_page += 1
+                i += 1
+                i_page += 1
 
             # last page?
             next_button = self.webdriver.find_element(
