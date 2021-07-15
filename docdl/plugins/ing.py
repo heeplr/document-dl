@@ -98,7 +98,7 @@ class ING(docdl.SeleniumWebPortal):
             ))
         )
         # iterate rows
-        for n, row in enumerate(table.find_elements(
+        for i, row in enumerate(table.find_elements(
             By.CSS_SELECTOR, "div.ibbr-table-row"
         )):
             # the next spans contain our document data
@@ -129,7 +129,7 @@ class ING(docdl.SeleniumWebPortal):
                     'category': category,
                     'subject': subject,
                     'unread': unread,
-                    'id': n
+                    'id': i
                 }
             )
 
@@ -144,6 +144,6 @@ class ING(docdl.SeleniumWebPortal):
     help="DiBa Key"
 )
 @click.pass_context
-def ing(ctx, diba_key):
+def ing(ctx, *args, **kwargs):
     """banking.ing.de with photoTAN (postbox)"""
     docdl.cli.run(ctx, ING)
