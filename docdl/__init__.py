@@ -145,6 +145,7 @@ class SeleniumWebPortal(WebPortal):
         super().__enter__()
         # copy cookies to requests session
         self.copy_to_requests_session()
+        return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """cleanup selenium"""
