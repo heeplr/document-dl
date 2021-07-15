@@ -1,6 +1,5 @@
 """download documents from web portals"""
 
-import getpass
 import re
 import shutil
 import time
@@ -43,8 +42,6 @@ class WebPortal():
         # login to service
         if not self.login():
             raise AuthenticationError("login failed")
-        # copy cookies to requests session
-        self.copy_to_requests_session()
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -139,9 +136,6 @@ class WebPortal():
         """
         return dateparser.parse(datestring, date_format)
 
-    def prompt_password(self, prompt):
-        return getpass.getpass(prompt)
-
 
 class SeleniumWebPortal(WebPortal):
     """access portal using selenium"""
@@ -158,6 +152,10 @@ class SeleniumWebPortal(WebPortal):
         webdriver_opts = self._init_webdriver_options()
         self._init_webdriver(webdriver_opts, arguments['webdriver'])
 
+    def __enter__(self):
+        super().__enter__()
+        # copy cookies to requests session
+        self.copy_to_requests_session()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         """cleanup selenium"""
