@@ -116,8 +116,11 @@ import docdl
     show_default=True
 )
 @click.pass_context
-# pylint: disable=W0613
-def documentdl(browser, timeout, *args, **kwargs):
+# pylint: disable=W0613,C0103,R0913
+def documentdl(
+    ctx, username, password, string_matches, regex_matches, jq_matches,
+    headless, browser, timeout, image_loading, action
+):
     """download documents from web portals"""
     # set browser that SeleniumWebPortal plugins should use
     docdl.SeleniumWebPortal.WEBDRIVER = browser
@@ -153,9 +156,9 @@ def run(ctx, plugin_class):
         for document in portal.documents():
             # filter document
             filtered = (
-                document.match_string(root_params['matches']) and \
-                document.match_regex(root_params['regexes']) and \
-                document.match_jq(root_params['jq'])
+                document.match_string(root_params['string_matches']) and \
+                document.match_regex(root_params['regex_matches']) and \
+                document.match_jq(root_params['jq_matches'])
             )
             # skip filtered documents
             if not filtered:
