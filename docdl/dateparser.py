@@ -16,6 +16,24 @@ class Date(datetime.datetime):
 datetime.datetime = Date
 
 
+def check_for_keywords(date):
+    """check for shorthands"""
+    result = None
+    if date == "now":
+        result = datetime.datetime.now()
+    elif date == "today":
+        result = datetime.datetime.today()
+    elif date == "yesterday":
+        result = datetime.datetime.today() - datetime.timedelta(1)
+    elif date == "tomorrow":
+        result = datetime.datetime.today() + datetime.timedelta(1)
+    elif date in ("last week", "lastweek"):
+        result = datetime.datetime.today() - datetime.timedelta(7)
+    elif date in ("last month", "lastmonth"):
+        result = datetime.datetime.today() - datetime.timedelta(30)
+    return result
+
+# pylint: disable=R0911,R0912,R0915
 def parse(date, date_format=None):
     """convert input to datetime object
        :param date: either datetime string or datetime object
@@ -47,18 +65,8 @@ def parse(date, date_format=None):
         # remove whitespace before and after .
         date = re.sub(r'\s*\.\s', '.', date)
         # check for keywords
-        if date == "now":
-            return datetime.datetime.now()
-        if date == "today":
-            return datetime.datetime.today()
-        if date == "yesterday":
-            return datetime.datetime.today() - datetime.timedelta(1)
-        if date == "tomorrow":
-            return datetime.datetime.today() + datetime.timedelta(1)
-        if date in ("last week", "lastweek"):
-            return datetime.datetime.today() - datetime.timedelta(7)
-        if date in ("last month", "lastmonth"):
-            return datetime.datetime.today() - datetime.timedelta(30)
+        if result := check_for_keywords(date):
+            return result
         # got a pattern?
         if date_format:
             # use it to interpret date string
@@ -66,79 +74,79 @@ def parse(date, date_format=None):
 
         # try american date format MM/DD/YYYY
         try:
-            d = datetime.datetime.strptime(date, "%m/%d/%Y")
+            result = datetime.datetime.strptime(date, "%m/%d/%Y")
             # remove timezone info
-            return d.replace(tzinfo=None)
+            return result.replace(tzinfo=None)
         except ValueError:
             pass
 
         # try german date format DD.MM.YYYY
         try:
-            d = datetime.datetime.strptime(date, "%d.%m.%Y")
+            result = datetime.datetime.strptime(date, "%d.%m.%Y")
             # remove timezone info
-            return d.replace(tzinfo=None)
+            return result.replace(tzinfo=None)
         except ValueError:
             pass
 
         # try german date format DD.MM.YY
         try:
-            d = datetime.datetime.strptime(date, "%d.%m.%y")
+            result = datetime.datetime.strptime(date, "%d.%m.%y")
             # remove timezone info
-            return d.replace(tzinfo=None)
+            return result.replace(tzinfo=None)
         except ValueError:
             pass
 
         # try fuzzy parser
         try:
-            d = dateutil.parser.parse(date, fuzzy=True)
+            result = dateutil.parser.parse(date, fuzzy=True)
             # parse() could return a tuple
-            if isinstance(d, tuple):
-                d = d[0]
+            if isinstance(result, tuple):
+                result = result[0]
             # remove timezone info
-            return d.replace(tzinfo=None)
+            return result.replace(tzinfo=None)
         except (ValueError, TypeError, OverflowError):
             pass
 
         # try YYYYDDMM
         try:
-            d = datetime.datetime.strptime(date, "%Y%d%m")
-            return d.replace(tzinfo=None)
+            result = datetime.datetime.strptime(date, "%Y%d%m")
+            return result.replace(tzinfo=None)
         except ValueError:
             pass
 
         # try to split off timezone
         if "+" in date:
-            t = date.split("+")
-            tz = t[1]
-            date = t[0]
+            split_date = date.split("+")
+            # ~ tz = split_date[1]
+            date = split_date[0]
         if "z" in date:
-            t = date.split("z")
-            date = t[0]
+            split_date = date.split("z")
+            date = split_date[0]
         if "." in date:
-            t = date.split(".")
-            date = t[0]
+            split_date = date.split(".")
+            date = split_date[0]
 
         # will raise ValueError on problems
         try:
-            d = dateutil.parser.parse(date, fuzzy=True)
+            result = dateutil.parser.parse(date, fuzzy=True)
             # parse() could return a tuple
-            if isinstance(d, tuple):
-                d = d[0]
-            return d.replace(tzinfo=None)
+            if isinstance(result, tuple):
+                result = result[0]
+            return result.replace(tzinfo=None)
         except (ValueError, TypeError, OverflowError):
             pass
 
         # try timestamp
         try:
-            d = datetime.datetime.fromtimestamp(int(date))
-            return d.replace(tzinfo=None)
+            result = datetime.datetime.fromtimestamp(int(date))
+            return result.replace(tzinfo=None)
         except ValueError:
             pass
 
         # 2015-jan-thut05:01:39akdt
         try:
-            d = datetime.datetime.strptime(date, "%Y-%b-%at%H:%M:%Sakdt")
-            return d.replace(tzinfo=None)
+            result = datetime.datetime.strptime(date, "%Y-%b-%at%H:%M:%Sakdt")
+            return result.replace(tzinfo=None)
         except ValueError:
             pass
 
@@ -153,7 +161,7 @@ def parse(date, date_format=None):
 
 def replace_months(date):
     """replace literal month names with numbers"""
-    MONTHS = {
+    months = {
         1:  [ "jan", "januray", "januar" ],
         2:  [ "feb", "february", "februar" ],
         3:  [ "mar", "march", "märz" ],
@@ -169,9 +177,9 @@ def replace_months(date):
     }
 
     # walk all months
-    for month, names in MONTHS.items():
+    for month, names in months.items():
         # check for all names (sorted by length, longest first)
-        for name in reversed(sorted(names, key=lambda n: len(n))):
+        for name in reversed(sorted(names, key=len)):
             # replace on occurence
             if name in date:
                 return date.replace(name, f"{month}.")
