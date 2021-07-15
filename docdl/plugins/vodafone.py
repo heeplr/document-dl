@@ -64,28 +64,28 @@ class Vodafone(docdl.SeleniumWebPortal):
 
     def documents(self):
         """fetch list of documents"""
-        for n, d in enumerate(itertools.chain(self.my_documents(), self.invoices())):
+        for i, document in enumerate(itertools.chain(self.my_documents(), self.invoices())):
             # set an id
-            d.attributes['id'] = n
+            document.attributes['id'] = i
             # return document
-            yield d
+            yield document
 
     def my_documents(self):
         """iterate "Meine Dokumente"""
         # go to documents site
         self.webdriver.get(self.URL_MY_DOCUMENTS)
         # iterate all document elements
-        for e in self.webdriver.find_elements_by_css_selector("div.dataTable-row"):
+        for element in self.webdriver.find_elements_by_css_selector("div.dataTable-row"):
             # 1st cell is date
-            date = e.find_element_by_css_selector(":nth-child(1)") \
+            date = element.find_element_by_css_selector(":nth-child(1)") \
                    .get_attribute("textContent") \
                    .strip()
             # 2nd cell is topic
-            title = e.find_element_by_css_selector(":nth-child(2)") \
+            title = element.find_element_by_css_selector(":nth-child(2)") \
                     .get_attribute("textContent") \
                     .strip()
             # 4th cell contains link
-            url = e.find_element_by_css_selector(":nth-child(4)") \
+            url = element.find_element_by_css_selector(":nth-child(4)") \
                   .find_element_by_css_selector("a") \
                   .get_attribute("href") \
                   .strip()
@@ -106,11 +106,11 @@ class Vodafone(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_INVOICES)
         for table in self.webdriver.find_elements_by_css_selector("div.dataTable"):
             rows = table.find_elements_by_css_selector("div.dataTable-row")
-            for i, e in enumerate(rows):
+            for i, element in enumerate(rows):
                 # first row is a title row, skip it
                 if i == 0:
                     continue
-                cells = e.find_elements_by_tag_name("div")
+                cells = element.find_elements_by_tag_name("div")
                 # skip empty rows
                 if len(cells) < 2:
                     continue
