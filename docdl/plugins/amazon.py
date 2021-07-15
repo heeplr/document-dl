@@ -35,17 +35,16 @@ class Amazon(docdl.SeleniumWebPortal):
             ))
         )
         # captcha entry ?
-        captcha_entry = self.webdriver.find_elements(
+        if captcha_entry := self.webdriver.find_elements(
             By.XPATH, "//input[@id='captchacharacters']"
-        )
-        if captcha_entry:
+        ):
             # find_elements returns list, we need
             # the last (and only) entry
             captcha_entry = captcha_entry[0]
             # get image
-            captcha_img = self.webdriver.find_elements(
+            captcha_img = self.webdriver.find_element(
                 By.XPATH, "//img[contains(@src, 'captcha')]"
-            ).pop()
+            )
             # handle captcha (@todo handle failure/wrong input)
             self.captcha(captcha_img, captcha_entry)
             # submit
@@ -116,8 +115,11 @@ class Amazon(docdl.SeleniumWebPortal):
         # use this toplevel domain
         tld = self.arguments['tld']
         # load page with orders
-        self.webdriver.get(f"https://www.amazon.{tld}/gp/your-account/order-history")
-
+        self.webdriver.get(
+            f"https://www.amazon.{tld}/gp/your-account/order-history"
+        )
+        # wait for dropdown to select orders
+        # (last months, years, archived)
         orderfilter = WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.presence_of_element_located((
                 By.CSS_SELECTOR, "select#orderFilter"
@@ -135,9 +137,8 @@ class Amazon(docdl.SeleniumWebPortal):
         ):
             # add "archived" option
             options += [ "archived" ]
-        # collect all "order-details" links
-        order_detail_links = []
-        # iterate all years + archived orders
+
+        # iterate all years (+ archived orders)
         for option in options:
             # go back to order overview except if we already are on
             # the overview page
@@ -149,6 +150,7 @@ class Amazon(docdl.SeleniumWebPortal):
                     By.CSS_SELECTOR, "select#orderFilter"
                 ))
             )
+            # select current option
             orderfilter_select = Select(orderfilter)
             orderfilter_select.select_by_value(option)
 
@@ -169,12 +171,12 @@ class Amazon(docdl.SeleniumWebPortal):
                     ))
                 )
                 # loop until height doesn't change
-                if height != self.webdriver.execute_script(
+                if height == self.webdriver.execute_script(
                     "return document.documentElement.scrollHeight"
                 ):
                     break
 
-            # append links
+            # save all order detail links
             order_detail_links = [
                 e.get_attribute("href") for e in self.webdriver.find_elements(
                     By.XPATH, "//a[contains(@href, 'order-details')]"
