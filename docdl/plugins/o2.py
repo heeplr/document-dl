@@ -10,7 +10,7 @@ import docdl
 
 
 class O2(docdl.SeleniumWebPortal):
-
+    """download documents from o2online.de"""
     URL_LOGIN="https://login.o2online.de/auth/login"
     URL_LOGOUT="https://login.o2online.de/auth/logout"
     URL_MY_MESSAGES="https://www.o2online.de/ecareng/my-messages"
@@ -57,18 +57,18 @@ class O2(docdl.SeleniumWebPortal):
 
     def documents(self):
         """fetch list of documents"""
-        for n, d in enumerate(
+        for i, document in enumerate(
             itertools.chain(self.invoices(), self.invoice_overview())
         ):
             # set an id
-            d.attributes['id'] = n
+            document.attributes['id'] = i
             # return document
-            yield d
+            yield document
 
     def invoice_overview(self):
         """fetch invoice overview"""
-        r = self.session.get(self.URL_INVOICE_OVERVIEW)
-        invoiceoverview = r.json()
+        req = self.session.get(self.URL_INVOICE_OVERVIEW)
+        invoiceoverview = req.json()
         years = invoiceoverview['invoices'].keys()
         for year in years:
             yield docdl.Document(
@@ -85,15 +85,15 @@ class O2(docdl.SeleniumWebPortal):
     def invoices(self):
         """fetch list of invoices"""
         # fetch normal invoices
-        r = self.session.get(self.URL_INVOICES)
-        for d in self.parse_invoices_json(r.json()):
-            d.attributes['category'] = "invoice"
-            yield d
+        req = self.session.get(self.URL_INVOICES)
+        for document in self.parse_invoices_json(req.json()):
+            document.attributes['category'] = "invoice"
+            yield document
         # fetch value added invoices
-        r = self.session.get(self.URL_VALUE_ADDED_INVOICE)
-        for d in self.parse_invoices_json(r.json()):
-            d.attributes['category'] = "value_added_invoice"
-            yield d
+        req = self.session.get(self.URL_VALUE_ADDED_INVOICE)
+        for document in self.parse_invoices_json(req.json()):
+            document.attributes['category'] = "value_added_invoice"
+            yield document
 
     def parse_invoices_json(self, invoices):
         """parse all documents in invoiceinfo json"""
@@ -110,21 +110,23 @@ class O2(docdl.SeleniumWebPortal):
                 'date': self.parse_date(f"{year}-{month}-{day}")
             }
             # iterate documents in this invoice
-            for d in invoice['billDocuments']:
+            for document in invoice['billDocuments']:
+                category = document['documentType'].lower()
                 yield docdl.Document(
                     url=f"{self.URL_INVOICE}?" \
-                        f"billNumber={d['billNumber']}&" \
-                        f"documentType={d['documentType']}",
+                        f"billNumber={document['billNumber']}&" \
+                        f"documentType={document['documentType']}",
                     attributes={
                         **attributes,
-                        'number': d['billNumber'],
-                        'doctype': d['documentType'],
-                        'filename': f"o2-{year}-{month}-{day}-{d['documentType'].lower()}.pdf"
+                        'number': document['billNumber'],
+                        'doctype': document['documentType'],
+                        'filename': f"o2-{year}-{month}-{day}-{category}.pdf"
                     }
                 )
 
 @click.command()
 @click.pass_context
+# pylint: disable=C0103
 def o2(ctx):
     """o2online.de (invoices/postbox)"""
     docdl.cli.run(ctx, O2)
