@@ -284,6 +284,7 @@ or send a pull request.
 
 <br><br>
 ## TODO
+* logging
 * better documentation
 * properly parse rfc6266
 * delete action
