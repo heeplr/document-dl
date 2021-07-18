@@ -189,9 +189,7 @@ class Amazon(docdl.SeleniumWebPortal):
                 "return document.documentElement.scrollHeight"
             )
             # scroll to bottom
-            self.webdriver.execute_script(
-                "window.scrollTo(0, document.body.scrollHeight)"
-            )
+            self.scroll_to_bottom()
             # wait for loader to disappear
             WebDriverWait(self.webdriver, self.TIMEOUT).until(
                 EC.invisibility_of_element_located((

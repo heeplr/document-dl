@@ -352,6 +352,12 @@ class SeleniumWebPortal(WebPortal):
             "arguments[0].scrollIntoView(true);", element
         )
 
+    def scroll_to_bottom(self):
+        """scroll to bottom of page"""
+        self.webdriver.execute_script(
+            "window.scrollTo(0, document.body.scrollHeight)"
+        )
+
 class Document():
     """a document"""
 
