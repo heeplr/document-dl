@@ -4,16 +4,16 @@ import datetime
 import re
 import dateutil.parser
 
-
-class Date(datetime.datetime):
-    """custom datetime object wrapper represented in ISO format"""
-
-    def __repr__(self):
+def _default(self, o):
+    """function to encode a datetime object"""
+    if isinstance(o, datetime.datetime):
         """https://xkcd.com/1179/"""
-        return self.isoformat()
+        return o.isoformat()
+    return self.default(o)
 
-# monkeypatch datetime to use our ISO representation globally
-datetime.datetime = Date
+# monkeypatch JSONEncoder to always serialize dates in ISO format
+import json
+json.JSONEncoder.default = _default
 
 
 def check_for_keywords(date):
