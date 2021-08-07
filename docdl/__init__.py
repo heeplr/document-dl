@@ -409,19 +409,25 @@ class Document():
         # apply all filters to this document
         return all(_filter(attribute, pattern) for attribute, pattern in filters)
 
-    def match_jq(self, jq_string):
+    def match_jq(self, jq_strings):
         """
         :param jq_string: jq expression
         :result: True if jq expression produces any True result,
                  False otherwise
         """
         # null expression matches by default
-        if not jq_string:
+        if len(jq_strings) == 0:
             return True
-        # compile jq expression
-        exp = jq.compile(jq_string)
-        # feed attributes to jq
-        return any(exp.input(text=self.toJSON()).all())
+
+        # all jq expressions must produce output
+        return all(
+            [ any(
+                jq.compile(jq_string) \
+                    .input(text=self.toJSON()) \
+                    .all()) \
+                    for jq_string in jq_strings
+            ]
+        )
 
     def match_regex(self, regexes):
         """
@@ -430,7 +436,7 @@ class Document():
                  otherwise.
         """
         # always match if there are no regexes
-        if not regexes:
+        if len(regexes) == 0:
             return True
         _match = lambda attribute, regex: \
             re.match(regex, str(self.attributes[attribute]))

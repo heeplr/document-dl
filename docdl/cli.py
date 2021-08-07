@@ -56,6 +56,7 @@ import docdl
     "--jq",
     "jq_matches",
     metavar="JQ_EXPRESSION",
+    multiple=True,
     envvar="DOCDL_JQ",
     show_envvar=True,
     help="only output documents if json query matches document's " \
