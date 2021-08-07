@@ -1,20 +1,24 @@
 """parse any possible date/time string to datetime object"""
 
 import datetime
+import json
 import re
 import dateutil.parser
 
-def _default(self, o):
-    """function to encode a datetime object"""
-    if isinstance(o, datetime.datetime):
+
+def json_encode(obj):
+    """
+    custom json encoder that converts datetime
+    objects to ISO format string
+    """
+    # treat datetime objects specially
+    if isinstance(obj, datetime.datetime):
         """https://xkcd.com/1179/"""
-        return o.isoformat()
-    return self.default(o)
-
-# monkeypatch JSONEncoder to always serialize dates in ISO format
-import json
-json.JSONEncoder.default = _default
-
+        # we add the Z to prevent
+        # jq: error date ... does not match format "%Y-%m-%dT%H:%M:%SZ"
+        return obj.isoformat() + "Z"
+    # pass everything else to default encoder
+    return json.JSONEncoder.default(obj)
 
 def check_for_keywords(date):
     """check for shorthands"""
