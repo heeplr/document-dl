@@ -115,11 +115,22 @@ import docdl
     help="download or just list documents",
     show_default=True
 )
+@click.option(
+    "-f",
+    "--format",
+    "output_format",
+    type=click.Choice([ "list", "dicts" ], case_sensitive=False),
+    envvar="DOCDL_FORMAT",
+    show_envvar=True,
+    default="dicts",
+    help="choose between line buffered output of json dicts or one json list",
+    show_default=True
+)
 @click.pass_context
 # pylint: disable=W0613,C0103,R0913
 def documentdl(
     ctx, username, password, string_matches, regex_matches, jq_matches,
-    headless, browser, timeout, image_loading, action
+    headless, browser, timeout, image_loading, action, output_format
 ):
     """download documents from web portals"""
     # set browser that SeleniumWebPortal plugins should use
@@ -152,6 +163,8 @@ def run(ctx, plugin_class):
 
     # let's go
     with plugin as portal:
+        # list of documents
+        result = []
         # walk all documents found
         for document in portal.documents():
             # filter document
@@ -163,8 +176,17 @@ def run(ctx, plugin_class):
             # skip filtered documents
             if not filtered:
                 continue
-            # always output as json dict
-            click.echo(document.toJSON())
+            # line buffered dict output?
+            if root_params['output_format'] == "dicts":
+                # always output as json dict
+                click.echo(document.toJSON())
+            # just store result for later
+            else:
+                result += [ document.toJSON() ]
             # download ?
             if root_params['action'] == "download":
                 portal.download(document)
+
+        # output json list?
+        if root_params['output_format'] == "list":
+            click.echo(f"[ {','.join(result)} ]")
