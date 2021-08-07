@@ -1,6 +1,5 @@
 """download documents from web portals"""
 
-import json
 import pkg_resources
 import click
 import click_plugins
@@ -164,13 +163,7 @@ def run(ctx, plugin_class):
             if not filtered:
                 continue
             # always output as json dict
-            click.echo(
-                json.dumps(
-                    document.attributes,
-                    sort_keys=True,
-                    default=str
-                )
-            )
+            click.echo(document.toJSON())
             # download ?
             if root_params['action'] == "download":
                 portal.download(document)
