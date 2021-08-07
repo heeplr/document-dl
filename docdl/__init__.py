@@ -1,5 +1,6 @@
 """download documents from web portals"""
 
+import json
 import re
 import time
 import os
@@ -420,7 +421,7 @@ class Document():
         # compile jq expression
         exp = jq.compile(jq_string)
         # feed attributes to jq
-        return any(exp.input(self.attributes).all())
+        return any(exp.input(text=self.toJSON()).all())
 
     def match_regex(self, regexes):
         """
@@ -435,4 +436,11 @@ class Document():
             re.match(regex, str(self.attributes[attribute]))
         return all(
             _match(attribute, regex) for attribute, regex in regexes
+        )
+
+    def toJSON(self):
+        return json.dumps(
+            self.attributes,
+            sort_keys=True,
+            default=docdl.util.dateparser.json_encode
         )
