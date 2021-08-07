@@ -61,39 +61,34 @@ Options:
                                   only output documents where attribute
                                   contains pattern string  [env var:
                                   DOCDL_MATCH]
-
   -r, --regex <ATTRIBUTE REGEX>...
                                   only output documents where attribute value
                                   matches regex  [env var: DOCDL_REGEX]
-
   -j, --jq JQ_EXPRESSION          only output documents if json query matches
                                   document's attributes (see
                                   https://stedolan.github.io/jq/manual/ )
                                   [env var: DOCDL_JQ]
-
   -H, --headless BOOLEAN          show browser window if false  [env var:
-                                  DOCDL_HEADLESS; default: True]
-
+                                  DOCDL_HEADLESS;default: True]
   -b, --browser [chrome|edge|firefox|ie|opera|safari|webkitgtk]
                                   webdriver to use for selenium based plugins
-                                  [env var: DOCDL_BROWSER; default: chrome]
-
+                                  [env var: DOCDL_BROWSER;default: chrome]
   -t, --timeout INTEGER           seconds to wait for data before terminating
-                                  connection  [env var: DOCDL_TIMEOUT;
-                                  default: 15]
-
+                                  connection  [env var: DOCDL_TIMEOUT;default:
+                                  15]
   -i, --image-loading BOOLEAN     Turn off image loading when False  [env var:
-                                  DOCDL_IMAGE_LOADING; default: False]
-
+                                  DOCDL_IMAGE_LOADING;default: False]
   -a, --action [download|list]    download or just list documents  [env var:
-                                  DOCDL_ACTION; default: list]
-
+                                  DOCDL_ACTION;default: list]
+  -f, --format [list|dicts]       choose between line buffered output of json
+                                  dicts or one json list  [env var:
+                                  DOCDL_FORMAT;default: dicts]
   -h, --help                      Show this message and exit.
 
 Commands:
-  amazon    amazon.de (invoices)
+  amazon    Amazon (invoices)
   conrad    conrad.de (invoices)
-  dkb       dkb.de with photoTAN (postbox)
+  dkb       dkb.de with chipTAN QR (postbox)
   elster    elster.de with path to .pfx certfile as username (postbox)
   ing       banking.ing.de with photoTAN (postbox)
   o2        o2online.de (invoices/postbox)
