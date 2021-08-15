@@ -28,14 +28,27 @@ class WebPortal():
     # default timeout (seconds)
     TIMEOUT = 15
 
-    def __init__(self, login_id, password, arguments=None):
+    def __init__(self,
+                 login_id, password, useragent=None, arguments=None):
+        """
+        plugins inheriting from WebPortal can use self.session for scraping
+
+        :param login_id: username/login id
+        :param password: login password
+        :param useragent: use this useragent
+        :param arguments: extra arguments
+        """
         if arguments is None:
             arguments = {}
         self.arguments = arguments
         self.login_id = login_id
         self.password = password
+        self.useragent = useragent
         # initialize requests HTTP session
         self.session = requests.Session()
+        # set user agent
+        if useragent:
+            self.session.headers['User-Agent'] = useragent
 
     def __enter__(self):
         # login to service
@@ -118,11 +131,16 @@ class SeleniumWebPortal(WebPortal):
 
     WEBDRIVER = "chrome"
 
-    def __init__(self, login_id, password, arguments=None):
+    def __init__(self, login_id, password, useragent=None, arguments=None):
         """
-        plugins using SeleniumPortal can use self.webdriver for scraping
+        plugins inheriting from SeleniumPortal can use self.webdriver for scraping
+
+        :param login_id: username/login id
+        :param password: login password
+        :param useragent: use this useragent
+        :param arguments: extra arguments
         """
-        super().__init__(login_id, password, arguments)
+        super().__init__(login_id, password, useragent, arguments)
 
         # initialize selenium
         webdriver_opts = self._init_webdriver_options()
@@ -211,6 +229,9 @@ class SeleniumWebPortal(WebPortal):
                     "download.default_directory": os.getcwd(),
                 }
             )
+            # set user agent
+            if self.useragent:
+                webdriver_options.add_argument(f"user-agent='{self.useragent}'")
             # ~ # debugging
             # ~ webdriver_options.add_argument("--remote-debugging-port=9222")
             # set preference options
@@ -242,6 +263,11 @@ class SeleniumWebPortal(WebPortal):
             firefox_profile.set_preference("plugin.scan.plid.all", False)
             # turn off image loading by default
             firefox_profile.set_preference("permissions.default.image", 2)
+            # set user agent
+            if self.useragent:
+                firefox_profile.set_preference(
+                    "general.useragent.override", self.useragent
+                )
             # initialize driver
             self.webdriver = webdriver.Firefox(
                 firefox_profile=firefox_profile,
