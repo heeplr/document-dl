@@ -2,6 +2,7 @@
 
 import platform
 import shutil
+import sys
 import os
 
 from .dateparser import parse as parse_date
@@ -10,7 +11,7 @@ from .dateparser import parse as parse_date
 def show_image(filename, name="image"):
     """attempt to show image"""
     # always print image filename
-    print(f'{{"{name}": "{filename}"}}')
+    print(f'{{"{name}": "{filename}"}}', file=sys.stderr)
     # linux
     if platform.system() == 'Linux':
         if shutil.which("xdg-open") and os.environ['DISPLAY']:
