@@ -2,6 +2,7 @@
 
 import json
 import re
+import sys
 import time
 import os
 import requests
@@ -343,7 +344,9 @@ class SeleniumWebPortal(WebPortal):
             "captcha"
         )
         # ask for interactive captcha input
-        captcha = input(prompt)
+        sys.stderr.write(prompt)
+        sys.stderr.flush()
+        captcha = input()
         # enter into field
         entry.send_keys(captcha)
 
