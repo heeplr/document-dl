@@ -18,6 +18,15 @@ class ING(docdl.SeleniumWebPortal):
     URL_POSTBOX = "https://banking.ing.de/app/postbox"
     URL_TRANSACTIONS = "https://banking.ing.de/app/umsatzanzeige"
 
+    def __init__(self, login_id, password, useragent=None, arguments=None):
+        # don't use headless user agent to avoid ing.de mistaking us for a bot
+        super().__init__(
+            login_id=login_id,
+            password=password,
+            arguments=arguments,
+            useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0"
+        )
+
     def login(self):
         # load login page
         self.webdriver.get(self.URL_LOGIN)
