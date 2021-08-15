@@ -176,6 +176,9 @@ def run(ctx, plugin_class):
             # skip filtered documents
             if not filtered:
                 continue
+            # download ?
+            if root_params['action'] == "download":
+                portal.download(document)
             # line buffered dict output?
             if root_params['output_format'] == "dicts":
                 # always output as json dict
@@ -183,9 +186,6 @@ def run(ctx, plugin_class):
             # just store result for later
             else:
                 result += [ document.toJSON() ]
-            # download ?
-            if root_params['action'] == "download":
-                portal.download(document)
 
         # output json list?
         if root_params['output_format'] == "list":
