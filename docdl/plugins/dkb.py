@@ -1,6 +1,8 @@
 """download documents from dkb.de"""
 
+import itertools
 import re
+import sys
 import click
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -102,7 +104,8 @@ class DKB(docdl.SeleniumWebPortal):
         # treat QR code as captcha
         print(
             f"Überprüfen Sie den Startcode {startcode} "
-            f"bestätigen Sie mit der Taste OK."
+            f"bestätigen Sie mit der Taste OK.",
+            file=sys.stderr
         )
         self.captcha(qrcode, tan, prompt="please enter chipTAN: ")
         tan.submit()
@@ -119,6 +122,18 @@ class DKB(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_LOGOUT)
 
     def documents(self):
+        for i, document in enumerate(itertools.chain(self.inbox())):
+            # set an id
+            document.attributes['id'] = i
+            # return document
+            yield document
+
+    def accounts_csv(self):
+        """get transactions of each account as csv"""
+        # @todo
+        pass
+
+    def inbox(self):
         # load inbox
         self.webdriver.get(self.URL_INBOX)
         # wait for table
@@ -130,8 +145,6 @@ class DKB(docdl.SeleniumWebPortal):
         # iterate all category rows and collect links to categories
         catlinks = self._get_catlinks(table)
 
-        # count all documents
-        i = 0
         # iterate all categories
         for category, catlink in catlinks:
             self.webdriver.get(catlink)
@@ -163,12 +176,9 @@ class DKB(docdl.SeleniumWebPortal):
                             "date": docdl.util.parse_date(date),
                             "category": category,
                             "subject": topic,
-                            "unread": unread,
-                            "id": i
+                            "unread": unread
                         }
                     )
-                    # increment document counter
-                    i += 1
 
                 # is there a next-button for pagination?
                 if not self._nextbutton():
@@ -176,6 +186,9 @@ class DKB(docdl.SeleniumWebPortal):
                     break
 
     def _get_catlinks(self, table):
+        """
+        get links of all categories and return them as list of tuples
+        """
         catlinks = []
         for row in table.find_elements(
             By.XPATH, "//table[@id='welcomeMboTable']/tbody/tr"
@@ -190,6 +203,10 @@ class DKB(docdl.SeleniumWebPortal):
         return catlinks
 
     def _nextbutton(self):
+        """
+        find next-button on paginated page and return true/false
+        accordingly. Load next page if true.
+        """
         if nextspan := self.webdriver.find_elements(
             By.CSS_SELECTOR, "span.pager-navigator-next"
         ):
