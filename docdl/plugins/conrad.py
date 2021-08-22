@@ -33,7 +33,12 @@ class Conrad(docdl.SeleniumWebPortal):
         # enter credentials
         username.send_keys(self.login_id)
         password.send_keys(self.password)
+        # save current URL
+        current_url = self.webdriver.current_url
+        # submit form
         password.submit()
+        # wait for page to load
+        current_url = self.wait_for_urlchange(current_url)
         # wait for either login success or failure
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             lambda d: "Mein Konto" in d.title or \
@@ -43,8 +48,10 @@ class Conrad(docdl.SeleniumWebPortal):
         if "Conrad" in self.webdriver.title:
             return False
         # close cookie notification
-        cookie_button = self.webdriver.find_element(
-            By.XPATH, "//*[contains(text(), 'Ablehnen')]"
+        cookie_button = WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.visibility_of_element_located(
+                (By.XPATH, "//*[contains(text(), 'Ablehnen')]")
+            )
         )
         cookie_button.click()
         return True
