@@ -399,6 +399,14 @@ class SeleniumWebPortal(WebPortal):
             "window.scrollTo(0, document.body.scrollHeight)"
         )
 
+    def wait_for_urlchange(self, current_url):
+        """wait until current URL changes"""
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.url_changes(current_url)
+        )
+        # return new url
+        return self.webdriver.current_url
+
 
 class Document():
     """a document"""
