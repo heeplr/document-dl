@@ -19,12 +19,12 @@ class DKB(docdl.SeleniumWebPortal):
     URL_LOGOUT = "https://www.dkb.de/DkbTransactionBanking/banner.xhtml?$event=logout"
     URL_INBOX = "https://www.dkb.de/banking/postfach"
 
-    def __init__(self, login_id, password, arguments=None):
+    def __init__(self, login_id, password, useragent=None, arguments=None):
         """use custom init to force image loading (for photoTAN)"""
         if arguments and \
            "load_images" in arguments and not arguments['load_images']:
             arguments['load_images'] = True
-        super().__init__(login_id, password, arguments)
+        super().__init__(login_id, password, useragent, arguments)
 
     def login(self):
         # load login page
