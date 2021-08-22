@@ -26,7 +26,6 @@ class Vodafone(docdl.SeleniumWebPortal):
         # load main page
         self.webdriver.get(self.URL_BASE)
         # wait for cookie banner or login button
-
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             lambda d: d.find_elements(By.CSS_SELECTOR, "div.login-btn") or \
                       d.find_elements(By.CSS_SELECTOR, "div.red-btn")
@@ -38,10 +37,12 @@ class Vodafone(docdl.SeleniumWebPortal):
             # accept
             cookiebutton[0].click()
         # press login button to show login form
-        loginbutton = self.webdriver.find_element_by_css_selector("div.login-btn")
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
+        loginbutton = WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "div.login-btn"))
         )
+        # clicking two times makes it work in firefox
+        if self.WEBDRIVER == "firefox":
+            loginbutton.click()
         loginbutton.click()
         # fill out login form when it appears
         username = self.webdriver.find_element_by_xpath("//input[@name='username']")
@@ -55,7 +56,7 @@ class Vodafone(docdl.SeleniumWebPortal):
         # wait for page to load
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
                 lambda d: d.find_elements(By.CSS_SELECTOR, "a.logout-btn") or \
-                          d.find_elements(By.XPATH, "//input[@type='password']")
+                          d.find_elements(By.CSS_SELECTOR, "div.error")
         )
         # if there's a password prompt element found, login failed
         return len(self.webdriver.find_elements(By.CSS_SELECTOR, "a.logout-btn")) != 0
