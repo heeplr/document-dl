@@ -92,6 +92,8 @@ class DKB(docdl.SeleniumWebPortal):
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.visibility_of(qrcode)
         )
+        # save current url
+        current_url = self.webdriver.current_url
         # startcode
         startcode = self.webdriver.find_element(
             By.XPATH, "//b[contains(text(), 'Startcode')]"
@@ -109,6 +111,8 @@ class DKB(docdl.SeleniumWebPortal):
         )
         self.captcha(qrcode, tan, prompt="please enter chipTAN: ")
         tan.submit()
+        # wait for page to load
+        self.wait_for_urlchange(current_url)
         # wait for logout button
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             lambda d: "financialstatus" in d.current_url or \
