@@ -6,6 +6,7 @@ import shutil
 import sys
 import time
 import os
+import platform
 import requests
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -275,8 +276,19 @@ class SeleniumWebPortal(WebPortal):
                     "general.useragent.override", self.useragent
                 )
             # find binary
-            # @todo don't hardcode this
-            ff_path = "/usr/lib64/firefox/firefox"
+            if platform.machine() in [ 'x86_64','s390x','sparc64' ]:
+                moz_lib_dir="/usr/lib64"
+                secondary_lib_dir="/usr/lib"
+            else:
+                moz_lib_dir="/usr/lib"
+                secondary_lib_dir="/usr/lib64"
+            # try firefox binary
+            ff_path = f"{moz_lib_dir}/firefox/firefox"
+            if not (os.path.isfile(ff_path) and os.access(ff_path, os.X_OK)):
+                ff_path = f"{secondary_lib_dir}/firefox/firefox"
+                if not (os.path.isfile(ff_path) and os.access(ff_path, os.X_OK)):
+                    raise RuntimeError(f"firefox binary not found in {moz_lib_dir} or {secondary_lib_dir}")
+            # get path to geckodriver executable
             gecko_path = shutil.which("geckodriver")
             # initialize driver
             self.webdriver = webdriver.Firefox(
