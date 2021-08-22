@@ -2,10 +2,13 @@
 
 import json
 import re
+import shutil
 import sys
 import time
 import os
 import requests
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import jq
 import watchdog.events
 import watchdog.observers
@@ -243,6 +246,8 @@ class SeleniumWebPortal(WebPortal):
             self.webdriver = webdriver.Edge(options=webdriver_options)
 
         elif self.WEBDRIVER == "firefox":
+            # pylint: disable=C0415
+            from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
             # work around "acceptInsecureCerts=true" bug
             caps = {
                 'acceptInsecureCerts': False
@@ -268,11 +273,17 @@ class SeleniumWebPortal(WebPortal):
                 firefox_profile.set_preference(
                     "general.useragent.override", self.useragent
                 )
+            # find binary
+            # @todo don't hardcode this
+            ff_path = "/usr/lib64/firefox/firefox"
+            gecko_path = shutil.which("geckodriver")
             # initialize driver
             self.webdriver = webdriver.Firefox(
-                firefox_profile=firefox_profile,
-                capabilities=caps,
-                options=webdriver_options
+                executable_path=gecko_path,
+                firefox_binary=FirefoxBinary(ff_path),
+                # ~ firefox_profile=firefox_profile,
+                # ~ capabilities=caps,
+                # ~ options=webdriver_options
             )
 
         elif self.WEBDRIVER == "ie":
@@ -387,6 +398,7 @@ class SeleniumWebPortal(WebPortal):
         self.webdriver.execute_script(
             "window.scrollTo(0, document.body.scrollHeight)"
         )
+
 
 class Document():
     """a document"""
