@@ -250,8 +250,9 @@ class SeleniumWebPortal(WebPortal):
             from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
             # create custom profile
             firefox_profile = webdriver.FirefoxProfile()
-            # always enable private browsing
-            firefox_profile.set_preference("browser.privatebrowsing.autostart", True)
+            # webdriver.get_cookies() won't work in private browsing mode :(
+            # ~ # always enable private browsing
+            # ~ firefox_profile.set_preference("browser.privatebrowsing.autostart", True)
             # set default download directory to CWD
             firefox_profile.set_preference("browser.download.dir", os.getcwd())
             # save PDFs by default (don't preview)
