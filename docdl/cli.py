@@ -123,7 +123,7 @@ import docdl
     envvar="DOCDL_FORMAT",
     show_envvar=True,
     default="dicts",
-    help="choose between line buffered output of json dicts or one json list",
+    help="choose between line buffered output of json dicts or single json list",
     show_default=True
 )
 @click.pass_context
