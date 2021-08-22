@@ -34,7 +34,12 @@ class O2(docdl.SeleniumWebPortal):
         )
         # send username
         username.send_keys(self.login_id)
+        # save current URL
+        current_url = self.webdriver.current_url
+        # submit form
         username.submit()
+        # wait for page to load
+        current_url = self.wait_for_urlchange(current_url)
         # find entry field
         password = self.webdriver.find_element(
             By.XPATH,
@@ -44,8 +49,12 @@ class O2(docdl.SeleniumWebPortal):
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.visibility_of(password)
         )
+        # send password
         password.send_keys(self.password)
+        # submit form
         password.submit()
+        # wait for page to load
+        current_url = self.wait_for_urlchange(current_url)
         # wait for either login success or failure
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             lambda d: "Mein o2" in d.title or "Login" in d.title
