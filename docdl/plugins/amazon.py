@@ -62,7 +62,20 @@ class Amazon(docdl.SeleniumWebPortal):
             By.CSS_SELECTOR, "a#nav-item-signout",
             By.CSS_SELECTOR, "div#auth-error-message-box"
         ):
-            return False
+            # mobile phone entry?
+            if skipbutton := self.webdriver.find_elements(
+                By.CSS_SELECTOR, "a#ap-account-fixup-phone-skip-link"
+            ):
+                skipbutton.click()
+                # wait for signout link or error
+                if not self._wait_for_result(
+                    By.CSS_SELECTOR, "a#nav-item-signout",
+                    By.CSS_SELECTOR, "div#auth-error-message-box"
+                ):
+                    return False
+            # no mobile phone entry
+            else:
+                return False
         return True
 
     def logout(self):
@@ -174,6 +187,15 @@ class Amazon(docdl.SeleniumWebPortal):
         # find <select> for order filter
         orderfilter = WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.presence_of_element_located((
+                By.CSS_SELECTOR, "select#orderFilter"
+            ))
+        )
+        # move <select> to front
+        self.webdriver.execute_script(
+            "arguments[0].style.zIndex='99'", orderfilter
+        )
+        orderfilter = WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.element_to_be_clickable((
                 By.CSS_SELECTOR, "select#orderFilter"
             ))
         )
