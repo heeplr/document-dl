@@ -40,10 +40,10 @@ class Vodafone(docdl.SeleniumWebPortal):
         loginbutton = WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.element_to_be_clickable((By.CSS_SELECTOR, "div.login-btn"))
         )
+        loginbutton.click()
         # clicking two times makes it work in firefox
         if self.WEBDRIVER == "firefox":
             loginbutton.click()
-        loginbutton.click()
         # fill out login form when it appears
         username = self.webdriver.find_element_by_xpath("//input[@name='username']")
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
