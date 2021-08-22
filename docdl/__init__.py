@@ -248,10 +248,6 @@ class SeleniumWebPortal(WebPortal):
         elif self.WEBDRIVER == "firefox":
             # pylint: disable=C0415
             from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-            # work around "acceptInsecureCerts=true" bug
-            caps = {
-                'acceptInsecureCerts': False
-            }
             # create custom profile
             firefox_profile = webdriver.FirefoxProfile()
             # always enable private browsing
@@ -268,6 +264,10 @@ class SeleniumWebPortal(WebPortal):
             firefox_profile.set_preference("plugin.scan.plid.all", False)
             # turn off image loading by default
             firefox_profile.set_preference("permissions.default.image", 2)
+            # headless mode
+            if 'headless' in options:
+                # set headless mode
+                webdriver_options.headless = options['headless']
             # set user agent
             if self.useragent:
                 firefox_profile.set_preference(
@@ -281,9 +281,8 @@ class SeleniumWebPortal(WebPortal):
             self.webdriver = webdriver.Firefox(
                 executable_path=gecko_path,
                 firefox_binary=FirefoxBinary(ff_path),
-                # ~ firefox_profile=firefox_profile,
-                # ~ capabilities=caps,
-                # ~ options=webdriver_options
+                firefox_profile=firefox_profile,
+                options=webdriver_options
             )
 
         elif self.WEBDRIVER == "ie":
