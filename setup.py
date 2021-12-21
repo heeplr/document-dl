@@ -33,6 +33,7 @@ setup(
                 'elster=docdl.plugins.elster:elster',
                 'ing=docdl.plugins.ing:ing',
                 'o2=docdl.plugins.o2:o2',
+                'strato=docdl.plugins.strato:strato',
                 'vodafone=docdl.plugins.vodafone:vodafone'
             ],
             'console_scripts': [
