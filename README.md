@@ -166,6 +166,14 @@ $ document-dl --jq 'contains({id: 15})' --action download elster
 
 
 <br><br>
+## Security
+BEWARE that your login credentials are most probably **saved in your shell
+history when you pass them as commandline arguments**.
+You can use the input prompt to avoid that or set environment variables
+securely.
+
+
+<br><br>
 ## Writing a plugin
 
 Plugins are [click-plugins](https://github.com/click-contrib/click-plugins) which
@@ -266,14 +274,6 @@ setup(
         }
 )
 ```
-
-
-<br><br>
-## Security
-Beware that your login credentials are most probably saved in your shell
-history when you pass them as commandline arguments.
-You can use the input prompt to avoid that or set environment variables
-safely.
 
 
 <br><br>
