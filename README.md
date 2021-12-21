@@ -3,6 +3,15 @@
 # command line document download made easy
 ----
 
+Like [youtube-dl](https://youtube-dl.org/) downloads videos from various
+websites, document-dl can scrape documents like invoices, messages, reports, etc.
+
+It can save you from regularly logging into your account to download new
+documents.
+
+Websites that don't require any form of 2FA can be polled without interaction
+regularly using a cron job so documents are downloaded automatically.
+
 <br>
 
 ## Highlights
@@ -22,6 +31,7 @@
   * kabel.vodafone.de
   * conrad.de
   * elster.de
+  * strato.de
 
 
 <br><br>
@@ -92,6 +102,7 @@ Commands:
   elster    elster.de with path to .pfx certfile as username (postbox)
   ing       banking.ing.de with photoTAN (postbox)
   o2        o2online.de (invoices/postbox)
+  strato    strato.de (invoices)
   vodafone  kabel.vodafone.de (postbox, invoices)
 ```
 
