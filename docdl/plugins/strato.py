@@ -93,14 +93,22 @@ class Strato(docdl.SeleniumWebPortal):
             for invoice in invoice_table.find_elements(
                 By.XPATH, ".//tr"
             ):
+                # hidden row ?
+                if "hidden" in invoice.get_attribute("class"):
+                    # skip
+                    continue
                 columns = invoice.find_elements(By.CSS_SELECTOR, "td")
                 # got header?
                 if len(columns) == 0:
                     # skip
                     continue
                 # get attributes
-                date = columns[1].get_attribute("data-sortvalue")
-                status = columns[2].get_attribute("textContent")
+                date = columns[1] \
+                    .get_attribute("data-sortvalue") \
+                    .strip()
+                status = columns[2] \
+                    .get_attribute("textContent") \
+                    .strip()
                 invoice_link = columns[3].find_element(
                     By.XPATH, ".//a[contains(@href,'action=pdf')]"
                 )
