@@ -47,10 +47,17 @@ regularly using a cron job so documents are downloaded automatically.
 
 <br><br>
 ## Installation
+
+```sh
+$ pip3 install --user git+https://github.com/heeplr/document-dl.git
+```
+
+or for developers:
+
 ```sh
 $ git clone --recursive https://github.com/heeplr/document-dl
 $ cd document-dl
-$ pip install .
+$ pip install --user --editable .
 ```
 
 <br><br>
