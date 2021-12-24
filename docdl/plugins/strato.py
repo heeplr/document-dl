@@ -2,6 +2,7 @@
 
 import itertools
 import click
+import re
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -59,7 +60,7 @@ class Strato(docdl.SeleniumWebPortal):
             )
         )
         # login successful
-        return "Paketübersicht" in self.webdriver.title
+        return re.match(r".*(Ü|ü)bersicht.*", self.webdriver.title)
 
     def logout(self):
         logoutbutton = WebDriverWait(self.webdriver, self.TIMEOUT).until(
