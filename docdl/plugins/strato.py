@@ -49,8 +49,6 @@ class Strato(docdl.SeleniumWebPortal):
             )
         )
         submit.click()
-        # wait for page to load
-        current_url = self.wait_for_urlchange(current_url)
         # wait for either login success or failure
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.presence_of_element_located(
