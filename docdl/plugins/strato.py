@@ -106,6 +106,7 @@ class Strato(docdl.SeleniumWebPortal):
                     .strip()
                 status = columns[2] \
                     .get_attribute("textContent") \
+                    .lower() \
                     .strip()
                 invoice_link = columns[3].find_element(
                     By.XPATH, ".//a[contains(@href,'action=pdf')]"
@@ -126,6 +127,7 @@ class Strato(docdl.SeleniumWebPortal):
                     attributes={
                         'date': docdl.util.parse_date(date),
                         'doctype': 'invoice',
+                        'status': status,
                         'amount': amount,
                         'id': i,
                         'filename': f"strato-{title}.pdf"
