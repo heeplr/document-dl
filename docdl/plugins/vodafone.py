@@ -45,11 +45,15 @@ class Vodafone(docdl.SeleniumWebPortal):
         if self.WEBDRIVER == "firefox":
             loginbutton.click()
         # fill out login form when it appears
-        username = self.webdriver.find_element_by_xpath("//input[@name='username']")
+        username = self.webdriver.find_element(
+            By.XPATH, "//input[@name='username']"
+        )
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.visibility_of(username)
         )
-        password = self.webdriver.find_element_by_xpath("//input[@name='password']")
+        password = self.webdriver.find_element(
+            By.XPATH, "//input[@name='password']"
+        )
         username.send_keys(self.login_id)
         password.send_keys(self.password)
         password.submit()
@@ -77,18 +81,20 @@ class Vodafone(docdl.SeleniumWebPortal):
         # go to documents site
         self.webdriver.get(self.URL_MY_DOCUMENTS)
         # iterate all document elements
-        for element in self.webdriver.find_elements_by_css_selector("div.dataTable-row"):
+        for element in self.webdriver.find_elements(
+                By.CSS_SELECTOR, "div.dataTable-row"
+        ):
             # 1st cell is date
-            date = element.find_element_by_css_selector(":nth-child(1)") \
+            date = element.find_element(By.CSS_SELECTOR, ":nth-child(1)") \
                    .get_attribute("textContent") \
                    .strip()
             # 2nd cell is topic
-            title = element.find_element_by_css_selector(":nth-child(2)") \
+            title = element.find_element(By.CSS_SELECTOR, ":nth-child(2)") \
                     .get_attribute("textContent") \
                     .strip()
             # 4th cell contains link
-            url = element.find_element_by_css_selector(":nth-child(4)") \
-                  .find_element_by_css_selector("a") \
+            url = element.find_element(By.CSS_SELECTOR, ":nth-child(4)") \
+                  .find_element(By.CSS_SELECTOR, "a") \
                   .get_attribute("href") \
                   .strip()
             # generate document
@@ -106,13 +112,13 @@ class Vodafone(docdl.SeleniumWebPortal):
         """iterate invoices"""
         # go to bills overview
         self.webdriver.get(self.URL_INVOICES)
-        for table in self.webdriver.find_elements_by_css_selector("div.dataTable"):
-            rows = table.find_elements_by_css_selector("div.dataTable-row")
+        for table in self.webdriver.find_elements(By.CSS_SELECTOR, "div.dataTable"):
+            rows = table.find_elements(By.CSS_SELECTOR, "div.dataTable-row")
             for i, element in enumerate(rows):
                 # first row is a title row, skip it
                 if i == 0:
                     continue
-                cells = element.find_elements_by_tag_name("div")
+                cells = element.find_elements(By.XPATH, ".//div")
                 # skip empty rows
                 if len(cells) < 2:
                     continue
@@ -130,7 +136,7 @@ class Vodafone(docdl.SeleniumWebPortal):
                         .strip()
                 # get url
                 url = cells[5] \
-                      .find_element_by_css_selector("a") \
+                      .find_element(By.CSS_SELECTOR, "a") \
                       .get_attribute("href") \
                       .strip()
                 # generate document
