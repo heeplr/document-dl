@@ -14,8 +14,9 @@ class O2(docdl.SeleniumWebPortal):
     """download documents from o2online.de"""
     URL_LOGIN="https://login.o2online.de/auth/login"
     URL_LOGOUT="https://login.o2online.de/auth/logout"
+    URL_INVOICES="https://www.o2online.de/mein-o2/rechnung/"
     URL_MY_MESSAGES="https://www.o2online.de/ecareng/my-messages"
-    URL_INVOICES="https://www.o2online.de/vt-billing/api/invoiceinfo"
+    URL_INVOICE_INFO="https://www.o2online.de/vt-billing/api/invoiceinfo"
     URL_INVOICE="https://www.o2online.de/vt-billing/api/billdocument"
     URL_INVOICE_OVERVIEW="https://www.o2online.de/vt-billing/api/invoiceoverview"
     URL_VALUE_ADDED_INVOICE="https://www.o2online.de/vt-billing/api/value-added-services-invoices"
@@ -38,12 +39,18 @@ class O2(docdl.SeleniumWebPortal):
         current_url = self.webdriver.current_url
         # submit form
         username.submit()
-        # wait for page to load
-        current_url = self.wait_for_urlchange(current_url)
+        # wait for either password prompt or failure message
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.presence_of_element_located(
+                (By.XPATH,
+                "//input[contains(@type, 'password')] | " \
+                "//div[contains(@data-test-id, 'unified-login-error')]")
+            )
+        )
         # find entry field
         password = self.webdriver.find_element(
             By.XPATH,
-            "//input[@name='IDToken1']"
+            "//input[contains(@type, 'password')]"
         )
         # wait for entry field
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
@@ -55,12 +62,33 @@ class O2(docdl.SeleniumWebPortal):
         password.submit()
         # wait for page to load
         current_url = self.wait_for_urlchange(current_url)
-        # wait for either login success or failure
+        # wait for either login success, failure or "accept" button
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: "Mein o2" in d.title or "Login" in d.title
+            EC.presence_of_element_located(
+                (By.XPATH,
+                "//a[contains(@href, 'auth/logout')] | " \
+                "//div[contains(@data-test-id, 'unified-login-error')]")
+            )
         )
+        # click "accept" button if there is one
+        acceptbutton = self.webdriver.find_elements(
+            By.XPATH,
+            "//button[contains(text(), 'Akzeptieren')]"
+        )
+        if acceptbutton:
+            acceptbutton.click()
+        # click "close" button if there is one
+        closebutton = self.webdriver.find_elements(
+            By.XPATH,
+            "//button[contains(text(), 'Schließen')]"
+        )
+        if closebutton:
+            closebutton.click()
+
         # Login failed
-        return "Login" not in self.webdriver.title
+        return self.webdriver.find_elements(
+            By.XPATH, "//a[contains(@href, 'auth/logout')]"
+        )
 
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)
@@ -77,6 +105,8 @@ class O2(docdl.SeleniumWebPortal):
 
     def invoice_overview(self):
         """fetch invoice overview"""
+        # copy cookies to request session
+        self.copy_to_requests_session()
         req = self.session.get(self.URL_INVOICE_OVERVIEW)
         invoiceoverview = req.json()
         years = invoiceoverview['invoices'].keys()
@@ -94,8 +124,16 @@ class O2(docdl.SeleniumWebPortal):
 
     def invoices(self):
         """fetch list of invoices"""
+        # save current URL
+        current_url = self.webdriver.current_url
         # fetch normal invoices
-        req = self.session.get(self.URL_INVOICES)
+        req = self.webdriver.get(self.URL_INVOICES)
+        # wait for page to load
+        current_url = self.wait_for_urlchange(current_url)
+        # copy cookies to request session
+        self.copy_to_requests_session()
+        # load invoice info json
+        req = self.session.get(self.URL_INVOICE_INFO)
         for document in self.parse_invoices_json(req.json()):
             document.attributes['category'] = "invoice"
             yield document
