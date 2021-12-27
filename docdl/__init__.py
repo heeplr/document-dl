@@ -372,7 +372,7 @@ class SeleniumWebPortal(WebPortal):
         return handler.filename
 
     def copy_to_requests_session(self):
-        """copy current session to requests session"""
+        """copy current selenium session to requests session"""
         # copy cookies
         cookies = self.webdriver.get_cookies()
         for cookie in cookies:

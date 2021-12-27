@@ -184,17 +184,21 @@ securely.
 ## Writing a plugin
 
 Plugins are [click-plugins](https://github.com/click-contrib/click-plugins) which
-in turn are normal @click.command's registered in setup.py
+in turn are normal @click.command's that are registered in setup.py
 
-* put your plugin into *"docdl/plugins"*
+Roughly, you have to:
 
-* write your plugin class:
-  * if you just need requests, inherit from ```docdl.WebPortal``` and use
+* put your plugin into *"docdl/plugins/myplugin.py"*
+* write your plugin class, e.g. MyPlugin():
+  * if you just need python requests, inherit from ```docdl.WebPortal``` and use
     ```self.session``` that's initialized for you
   * if you need selenium, inherit from ```docdl.SeleniumWebPortal``` and use
     ```self.webdriver``` that's initialized for you
-  * add click glue code
-  * add your plugin to setup.py docdl_plugins registry
+  * add a *login()*, *logout()* and *documents()* method.
+* add click glue code
+* add your plugin to setup.py docdl_plugins registry
+
+### requests plugin example
 
 ```python
 import docdl
@@ -203,18 +207,28 @@ import docdl.util
 class MyPlugin(docdl.WebPortal):
 
     URL_LOGIN = "https://myservice.com/login"
+    URL_LOGOUT = "https://myservice.com/logout"
 
     def login(self):
+        # maybe load some session cookie
         request = self.session.get(self.URL_LOGIN)
-        # ... authenticate ...
-        if not_logged_in:
+        # authenticate
+        request = self.session.post(
+            self.URL_LOGIN,
+            data={ 'username': self.username, 'password': self.password }
+        )
+        # return false if login failed, true otherwise
+        if not request.ok:
             return False
         return True
 
     def logout(self):
-        # ... logout ...
+        request = self.session.get(self.URL_LOGOUT)
 
     def documents(self):
+        # acquire list of documents
+        # ...
+
         # iterate over all available documents
         for count, document in enumerate(all_documents):
 
@@ -263,7 +277,14 @@ def myplugin(ctx):
 
 ```
 
-and in setup.py:
+### selenium plugin example
+
+TBD
+
+
+### register plugin
+
+...in setup.py:
 
 ```
 # ...
