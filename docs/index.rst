@@ -10,7 +10,13 @@ Welcome to document-dl's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+docdl
+=====
 
+.. toctree::
+   :maxdepth: 4
+
+   docdl
 
 Indices and tables
 ==================
