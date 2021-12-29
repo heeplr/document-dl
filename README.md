@@ -3,8 +3,8 @@
 # command line document download made easy
 ----
 
-Like [youtube-dl](https://youtube-dl.org/) downloads videos from various
-websites, document-dl can scrape documents like invoices, messages, reports, etc.
+Like [youtube-dl](https://youtube-dl.org/) can download videos from various
+websites, document-dl can download documents like invoices, messages, reports, etc.
 
 It can save you from regularly logging into your account to download new
 documents.
