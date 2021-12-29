@@ -46,9 +46,10 @@ regularly using a cron job so documents are downloaded automatically.
 * [selenium](https://selenium-python.readthedocs.io/) (default webdriver is "chrome")
 
 <br><br>
-## Installation
+## Installation (for debian bullseye)
 
 ```sh
+$ apt install git python3-dev python3-pip python3-selenium chromium-chromedriver
 $ pip3 install --user git+https://github.com/heeplr/document-dl.git
 ```
 
