@@ -94,7 +94,12 @@ class Amazon(docdl.SeleniumWebPortal):
         # get options from orderfilter so we get all available invoices
         options = self._orderfilter_options()
         # iterate all years (+ archived orders)
+        limit_year = self.arguments['limit_year']
         for option in options:
+            # skip years in limited mode
+            if limit_year and option != f"year-{limit_year}":
+                # debug(f"skipping option {option} due to limit_year set to {limit_year}")
+                continue
             # go back to order overview except if we already are on
             # the overview page
             if "order-details" in self.webdriver.current_url:
@@ -280,6 +285,16 @@ class Amazon(docdl.SeleniumWebPortal):
     envvar="DOCDL_AMAZON_TLD",
     show_envvar=True,
     help="toplevel domain to use"
+)
+@click.option(
+    "-y",
+    "--limit-year",
+    type=int,
+    envvar="DOCDL_LIMIT_YEAR",
+    show_envvar=True,
+    default=None,
+    help="limit handling to documents of the given year",
+    show_default=True
 )
 @click.pass_context
 # pylint: disable=W0613
