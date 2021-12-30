@@ -288,7 +288,7 @@ class Amazon(docdl.SeleniumWebPortal):
 )
 @click.option(
     "-y",
-    "--limit_year",
+    "--limit-year",
     type=int,
     envvar="DOCDL_LIMIT_YEAR",
     show_envvar=True,
