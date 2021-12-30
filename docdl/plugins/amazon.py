@@ -97,8 +97,8 @@ class Amazon(docdl.SeleniumWebPortal):
         limit_year = self.arguments['limit_year']
         for option in options:
             # skip years in limited mode
-            if limit_year and option != "year-{}".format(limit_year):
-                # debug("skipping option {} due to limit_year set to {}".format(option, limit_year))
+            if limit_year and option != f"year-{limit_year}":
+                # debug(f"skipping option {option} due to limit_year set to {limit_year}")
                 continue
             # go back to order overview except if we already are on
             # the overview page
