@@ -31,6 +31,7 @@ setup(
                 'conrad=docdl.plugins.conrad:conrad',
                 'dkb=docdl.plugins.dkb:dkb',
                 'elster=docdl.plugins.elster:elster',
+                'handyvertrag=docdl.plugins.handyvertrag:handyvertrag',
                 'ing=docdl.plugins.ing:ing',
                 'o2=docdl.plugins.o2:o2',
                 'strato=docdl.plugins.strato:strato',
