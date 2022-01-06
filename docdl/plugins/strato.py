@@ -49,11 +49,11 @@ class Strato(docdl.SeleniumWebPortal):
         submit.click()
         # wait for either login success or failure
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located(
-                (By.XPATH,
-                "//p[contains(@class,'err-login')] | " \
-                "//*[contains(text(), 'Service-PIN')]")
-            )
+            EC.presence_of_element_located((
+                By.XPATH,
+                "//p[contains(@class,'err-login')] | "
+                "//*[contains(text(), 'Service-PIN')]"
+            ))
         )
         # login successful
         return re.match(r".*(Ü|ü)bersicht.*", self.webdriver.title)
@@ -110,14 +110,14 @@ class Strato(docdl.SeleniumWebPortal):
                     By.XPATH, ".//a[contains(@href,'action=pdf')]"
                 )
                 title = invoice_link \
-                        .get_attribute("textContent") \
-                        .strip()
+                    .get_attribute("textContent") \
+                    .strip()
                 amount = columns[4].find_element(
-                            By.XPATH,
-                            ".//span[@class='jss_price']"
-                        ) \
-                        .get_attribute("textContent") \
-                        .strip()
+                        By.XPATH,
+                        ".//span[@class='jss_price']"
+                    ) \
+                    .get_attribute("textContent") \
+                    .strip()
 
                 # create document
                 yield docdl.Document(
@@ -135,7 +135,7 @@ class Strato(docdl.SeleniumWebPortal):
                 i += 1
 
             # load next page
-            nextbutton =  WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            nextbutton = WebDriverWait(self.webdriver, self.TIMEOUT).until(
                 EC.visibility_of_element_located(
                     (By.XPATH, "//a[contains(@class,'next')]")
                 )
