@@ -517,6 +517,7 @@ class Document():
             return True
 
         # all jq expressions must produce output
+        # false positive - pylint: disable=R1729
         return all([
             any(
                 jq.compile(jq_string)
@@ -544,7 +545,9 @@ class Document():
             _match_attr(attribute, regex) for attribute, regex in regexes
         )
 
+    # we don't use camelCase here pylint: disable=C0103
     def toJSON(self):
+        """:result: json representation of document"""
         return json.dumps(
             self.attributes,
             sort_keys=True,
