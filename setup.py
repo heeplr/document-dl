@@ -1,4 +1,4 @@
-import fastentrypoints                          # noqa: F401
+import fastentrypoints  # noqa: F401 (fastentrypoint does it's magic on import)
 from setuptools import setup, find_packages
 
 
