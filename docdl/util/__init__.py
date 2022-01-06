@@ -5,7 +5,7 @@ import shutil
 import sys
 import os
 
-from .dateparser import parse as parse_date
+from .dateparser import parse as parse_date  # noqa: F401 (import as shortcut)
 
 
 def show_image(filename, name="image"):
