@@ -16,10 +16,10 @@ class Vodafone(docdl.SeleniumWebPortal):
     """
 
     URL_BASE = "https://kabel.vodafone.de"
-    URL_MY_DOCUMENTS = f"{URL_BASE}/meinkabel/meine_kundendaten/meine_dokumente"
-    URL_INVOICES = f"{URL_BASE}/meinkabel/rechnungen/rechnung"
+    URL_MYCABLE = f"{URL_BASE}/meinkabel"
+    URL_MY_DOCUMENTS = f"{URL_MYCABLE}/meine_kundendaten/meine_dokumente"
+    URL_INVOICES = f"{URL_MYCABLE}/rechnungen/rechnung"
     URL_LOGOUT = "https://www.vodafone.de/mint/saml/logout"
-
 
     def login(self):
         """authenticate"""
@@ -27,8 +27,9 @@ class Vodafone(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_BASE)
         # wait for cookie banner or login button
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: d.find_elements(By.CSS_SELECTOR, "div.login-btn") or \
-                      d.find_elements(By.CSS_SELECTOR, "div.red-btn")
+            lambda d:
+                d.find_elements(By.CSS_SELECTOR, "div.login-btn") or
+                d.find_elements(By.CSS_SELECTOR, "div.red-btn")
         )
         # cookie banner?
         if cookiebutton := self.webdriver.find_elements(
@@ -59,18 +60,25 @@ class Vodafone(docdl.SeleniumWebPortal):
         password.submit()
         # wait for page to load
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-                lambda d: d.find_elements(By.CSS_SELECTOR, "a.logout-btn") or \
-                          d.find_elements(By.CSS_SELECTOR, "div.error")
+            lambda d:
+                d.find_elements(By.CSS_SELECTOR, "a.logout-btn") or
+                d.find_elements(By.CSS_SELECTOR, "div.error")
         )
         # if there's a password prompt element found, login failed
-        return len(self.webdriver.find_elements(By.CSS_SELECTOR, "a.logout-btn")) != 0
+        return len(
+            self.webdriver.find_elements(By.CSS_SELECTOR, "a.logout-btn")
+        ) != 0
 
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)
 
     def documents(self):
         """fetch list of documents"""
-        for i, document in enumerate(itertools.chain(self.my_documents(), self.invoices())):
+        # chain all document types
+        docs = enumerate(
+            itertools.chain(self.my_documents(), self.invoices())
+        )
+        for i, document in docs:
             # set an id
             document.attributes['id'] = i
             # return document
@@ -86,17 +94,17 @@ class Vodafone(docdl.SeleniumWebPortal):
         ):
             # 1st cell is date
             date = element.find_element(By.CSS_SELECTOR, ":nth-child(1)") \
-                   .get_attribute("textContent") \
-                   .strip()
+                .get_attribute("textContent") \
+                .strip()
             # 2nd cell is topic
             title = element.find_element(By.CSS_SELECTOR, ":nth-child(2)") \
-                    .get_attribute("textContent") \
-                    .strip()
+                .get_attribute("textContent") \
+                .strip()
             # 4th cell contains link
             url = element.find_element(By.CSS_SELECTOR, ":nth-child(4)") \
-                  .find_element(By.CSS_SELECTOR, "a") \
-                  .get_attribute("href") \
-                  .strip()
+                .find_element(By.CSS_SELECTOR, "a") \
+                .get_attribute("href") \
+                .strip()
             # generate document
             yield docdl.Document(
                 url=url,
@@ -107,12 +115,13 @@ class Vodafone(docdl.SeleniumWebPortal):
                 }
             )
 
-
     def invoices(self):
         """iterate invoices"""
         # go to bills overview
         self.webdriver.get(self.URL_INVOICES)
-        for table in self.webdriver.find_elements(By.CSS_SELECTOR, "div.dataTable"):
+        for table in self.webdriver.find_elements(
+            By.CSS_SELECTOR, "div.dataTable"
+        ):
             rows = table.find_elements(By.CSS_SELECTOR, "div.dataTable-row")
             for i, element in enumerate(rows):
                 # first row is a title row, skip it
@@ -124,21 +133,21 @@ class Vodafone(docdl.SeleniumWebPortal):
                     continue
                 # get type
                 doctype = cells[0] \
-                        .get_attribute("title") \
-                        .strip()
+                    .get_attribute("title") \
+                    .strip()
                 # get date
                 date = cells[1] \
-                        .get_attribute("textContent") \
-                        .strip()
+                    .get_attribute("textContent") \
+                    .strip()
                 # get title
                 title = cells[2] \
-                        .get_attribute("textContent") \
-                        .strip()
+                    .get_attribute("textContent") \
+                    .strip()
                 # get url
                 url = cells[5] \
-                      .find_element(By.CSS_SELECTOR, "a") \
-                      .get_attribute("href") \
-                      .strip()
+                    .find_element(By.CSS_SELECTOR, "a") \
+                    .get_attribute("href") \
+                    .strip()
                 # generate document
                 yield docdl.Document(
                     url=url,
@@ -149,6 +158,7 @@ class Vodafone(docdl.SeleniumWebPortal):
                         'category': "invoice"
                     }
                 )
+
 
 @click.command()
 @click.pass_context
