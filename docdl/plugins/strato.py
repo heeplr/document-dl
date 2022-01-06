@@ -1,6 +1,5 @@
 """download documents from strato.de"""
 
-import itertools
 import click
 import re
 from selenium.webdriver.common.by import By
