@@ -39,8 +39,7 @@ class Strato(docdl.SeleniumWebPortal):
         # enter credentials
         username.send_keys(self.login_id)
         password.send_keys(self.password)
-        # save current URL
-        current_url = self.webdriver.current_url
+
         # submit form
         submit = WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.presence_of_element_located(
