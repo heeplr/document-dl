@@ -480,15 +480,18 @@ class Document():
         :result: True if all document attributes contain the pattern,
                  False otherwise
         """
+
+        def _filter_attr(attribute, pattern):
+            """apply filter to an attribute of a document"""
+            return str(pattern) in str(self.attributes[attribute])
+
         # null filter match by default
         if len(filters) == 0:
             return True
-        # apply filter to an attribute of a document
-        _filter = lambda attribute, pattern: \
-            str(pattern) in str(self.attributes[attribute])
+
         # apply all filters to this document
         return all(
-            _filter(attribute, pattern) for attribute, pattern in filters
+            _filter_attr(attribute, pattern) for attribute, pattern in filters
         )
 
     def match_jq(self, jq_strings):
@@ -517,13 +520,16 @@ class Document():
         :result: True if all attributes match their regex, False
                  otherwise.
         """
+
+        def _match_attr(attribute, regex):
+            return re.match(regex, str(self.attributes[attribute]))
+
         # always match if there are no regexes
         if len(regexes) == 0:
             return True
-        _match = lambda attribute, regex: \
-            re.match(regex, str(self.attributes[attribute]))
+
         return all(
-            _match(attribute, regex) for attribute, regex in regexes
+            _match_attr(attribute, regex) for attribute, regex in regexes
         )
 
     def toJSON(self):
