@@ -129,7 +129,7 @@ class O2(docdl.SeleniumWebPortal):
         # save current URL
         current_url = self.webdriver.current_url
         # fetch normal invoices
-        req = self.webdriver.get(self.URL_INVOICES)
+        self.webdriver.get(self.URL_INVOICES)
         # wait for page to load
         current_url = self.wait_for_urlchange(current_url)
         # copy cookies to request session
