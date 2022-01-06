@@ -31,10 +31,10 @@ class DKB(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_LOGIN)
         # wait for username entry
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: \
+            lambda d:
                 d.find_elements(
                     By.XPATH, "//input[@id='loginInputSelector']"
-                ) or \
+                ) or
                 d.find_elements(
                     By.XPATH, "//button[contains(text(), 'annehmen')]"
                 )
@@ -115,8 +115,8 @@ class DKB(docdl.SeleniumWebPortal):
         self.wait_for_urlchange(current_url)
         # wait for logout button
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: "financialstatus" in d.current_url or \
-                      "LoginWithTan" in d.current_url or \
+            lambda d: "financialstatus" in d.current_url or
+                      "LoginWithTan" in d.current_url or
                       d.current_url.endswith("banking")
         )
         # login successful?
@@ -175,8 +175,8 @@ class DKB(docdl.SeleniumWebPortal):
                     topic = link.get_attribute("textContent").strip()
                     # create document
                     yield docdl.Document(
-                        url = url,
-                        attributes = {
+                        url=url,
+                        attributes={
                             "date": docdl.util.parse_date(date),
                             "category": category,
                             "subject": topic,
@@ -203,7 +203,7 @@ class DKB(docdl.SeleniumWebPortal):
             subject = row.find_element(By.CSS_SELECTOR, "td.subject")
             catlink = subject.find_element(By.CSS_SELECTOR, "a")
             url = catlink.get_attribute("href")
-            catlinks += [ ( category, url) ]
+            catlinks += [(category, url)]
         return catlinks
 
     def _nextbutton(self):
