@@ -17,7 +17,7 @@ class Strato(docdl.SeleniumWebPortal):
 
     def login(self):
         # load homepage
-        self.webdriver.get(f"https://www.strato.de/apps/CustomerService")
+        self.webdriver.get("https://www.strato.de/apps/CustomerService")
         # accept cookies
         accept_cookies = WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.visibility_of_element_located(
