@@ -208,8 +208,7 @@ class SeleniumWebPortal(WebPortal):
         # pylint: disable=C0415
         from selenium import webdriver
 
-        # init webdriver
-        if self.WEBDRIVER == "chrome":
+        def _init_chrome():
             # add prefs
             # selenium webdriver specific options
             if 'headless' in options:
@@ -246,13 +245,13 @@ class SeleniumWebPortal(WebPortal):
             # ~ webdriver_options.add_argument("--remote-debugging-port=9222")
             # set preference options
             # init webdriver
-            self.webdriver = webdriver.Chrome(options=webdriver_options)
+            return webdriver.Chrome(options=webdriver_options)
 
-        elif self.WEBDRIVER == "edge":
+        def _init_edge():
             # pylint: disable=E1123
-            self.webdriver = webdriver.Edge(options=webdriver_options)
+            return webdriver.Edge(options=webdriver_options)
 
-        elif self.WEBDRIVER == "firefox":
+        def _init_firefox():
             # pylint: disable=C0415
             from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
             # create custom profile
@@ -304,26 +303,40 @@ class SeleniumWebPortal(WebPortal):
             # get path to geckodriver executable
             gecko_path = shutil.which("geckodriver")
             # initialize driver
-            self.webdriver = webdriver.Firefox(
+            return webdriver.Firefox(
                 executable_path=gecko_path,
                 firefox_binary=FirefoxBinary(ff_path),
                 firefox_profile=firefox_profile,
                 options=webdriver_options
             )
 
-        elif self.WEBDRIVER == "ie":
-            self.webdriver = webdriver.Ie(options=webdriver_options)
+        def _init_ie():
+            return webdriver.Ie(options=webdriver_options)
 
-        elif self.WEBDRIVER == "opera":
+        def _init_opera():
             # pylint: disable=E0611
-            self.webdriver = webdriver.Opera(options=webdriver_options)
+            return webdriver.Opera(options=webdriver_options)
 
-        elif self.WEBDRIVER == "safari":
+        def _init_safari():
             # pylint: disable=E1123
-            self.webdriver = webdriver.Safari(options=webdriver_options)
+            return webdriver.Safari(options=webdriver_options)
 
-        elif self.WEBDRIVER == "webkitgtk":
-            self.webdriver = webdriver.WebKitGTK(options=webdriver_options)
+        def _init_webkitgtk():
+            return webdriver.WebKitGTK(options=webdriver_options)
+
+        # webdriver registry
+        webdrivers = {
+            'chrome': _init_chrome,
+            'edge': _init_edge,
+            'firefox': _init_firefox,
+            'ie': _init_ie,
+            'opera': _init_opera,
+            'safari': _init_safari,
+            'webkitgtk': _init_webkitgtk
+        }
+
+        # init webdriver
+        self.webdriver = webdrivers[self.WEBDRIVER]()
 
     def documents(self):
         """
@@ -456,8 +469,7 @@ class Document():
         self.attributes = attributes
 
     def __repr__(self):
-        return f"class {self.__class__.__name__}(url=\"{self.url}\", "
-        "attributes={self.attributes})"
+        return f"class {self.__class__.__name__}(url=\"{self.url}\", attributes={self.attributes})"
 
     def rename_after_download(self, filename):
         """
