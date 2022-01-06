@@ -16,6 +16,7 @@ import watchdog.observers
 
 import docdl.util
 
+
 # ---------------------------------------------------------------------
 class AuthenticationError(Exception):
     """authentication failure"""
@@ -96,7 +97,9 @@ class WebPortal():
             document.url, stream=True, headers=document.request_headers
         )
         if not req.ok:
-            raise DownloadError(f"\"{document.url}\" status code: {req.status_code}")
+            raise DownloadError(
+                f"\"{document.url}\" status code: {req.status_code}"
+            )
 
         # filename not already set?
         if "filename" in document.attributes:
@@ -137,7 +140,8 @@ class SeleniumWebPortal(WebPortal):
 
     def __init__(self, login_id, password, useragent=None, arguments=None):
         """
-        plugins inheriting from SeleniumPortal can use self.webdriver for scraping
+        plugins inheriting from SeleniumPortal can use self.webdriver for
+        scraping
 
         :param login_id: username/login id
         :param password: login password
@@ -235,7 +239,9 @@ class SeleniumWebPortal(WebPortal):
             )
             # set user agent
             if self.useragent:
-                webdriver_options.add_argument(f"user-agent='{self.useragent}'")
+                webdriver_options.add_argument(
+                    f"user-agent='{self.useragent}'"
+                )
             # ~ # debugging
             # ~ webdriver_options.add_argument("--remote-debugging-port=9222")
             # set preference options
@@ -253,7 +259,9 @@ class SeleniumWebPortal(WebPortal):
             firefox_profile = webdriver.FirefoxProfile()
             # webdriver.get_cookies() won't work in private browsing mode :(
             # ~ # always enable private browsing
-            # ~ firefox_profile.set_preference("browser.privatebrowsing.autostart", True)
+            # ~ firefox_profile.set_preference(
+            # ~     "browser.privatebrowsing.autostart", True
+            # ~ )
             # set default download directory to CWD
             firefox_profile.set_preference("browser.download.dir", os.getcwd())
             # save PDFs by default (don't preview)
@@ -276,18 +284,23 @@ class SeleniumWebPortal(WebPortal):
                     "general.useragent.override", self.useragent
                 )
             # find binary
-            if platform.machine() in [ 'x86_64','s390x','sparc64' ]:
-                moz_lib_dir="/usr/lib64"
-                secondary_lib_dir="/usr/lib"
+            if platform.machine() in ['x86_64', 's390x', 'sparc64']:
+                moz_lib_dir = "/usr/lib64"
+                secondary_lib_dir = "/usr/lib"
             else:
-                moz_lib_dir="/usr/lib"
-                secondary_lib_dir="/usr/lib64"
+                moz_lib_dir = "/usr/lib"
+                secondary_lib_dir = "/usr/lib64"
             # try firefox binary
             ff_path = f"{moz_lib_dir}/firefox/firefox"
             if not (os.path.isfile(ff_path) and os.access(ff_path, os.X_OK)):
                 ff_path = f"{secondary_lib_dir}/firefox/firefox"
-                if not (os.path.isfile(ff_path) and os.access(ff_path, os.X_OK)):
-                    raise RuntimeError(f"firefox binary not found in {moz_lib_dir} or {secondary_lib_dir}")
+                if not (
+                    os.path.isfile(ff_path) and os.access(ff_path, os.X_OK)
+                ):
+                    raise RuntimeError(
+                        f"firefox binary not found in {moz_lib_dir} "
+                        "or {secondary_lib_dir}"
+                    )
             # get path to geckodriver executable
             gecko_path = shutil.which("geckodriver")
             # initialize driver
@@ -378,7 +391,9 @@ class SeleniumWebPortal(WebPortal):
         for cookie in cookies:
             self.session.cookies.set(cookie['name'], cookie['value'])
         # copy user agent
-        user_agent = self.webdriver.execute_script("return navigator.userAgent;")
+        user_agent = self.webdriver.execute_script(
+            "return navigator.userAgent;"
+        )
         self.session.headers['User-Agent'] = user_agent
 
     def captcha(self, image, entry, prompt="please enter captcha: "):
@@ -423,7 +438,10 @@ class SeleniumWebPortal(WebPortal):
 class Document():
     """a document"""
 
-    def __init__(self, url=None, attributes=None, request_headers=None, download_element=None):
+    def __init__(
+        self, url=None, attributes=None, request_headers=None,
+        download_element=None
+    ):
         # default custom request headers
         if request_headers is None:
             request_headers = {}
@@ -438,7 +456,8 @@ class Document():
         self.attributes = attributes
 
     def __repr__(self):
-        return f"class {self.__class__.__name__}(url=\"{self.url}\", attributes={self.attributes})"
+        return f"class {self.__class__.__name__}(url=\"{self.url}\", "
+        "attributes={self.attributes})"
 
     def rename_after_download(self, filename):
         """
@@ -468,7 +487,9 @@ class Document():
         _filter = lambda attribute, pattern: \
             str(pattern) in str(self.attributes[attribute])
         # apply all filters to this document
-        return all(_filter(attribute, pattern) for attribute, pattern in filters)
+        return all(
+            _filter(attribute, pattern) for attribute, pattern in filters
+        )
 
     def match_jq(self, jq_strings):
         """
@@ -481,14 +502,14 @@ class Document():
             return True
 
         # all jq expressions must produce output
-        return all(
-            [ any(
-                jq.compile(jq_string) \
-                    .input(text=self.toJSON()) \
-                    .all()) \
-                    for jq_string in jq_strings
-            ]
-        )
+        return all([
+            any(
+                jq.compile(jq_string)
+                .input(text=self.toJSON())
+                .all()
+            )
+            for jq_string in jq_strings
+        ])
 
     def match_regex(self, regexes):
         """
