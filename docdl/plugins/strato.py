@@ -1,7 +1,7 @@
 """download documents from strato.de"""
 
-import click
 import re
+import click
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
