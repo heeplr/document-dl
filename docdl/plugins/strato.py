@@ -151,5 +151,5 @@ class Strato(docdl.SeleniumWebPortal):
 @click.pass_context
 # pylint: disable=W0613
 def strato(ctx, *args, **kwargs):
-    """Strato (invoices)"""
+    """strato.de (invoices)"""
     docdl.cli.run(ctx, Strato)
