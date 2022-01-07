@@ -28,6 +28,7 @@ regularly using a cron job so documents are downloaded automatically.
 * existing plugins (some of them even work):
   * amazon
   * ing.de
+  * handyvertrag.de
   * dkb.de
   * o2.de
   * kabel.vodafone.de
@@ -111,6 +112,8 @@ Commands:
   dkb       dkb.de with chipTAN QR (postbox)
   elster    elster.de with path to .pfx certfile as username (postbox)
   ing       banking.ing.de with photoTAN (postbox)
+  handyvertrag
+            handyvertrag.de (invoices, call logs)
   o2        o2online.de (invoices, call log, postbox)
   strato    strato.de (invoices)
   vodafone  kabel.vodafone.de (postbox, invoices)
