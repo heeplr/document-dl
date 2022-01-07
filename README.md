@@ -1,6 +1,8 @@
 
 ----
 # command line document download made easy
+[![Pylint](https://github.com/heeplr/document-dl/actions/workflows/pylint.yml/badge.svg)](https://github.com/heeplr/document-dl/actions/workflows/pylint.yml)
+[![flake8](https://github.com/heeplr/document-dl/actions/workflows/flake8.yml/badge.svg)](https://github.com/heeplr/document-dl/actions/workflows/flake8.yml)
 ----
 
 Like [youtube-dl](https://youtube-dl.org/) can download videos from various
