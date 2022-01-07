@@ -6,20 +6,20 @@ import re
 import dateutil.parser
 
 
-def json_encode(obj):
+class DateEncoder(json.JSONEncoder):
     """
     custom json encoder that converts datetime
     objects to ISO format string
     """
-    # treat datetime objects specially
-    if isinstance(obj, datetime.datetime):
-        """https://xkcd.com/1179/"""
-        # we add the Z to prevent
-        # jq: error date ... does not match format "%Y-%m-%dT%H:%M:%SZ"
-        return obj.isoformat() + "Z"
-    # pass everything else to default encoder
-    return json.JSONEncoder.default(obj)
-
+    def default(self, o):
+        # treat datetime objects specially
+        if isinstance(o, datetime.datetime):
+            # https://xkcd.com/1179/
+            # we add the Z to prevent:
+            # >>jq: error date ... does not match format "%Y-%m-%dT%H:%M:%SZ"<<
+            return o.isoformat() + "Z"
+        # pass everything else to default encoder
+        return json.JSONEncoder.default(self, o)
 
 def check_for_keywords(date):
     """check for shorthands"""

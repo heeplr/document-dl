@@ -551,5 +551,5 @@ class Document():
         return json.dumps(
             self.attributes,
             sort_keys=True,
-            default=docdl.util.dateparser.json_encode
+            cls=docdl.util.dateparser.DateEncoder
         )
