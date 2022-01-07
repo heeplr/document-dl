@@ -111,7 +111,7 @@ class Vodafone(docdl.SeleniumWebPortal):
                 attributes={
                     'title': title,
                     'date': docdl.util.parse_date(date),
-                    'category': "my_documents"
+                    'category': "postbox"
                 }
             )
 
