@@ -127,7 +127,8 @@ class Conrad(docdl.SeleniumWebPortal):
                     'doctype': doctype,
                     'amount': amount,
                     'id': i,
-                    'filename': filename
+                    'filename': filename,
+                    'category': 'invoice'
                 }
             )
 
