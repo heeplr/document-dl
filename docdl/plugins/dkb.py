@@ -126,7 +126,7 @@ class DKB(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_LOGOUT)
 
     def documents(self):
-        for i, document in enumerate(itertools.chain(self.inbox())):
+        for i, document in enumerate(itertools.chain(self._inbox())):
             # set an id
             document.attributes['id'] = i
             # return document
@@ -137,7 +137,7 @@ class DKB(docdl.SeleniumWebPortal):
         # ~ # @todo
         # ~ pass
 
-    def inbox(self):
+    def _inbox(self):
         # load inbox
         self.webdriver.get(self.URL_INBOX)
         # wait for table
