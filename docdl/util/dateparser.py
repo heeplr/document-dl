@@ -21,6 +21,7 @@ class DateEncoder(json.JSONEncoder):
         # pass everything else to default encoder
         return json.JSONEncoder.default(self, o)
 
+
 def check_for_keywords(date):
     """check for shorthands"""
     result = None
