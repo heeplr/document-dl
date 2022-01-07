@@ -7,7 +7,8 @@
 #
 # An arbitrary name can be chosen by symlinking this file to "document-dl-$SERVICE".
 # Executing the symlink will load config from "~/.config/document-dl-$SERVICE.conf"
-# which contains a list of environment variables.
+# which contains a list of environment variables. This script can be
+# used to cleanly manage cronjobs.
 
 # Mandatory config variables are:
 # * DOCDL_PLUGIN to specify the plugin to use
