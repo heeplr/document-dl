@@ -113,8 +113,8 @@ Commands:
   elster    elster.de with path to .pfx certfile as username (postbox)
   ing       banking.ing.de with photoTAN (postbox)
   handyvertrag
-            handyvertrag.de (invoices, call logs)
-  o2        o2online.de (invoices, call log, postbox)
+            handyvertrag.de (invoices, call record)
+  o2        o2online.de (invoices, call record, postbox)
   strato    strato.de (invoices)
   vodafone  kabel.vodafone.de (postbox, invoices)
 ```

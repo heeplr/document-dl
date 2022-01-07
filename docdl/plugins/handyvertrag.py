@@ -115,5 +115,5 @@ class Handyvertrag(docdl.SeleniumWebPortal):
 @click.pass_context
 # pylint: disable=C0103
 def handyvertrag(ctx):
-    """service.handyvertrag.de (invoices, call logs)"""
+    """service.handyvertrag.de (invoices, call record)"""
     docdl.cli.run(ctx, Handyvertrag)
