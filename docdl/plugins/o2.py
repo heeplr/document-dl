@@ -179,5 +179,5 @@ class O2(docdl.SeleniumWebPortal):
 @click.pass_context
 # pylint: disable=C0103
 def o2(ctx):
-    """o2online.de (invoices/postbox)"""
+    """o2online.de (invoices, call log, postbox)"""
     docdl.cli.run(ctx, O2)
