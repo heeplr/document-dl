@@ -296,7 +296,7 @@ class Amazon(docdl.SeleniumWebPortal):
     "-y",
     "--limit-year",
     type=int,
-    envvar="DOCDL_LIMIT_YEAR",
+    envvar="DOCDL_AMAZON_LIMIT_YEAR",
     show_envvar=True,
     default=None,
     help="limit handling to documents of the given year",
