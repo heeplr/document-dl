@@ -6,19 +6,21 @@ import re
 import dateutil.parser
 
 
-def json_encode(obj):
+class DateEncoder(json.JSONEncoder):
     """
     custom json encoder that converts datetime
     objects to ISO format string
     """
-    # treat datetime objects specially
-    if isinstance(obj, datetime.datetime):
-        """https://xkcd.com/1179/"""
-        # we add the Z to prevent
-        # jq: error date ... does not match format "%Y-%m-%dT%H:%M:%SZ"
-        return obj.isoformat() + "Z"
-    # pass everything else to default encoder
-    return json.JSONEncoder.default(obj)
+    def default(self, o):
+        # treat datetime objects specially
+        if isinstance(o, datetime.datetime):
+            # https://xkcd.com/1179/
+            # we add the Z to prevent:
+            # >>jq: error date ... does not match format "%Y-%m-%dT%H:%M:%SZ"<<
+            return o.isoformat() + "Z"
+        # pass everything else to default encoder
+        return json.JSONEncoder.default(self, o)
+
 
 def check_for_keywords(date):
     """check for shorthands"""
@@ -36,6 +38,7 @@ def check_for_keywords(date):
     elif date in ("last month", "lastmonth"):
         result = datetime.datetime.today() - datetime.timedelta(30)
     return result
+
 
 # pylint: disable=R0911,R0912,R0915
 def parse(date, date_format=None):
@@ -166,18 +169,18 @@ def parse(date, date_format=None):
 def replace_months(date):
     """replace literal month names with numbers"""
     months = {
-        1:  [ "jan", "januray", "januar" ],
-        2:  [ "feb", "february", "februar" ],
-        3:  [ "mar", "march", "märz" ],
-        4:  [ "apr", "april" ],
-        5:  [ "may", "mai" ],
-        6:  [ "jun", "june", "juni" ],
-        7:  [ "jul", "july", "juli" ],
-        8:  [ "aug", "august" ],
-        9:  [ "sep", "september" ],
-        10: [ "oct", "october", "oktober" ],
-        11: [ "nov", "november" ],
-        12: [ "dec", "december", "dezember" ],
+        1: ["jan", "januray", "januar"],
+        2: ["feb", "february", "februar"],
+        3: ["mar", "march", "märz"],
+        4: ["apr", "april"],
+        5: ["may", "mai"],
+        6: ["jun", "june", "juni"],
+        7: ["jul", "july", "juli"],
+        8: ["aug", "august"],
+        9: ["sep", "september"],
+        10: ["oct", "october", "oktober"],
+        11: ["nov", "november"],
+        12: ["dec", "december", "dezember"],
     }
 
     # walk all months

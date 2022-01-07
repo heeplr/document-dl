@@ -24,7 +24,8 @@ class ING(docdl.SeleniumWebPortal):
             login_id=login_id,
             password=password,
             arguments=arguments,
-            useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0"
+            useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) "
+                      "Gecko/20100101 Firefox/91.0"
         )
 
     def login(self):
@@ -52,9 +53,16 @@ class ING(docdl.SeleniumWebPortal):
         nextbutton.click()
         # wait for success or failure
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: d.find_elements(By.CSS_SELECTOR, "div.diba-keypad") or \
-                      d.find_elements(By.CSS_SELECTOR, "div.notification--warning") or \
-                      d.find_elements(By.CSS_SELECTOR, "small.form-group__error")
+            lambda d:
+                d.find_elements(
+                    By.CSS_SELECTOR, "div.diba-keypad"
+                ) or
+                d.find_elements(
+                    By.CSS_SELECTOR, "div.notification--warning"
+                ) or
+                d.find_elements(
+                    By.CSS_SELECTOR, "small.form-group__error"
+                )
         )
         # get DiBa Key digits
         if not (digits := self.webdriver.find_elements(
@@ -66,7 +74,7 @@ class ING(docdl.SeleniumWebPortal):
             # login error
             return False
         # get requested digits from html
-        digits = [ e.get_attribute('textContent').strip() for e in digits ]
+        digits = [e.get_attribute('textContent').strip() for e in digits]
         # click numbers on keypad
         for digit in digits:
             number = self.arguments['diba_key'][int(digit)-1]
@@ -78,9 +86,16 @@ class ING(docdl.SeleniumWebPortal):
         nextbutton.click()
         # wait for photoTAN
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: d.find_elements(By.CSS_SELECTOR, "img.thumbnail__image") or \
-                      d.find_elements(By.CSS_SELECTOR, "div.notification--warning") or \
-                      d.find_elements(By.CSS_SELECTOR, "small.form-group__error")
+            lambda d:
+                d.find_elements(
+                    By.CSS_SELECTOR, "img.thumbnail__image"
+                ) or
+                d.find_elements(
+                    By.CSS_SELECTOR, "div.notification--warning"
+                ) or
+                d.find_elements(
+                    By.CSS_SELECTOR, "small.form-group__error"
+                )
         )
         # handle photoTAN
         if not (qrcode := self.webdriver.find_element(
@@ -104,10 +119,10 @@ class ING(docdl.SeleniumWebPortal):
             lambda d:
                 d.find_elements(
                     By.XPATH, "//button[@aria-label='Logout']"
-                ) or \
+                ) or
                 d.find_elements(
                     By.CSS_SELECTOR, "input.input-field"
-                ) or \
+                ) or
                 d.find_elements(
                     By.CSS_SELECTOR, "section.insight-modal"
                 )
@@ -121,7 +136,9 @@ class ING(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_LOGOUT)
 
     def documents(self):
-        for i, document in enumerate(itertools.chain(self.postbox(), self.csv())):
+        # chain all document types
+        docs = itertools.chain(self.postbox(), self.csv())
+        for i, document in enumerate(docs):
             # set an id
             document.attributes['id'] = i
             # return document
@@ -171,11 +188,11 @@ class ING(docdl.SeleniumWebPortal):
         )
         # create document
         yield docdl.Document(
-                download_element = downloadbutton,
-                attributes = {
-                    'category': "csv_export",
-                }
-            )
+            download_element=downloadbutton,
+            attributes={
+                'category': "csv_export",
+            }
+        )
 
     def postbox(self):
         """scrape documents in postbox"""
@@ -212,14 +229,15 @@ class ING(docdl.SeleniumWebPortal):
             url = download.get_attribute("href")
             # create document
             yield docdl.Document(
-                url = url,
-                attributes = {
+                url=url,
+                attributes={
                     'date': docdl.util.parse_date(date),
                     'category': category,
                     'subject': subject,
                     'unread': unread
                 }
             )
+
 
 @click.command()
 @click.option(

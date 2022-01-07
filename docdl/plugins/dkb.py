@@ -31,10 +31,10 @@ class DKB(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_LOGIN)
         # wait for username entry
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: \
+            lambda d:
                 d.find_elements(
                     By.XPATH, "//input[@id='loginInputSelector']"
-                ) or \
+                ) or
                 d.find_elements(
                     By.XPATH, "//button[contains(text(), 'annehmen')]"
                 )
@@ -115,8 +115,8 @@ class DKB(docdl.SeleniumWebPortal):
         self.wait_for_urlchange(current_url)
         # wait for logout button
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: "financialstatus" in d.current_url or \
-                      "LoginWithTan" in d.current_url or \
+            lambda d: "financialstatus" in d.current_url or
+                      "LoginWithTan" in d.current_url or
                       d.current_url.endswith("banking")
         )
         # login successful?
@@ -126,18 +126,34 @@ class DKB(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_LOGOUT)
 
     def documents(self):
-        for i, document in enumerate(itertools.chain(self.inbox())):
+        for i, document in enumerate(itertools.chain(self._inbox())):
             # set an id
             document.attributes['id'] = i
             # return document
             yield document
 
-    def accounts_csv(self):
-        """get transactions of each account as csv"""
-        # @todo
-        pass
+    # ~ def accounts_csv(self):
+        # ~ """get transactions of each account as csv"""
+        # ~ # @todo
+        # ~ pass
 
-    def inbox(self):
+    def _inbox(self):
+
+        def get_catlinks(table):
+            """get links of all categories and return them as list of tuples"""
+            catlinks = []
+            for row in table.find_elements(
+                By.XPATH, "//table[@id='welcomeMboTable']/tbody/tr"
+            ):
+                # get category
+                category = row.get_attribute("id").lower()
+                # get link to open category
+                subject = row.find_element(By.CSS_SELECTOR, "td.subject")
+                catlink = subject.find_element(By.CSS_SELECTOR, "a")
+                url = catlink.get_attribute("href")
+                catlinks += [(category, url)]
+            return catlinks
+
         # load inbox
         self.webdriver.get(self.URL_INBOX)
         # wait for table
@@ -147,7 +163,7 @@ class DKB(docdl.SeleniumWebPortal):
             ))
         )
         # iterate all category rows and collect links to categories
-        catlinks = self._get_catlinks(table)
+        catlinks = get_catlinks(table)
 
         # iterate all categories
         for category, catlink in catlinks:
@@ -175,8 +191,8 @@ class DKB(docdl.SeleniumWebPortal):
                     topic = link.get_attribute("textContent").strip()
                     # create document
                     yield docdl.Document(
-                        url = url,
-                        attributes = {
+                        url=url,
+                        attributes={
                             "date": docdl.util.parse_date(date),
                             "category": category,
                             "subject": topic,
@@ -188,23 +204,6 @@ class DKB(docdl.SeleniumWebPortal):
                 if not self._nextbutton():
                     # quit
                     break
-
-    def _get_catlinks(self, table):
-        """
-        get links of all categories and return them as list of tuples
-        """
-        catlinks = []
-        for row in table.find_elements(
-            By.XPATH, "//table[@id='welcomeMboTable']/tbody/tr"
-        ):
-            # get category
-            category = row.get_attribute("id").lower()
-            # get link to open category
-            subject = row.find_element(By.CSS_SELECTOR, "td.subject")
-            catlink = subject.find_element(By.CSS_SELECTOR, "a")
-            url = catlink.get_attribute("href")
-            catlinks += [ ( category, url) ]
-        return catlinks
 
     def _nextbutton(self):
         """

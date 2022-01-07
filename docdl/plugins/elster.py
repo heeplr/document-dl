@@ -14,9 +14,9 @@ import docdl.util
 class Elster(docdl.SeleniumWebPortal):
     """login_id must be the path to the .pfx file"""
 
-    URL_LOGIN="https://www.elster.de/eportal/login"
-    URL_LOGOUT="https://www.elster.de/eportal/logout"
-    URL_INBOX="https://www.elster.de/eportal/meinelster/meinposteingang"
+    URL_LOGIN = "https://www.elster.de/eportal/login"
+    URL_LOGOUT = "https://www.elster.de/eportal/logout"
+    URL_INBOX = "https://www.elster.de/eportal/meinelster/meinposteingang"
 
     def login(self):
         """authenticate using certfile + password"""
@@ -44,7 +44,7 @@ class Elster(docdl.SeleniumWebPortal):
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.visibility_of_element_located((
                 By.XPATH,
-                "//div[contains(@class,'messageBox--error')] | " \
+                "//div[contains(@class,'messageBox--error')] | "
                 "//*[contains(text(), 'Erfolgreich eingeloggt')]"
             ))
         )
@@ -66,11 +66,13 @@ class Elster(docdl.SeleniumWebPortal):
             # iterate all rows of table
             while True:
                 # wait for table
-                posteingang = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-                    EC.presence_of_element_located((
-                        By.CSS_SELECTOR, "#posteingangModel tbody"
-                    ))
-                )
+                posteingang = WebDriverWait(
+                    self.webdriver, self.TIMEOUT
+                    ).until(
+                        EC.presence_of_element_located((
+                            By.CSS_SELECTOR, "#posteingangModel tbody"
+                        ))
+                    )
                 # find all rows on this page
                 rows = posteingang.find_elements(By.CSS_SELECTOR, "tr")
                 # last row?
@@ -86,8 +88,8 @@ class Elster(docdl.SeleniumWebPortal):
                     ))
                 )
                 betreff = downloadbutton \
-                            .get_attribute("textContent") \
-                            .strip()
+                    .get_attribute("textContent") \
+                    .strip()
 
                 gelesen = row.find_element(
                     By.CSS_SELECTOR, "span.icon"
@@ -112,8 +114,8 @@ class Elster(docdl.SeleniumWebPortal):
                 datum = re.sub(r"[\n\r\t]+", " ", datum)
 
                 yield docdl.Document(
-                    download_element = downloadbutton,
-                    attributes = {
+                    download_element=downloadbutton,
+                    attributes={
                         'betreff': betreff,
                         'ordnungskriterium': ordnungskriterium,
                         'profil': profil,
@@ -182,6 +184,7 @@ class Elster(docdl.SeleniumWebPortal):
             pass
 
         return filename
+
 
 @click.command()
 @click.pass_context

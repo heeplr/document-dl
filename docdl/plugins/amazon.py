@@ -30,7 +30,9 @@ class Amazon(docdl.SeleniumWebPortal):
         # wait for account-link or captcha request
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.presence_of_element_located((
-                By.XPATH, "//a[@id='nav-link-accountList'] | //input[@id='captchacharacters']"
+                By.XPATH,
+                "//a[@id='nav-link-accountList'] | "
+                "//input[@id='captchacharacters']"
             ))
         )
         # captcha entry ?
@@ -42,7 +44,9 @@ class Amazon(docdl.SeleniumWebPortal):
         # get loginbutton
         loginbutton = WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.presence_of_element_located((
-                By.XPATH, "//a[@id='nav-link-accountList'] | //a[@data-nav-role='signin']"
+                By.XPATH,
+                "//a[@id='nav-link-accountList'] | "
+                "//a[@data-nav-role='signin']"
             ))
         )
         # click "login"
@@ -97,8 +101,9 @@ class Amazon(docdl.SeleniumWebPortal):
         limit_year = self.arguments['limit_year']
         for option in options:
             # skip years in limited mode
-            if limit_year and option != "year-{}".format(limit_year):
-                # debug("skipping option {} due to limit_year set to {}".format(option, limit_year))
+            if limit_year and option != f"year-{limit_year}":
+                # debug(f"skipping option {option} due to limit_year set
+                # to {limit_year}")
                 continue
             # go back to order overview except if we already are on
             # the overview page
@@ -185,7 +190,7 @@ class Amazon(docdl.SeleniumWebPortal):
             By.XPATH, ".//option[contains(@value, 'archived')]"
         ):
             # add "archived" option
-            options += [ "archived" ]
+            options += ["archived"]
         return options
 
     def _set_orderfilter(self, option):
@@ -266,8 +271,8 @@ class Amazon(docdl.SeleniumWebPortal):
     ):
         # wait for success element or error dialog
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: \
-                d.find_elements(success_by, success_selector) or \
+            lambda d:
+                d.find_elements(success_by, success_selector) or
                 d.find_elements(error_by, error_selector)
         )
         # error ?
@@ -275,6 +280,7 @@ class Amazon(docdl.SeleniumWebPortal):
             return False
 
         return True
+
 
 @click.command()
 @click.option(
@@ -288,7 +294,7 @@ class Amazon(docdl.SeleniumWebPortal):
 )
 @click.option(
     "-y",
-    "--limit_year",
+    "--limit-year",
     type=int,
     envvar="DOCDL_LIMIT_YEAR",
     show_envvar=True,

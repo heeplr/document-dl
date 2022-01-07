@@ -1,8 +1,7 @@
 """download documents from strato.de"""
 
-import itertools
-import click
 import re
+import click
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -18,7 +17,7 @@ class Strato(docdl.SeleniumWebPortal):
 
     def login(self):
         # load homepage
-        self.webdriver.get(f"https://www.strato.de/apps/CustomerService")
+        self.webdriver.get("https://www.strato.de/apps/CustomerService")
         # accept cookies
         accept_cookies = WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.visibility_of_element_located(
@@ -40,8 +39,7 @@ class Strato(docdl.SeleniumWebPortal):
         # enter credentials
         username.send_keys(self.login_id)
         password.send_keys(self.password)
-        # save current URL
-        current_url = self.webdriver.current_url
+
         # submit form
         submit = WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.presence_of_element_located(
@@ -51,11 +49,11 @@ class Strato(docdl.SeleniumWebPortal):
         submit.click()
         # wait for either login success or failure
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located(
-                (By.XPATH,
-                "//p[contains(@class,'err-login')] | " \
-                "//*[contains(text(), 'Service-PIN')]")
-            )
+            EC.presence_of_element_located((
+                By.XPATH,
+                "//p[contains(@class,'err-login')] | "
+                "//*[contains(text(), 'Service-PIN')]"
+            ))
         )
         # login successful
         return re.match(r".*(Ü|ü)bersicht.*", self.webdriver.title)
@@ -112,14 +110,14 @@ class Strato(docdl.SeleniumWebPortal):
                     By.XPATH, ".//a[contains(@href,'action=pdf')]"
                 )
                 title = invoice_link \
-                        .get_attribute("textContent") \
-                        .strip()
+                    .get_attribute("textContent") \
+                    .strip()
                 amount = columns[4].find_element(
-                            By.XPATH,
-                            ".//span[@class='jss_price']"
-                        ) \
-                        .get_attribute("textContent") \
-                        .strip()
+                        By.XPATH,
+                        ".//span[@class='jss_price']"
+                    ) \
+                    .get_attribute("textContent") \
+                    .strip()
 
                 # create document
                 yield docdl.Document(
@@ -137,7 +135,7 @@ class Strato(docdl.SeleniumWebPortal):
                 i += 1
 
             # load next page
-            nextbutton =  WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            nextbutton = WebDriverWait(self.webdriver, self.TIMEOUT).until(
                 EC.visibility_of_element_located(
                     (By.XPATH, "//a[contains(@class,'next')]")
                 )
@@ -153,5 +151,5 @@ class Strato(docdl.SeleniumWebPortal):
 @click.pass_context
 # pylint: disable=W0613
 def strato(ctx, *args, **kwargs):
-    """Strato (invoices)"""
+    """strato.de (invoices)"""
     docdl.cli.run(ctx, Strato)

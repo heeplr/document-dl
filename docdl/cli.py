@@ -59,7 +59,7 @@ import docdl
     multiple=True,
     envvar="DOCDL_JQ",
     show_envvar=True,
-    help="only output documents if json query matches document's " \
+    help="only output documents if json query matches document's "
          "attributes (see https://stedolan.github.io/jq/manual/ )"
 )
 @click.option(
@@ -119,11 +119,12 @@ import docdl
     "-f",
     "--format",
     "output_format",
-    type=click.Choice([ "list", "dicts" ], case_sensitive=False),
+    type=click.Choice(["list", "dicts"], case_sensitive=False),
     envvar="DOCDL_FORMAT",
     show_envvar=True,
     default="dicts",
-    help="choose between line buffered output of json dicts or single json list",
+    help="choose between line buffered output "
+         "of json dicts or single json list",
     show_default=True
 )
 @click.pass_context
@@ -169,8 +170,8 @@ def run(ctx, plugin_class):
         for document in portal.documents():
             # filter document
             filtered = (
-                document.match_string(root_params['string_matches']) and \
-                document.match_regex(root_params['regex_matches']) and \
+                document.match_string(root_params['string_matches']) and
+                document.match_regex(root_params['regex_matches']) and
                 document.match_jq(root_params['jq_matches'])
             )
             # skip filtered documents
@@ -185,7 +186,7 @@ def run(ctx, plugin_class):
                 click.echo(document.toJSON())
             # just store result for later
             else:
-                result += [ document.toJSON() ]
+                result += [document.toJSON()]
 
         # output json list?
         if root_params['output_format'] == "list":

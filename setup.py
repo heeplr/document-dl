@@ -1,5 +1,4 @@
-import sys
-import fastentrypoints
+import fastentrypoints  # noqa: F401 (fastentrypoint does it's magic on import)
 from setuptools import setup, find_packages
 
 
@@ -23,22 +22,21 @@ setup(
         'selenium',
         'watchdog'
     ],
-    packages=find_packages(
-        exclude=['tests*']),
-        entry_points={
-            'docdl_plugins': [
-                'amazon=docdl.plugins.amazon:amazon',
-                'conrad=docdl.plugins.conrad:conrad',
-                'dkb=docdl.plugins.dkb:dkb',
-                'elster=docdl.plugins.elster:elster',
-                'handyvertrag=docdl.plugins.handyvertrag:handyvertrag',
-                'ing=docdl.plugins.ing:ing',
-                'o2=docdl.plugins.o2:o2',
-                'strato=docdl.plugins.strato:strato',
-                'vodafone=docdl.plugins.vodafone:vodafone'
-            ],
-            'console_scripts': [
-                'document-dl=docdl.cli:documentdl',
-            ]
-        }
+    packages=find_packages(exclude=['tests*']),
+    entry_points={
+        'docdl_plugins': [
+            'amazon=docdl.plugins.amazon:amazon',
+            'conrad=docdl.plugins.conrad:conrad',
+            'dkb=docdl.plugins.dkb:dkb',
+            'elster=docdl.plugins.elster:elster',
+            'handyvertrag=docdl.plugins.handyvertrag:handyvertrag',
+            'ing=docdl.plugins.ing:ing',
+            'o2=docdl.plugins.o2:o2',
+            'strato=docdl.plugins.strato:strato',
+            'vodafone=docdl.plugins.vodafone:vodafone'
+        ],
+        'console_scripts': [
+            'document-dl=docdl.cli:documentdl',
+        ]
+    }
 )

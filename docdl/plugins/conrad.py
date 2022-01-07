@@ -12,9 +12,9 @@ import docdl.util
 
 class Conrad(docdl.SeleniumWebPortal):
     """download documents from conrad.de"""
-    URL_LOGIN="https://www.conrad.de/de/account.html"
-    URL_LOGOUT="https://api.conrad.de/session/1/logout"
-    URL_INVOICES="https://www.conrad.de/de/account.html#/invoices"
+    URL_LOGIN = "https://www.conrad.de/de/account.html"
+    URL_LOGOUT = "https://api.conrad.de/session/1/logout"
+    URL_INVOICES = "https://www.conrad.de/de/account.html#/invoices"
 
     def login(self):
         # load login page
@@ -41,7 +41,7 @@ class Conrad(docdl.SeleniumWebPortal):
         current_url = self.wait_for_urlchange(current_url)
         # wait for either login success or failure
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: "Mein Konto" in d.title or \
+            lambda d: "Mein Konto" in d.title or
                       "Conrad" in d.title
         )
         # Login failed
@@ -58,7 +58,6 @@ class Conrad(docdl.SeleniumWebPortal):
 
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)
-
 
     def documents(self):
         # wait for loader icon to disappear
@@ -90,35 +89,35 @@ class Conrad(docdl.SeleniumWebPortal):
         )):
             # get attributes
             title = invoice.find_element(
-                        By.XPATH,
-                        ".//div[@data-e2e='invoiceListItem-title']"
-                    ) \
-                    .get_attribute("textContent") \
-                    .strip()
+                    By.XPATH,
+                    ".//div[@data-e2e='invoiceListItem-title']"
+                ) \
+                .get_attribute("textContent") \
+                .strip()
             date = re.match(r".*(\d{2}\.\d{2}\.\d{4})", title)[1]
             number = invoice.find_element(
-                        By.XPATH,
-                        ".//div[@data-e2e='invoiceListItem-invoiceNumber']"
-                    ) \
-                    .get_attribute("textContent") \
-                    .strip()
+                    By.XPATH,
+                    ".//div[@data-e2e='invoiceListItem-invoiceNumber']"
+                ) \
+                .get_attribute("textContent") \
+                .strip()
             doctype = invoice.find_element(
-                        By.XPATH,
-                        ".//div[@data-e2e='invoiceListItem-type']"
-                    ) \
-                    .get_attribute("textContent") \
-                    .strip() \
-                    .lower()
+                    By.XPATH,
+                    ".//div[@data-e2e='invoiceListItem-type']"
+                ) \
+                .get_attribute("textContent") \
+                .strip() \
+                .lower()
             amount = invoice.find_element(
-                        By.XPATH,
-                        ".//div[@data-e2e='invoiceListItem-amount']"
-                    ) \
-                    .get_attribute("textContent") \
-                    .strip()
+                    By.XPATH,
+                    ".//div[@data-e2e='invoiceListItem-amount']"
+                ) \
+                .get_attribute("textContent") \
+                .strip()
             # strip currency symbol
             amount = re.match(r"[^\d]*(\d+,\d+).*", amount)[1]
-            # ~ # get download url
-            # ~ url = f"https://api.conrad.de/crm/1/invoices/{number}/pdf?apikey={apikey}"
+            # create filename
+            filename = f"conrad-{date.replace('.','-')}-{doctype}-{number}.pdf"
             # create document
             yield docdl.Document(
                 download_element=invoice,
@@ -128,7 +127,8 @@ class Conrad(docdl.SeleniumWebPortal):
                     'doctype': doctype,
                     'amount': amount,
                     'id': i,
-                    'filename': f"conrad-{date.replace('.','-')}-{doctype}-{number}.pdf"
+                    'filename': filename,
+                    'category': 'invoice'
                 }
             )
 

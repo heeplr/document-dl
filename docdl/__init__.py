@@ -16,6 +16,7 @@ import watchdog.observers
 
 import docdl.util
 
+
 # ---------------------------------------------------------------------
 class AuthenticationError(Exception):
     """authentication failure"""
@@ -96,7 +97,9 @@ class WebPortal():
             document.url, stream=True, headers=document.request_headers
         )
         if not req.ok:
-            raise DownloadError(f"\"{document.url}\" status code: {req.status_code}")
+            raise DownloadError(
+                f"\"{document.url}\" status code: {req.status_code}"
+            )
 
         # filename not already set?
         if "filename" in document.attributes:
@@ -137,7 +140,8 @@ class SeleniumWebPortal(WebPortal):
 
     def __init__(self, login_id, password, useragent=None, arguments=None):
         """
-        plugins inheriting from SeleniumPortal can use self.webdriver for scraping
+        plugins inheriting from SeleniumPortal can use self.webdriver for
+        scraping
 
         :param login_id: username/login id
         :param password: login password
@@ -204,8 +208,7 @@ class SeleniumWebPortal(WebPortal):
         # pylint: disable=C0415
         from selenium import webdriver
 
-        # init webdriver
-        if self.WEBDRIVER == "chrome":
+        def _init_chrome():
             # add prefs
             # selenium webdriver specific options
             if 'headless' in options:
@@ -235,25 +238,29 @@ class SeleniumWebPortal(WebPortal):
             )
             # set user agent
             if self.useragent:
-                webdriver_options.add_argument(f"user-agent='{self.useragent}'")
+                webdriver_options.add_argument(
+                    f"user-agent='{self.useragent}'"
+                )
             # ~ # debugging
             # ~ webdriver_options.add_argument("--remote-debugging-port=9222")
             # set preference options
             # init webdriver
-            self.webdriver = webdriver.Chrome(options=webdriver_options)
+            return webdriver.Chrome(options=webdriver_options)
 
-        elif self.WEBDRIVER == "edge":
+        def _init_edge():
             # pylint: disable=E1123
-            self.webdriver = webdriver.Edge(options=webdriver_options)
+            return webdriver.Edge(options=webdriver_options)
 
-        elif self.WEBDRIVER == "firefox":
+        def _init_firefox():
             # pylint: disable=C0415
             from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
             # create custom profile
             firefox_profile = webdriver.FirefoxProfile()
             # webdriver.get_cookies() won't work in private browsing mode :(
             # ~ # always enable private browsing
-            # ~ firefox_profile.set_preference("browser.privatebrowsing.autostart", True)
+            # ~ firefox_profile.set_preference(
+            # ~     "browser.privatebrowsing.autostart", True
+            # ~ )
             # set default download directory to CWD
             firefox_profile.set_preference("browser.download.dir", os.getcwd())
             # save PDFs by default (don't preview)
@@ -276,41 +283,60 @@ class SeleniumWebPortal(WebPortal):
                     "general.useragent.override", self.useragent
                 )
             # find binary
-            if platform.machine() in [ 'x86_64','s390x','sparc64' ]:
-                moz_lib_dir="/usr/lib64"
-                secondary_lib_dir="/usr/lib"
+            if platform.machine() in ['x86_64', 's390x', 'sparc64']:
+                moz_lib_dir = "/usr/lib64"
+                secondary_lib_dir = "/usr/lib"
             else:
-                moz_lib_dir="/usr/lib"
-                secondary_lib_dir="/usr/lib64"
+                moz_lib_dir = "/usr/lib"
+                secondary_lib_dir = "/usr/lib64"
             # try firefox binary
             ff_path = f"{moz_lib_dir}/firefox/firefox"
             if not (os.path.isfile(ff_path) and os.access(ff_path, os.X_OK)):
                 ff_path = f"{secondary_lib_dir}/firefox/firefox"
-                if not (os.path.isfile(ff_path) and os.access(ff_path, os.X_OK)):
-                    raise RuntimeError(f"firefox binary not found in {moz_lib_dir} or {secondary_lib_dir}")
+                if not (
+                    os.path.isfile(ff_path) and os.access(ff_path, os.X_OK)
+                ):
+                    raise RuntimeError(
+                        f"firefox binary not found in {moz_lib_dir} "
+                        "or {secondary_lib_dir}"
+                    )
             # get path to geckodriver executable
             gecko_path = shutil.which("geckodriver")
             # initialize driver
-            self.webdriver = webdriver.Firefox(
+            return webdriver.Firefox(
                 executable_path=gecko_path,
                 firefox_binary=FirefoxBinary(ff_path),
                 firefox_profile=firefox_profile,
                 options=webdriver_options
             )
 
-        elif self.WEBDRIVER == "ie":
-            self.webdriver = webdriver.Ie(options=webdriver_options)
+        def _init_ie():
+            return webdriver.Ie(options=webdriver_options)
 
-        elif self.WEBDRIVER == "opera":
+        def _init_opera():
             # pylint: disable=E0611
-            self.webdriver = webdriver.Opera(options=webdriver_options)
+            return webdriver.Opera(options=webdriver_options)
 
-        elif self.WEBDRIVER == "safari":
+        def _init_safari():
             # pylint: disable=E1123
-            self.webdriver = webdriver.Safari(options=webdriver_options)
+            return webdriver.Safari(options=webdriver_options)
 
-        elif self.WEBDRIVER == "webkitgtk":
-            self.webdriver = webdriver.WebKitGTK(options=webdriver_options)
+        def _init_webkitgtk():
+            return webdriver.WebKitGTK(options=webdriver_options)
+
+        # webdriver registry
+        webdrivers = {
+            'chrome': _init_chrome,
+            'edge': _init_edge,
+            'firefox': _init_firefox,
+            'ie': _init_ie,
+            'opera': _init_opera,
+            'safari': _init_safari,
+            'webkitgtk': _init_webkitgtk
+        }
+
+        # init webdriver
+        self.webdriver = webdrivers[self.WEBDRIVER]()
 
     def documents(self):
         """
@@ -378,7 +404,9 @@ class SeleniumWebPortal(WebPortal):
         for cookie in cookies:
             self.session.cookies.set(cookie['name'], cookie['value'])
         # copy user agent
-        user_agent = self.webdriver.execute_script("return navigator.userAgent;")
+        user_agent = self.webdriver.execute_script(
+            "return navigator.userAgent;"
+        )
         self.session.headers['User-Agent'] = user_agent
 
     def captcha(self, image, entry, prompt="please enter captcha: "):
@@ -423,7 +451,10 @@ class SeleniumWebPortal(WebPortal):
 class Document():
     """a document"""
 
-    def __init__(self, url=None, attributes=None, request_headers=None, download_element=None):
+    def __init__(
+        self, url=None, attributes=None, request_headers=None,
+        download_element=None
+    ):
         # default custom request headers
         if request_headers is None:
             request_headers = {}
@@ -461,14 +492,19 @@ class Document():
         :result: True if all document attributes contain the pattern,
                  False otherwise
         """
+
+        def _filter_attr(attribute, pattern):
+            """apply filter to an attribute of a document"""
+            return str(pattern) in str(self.attributes[attribute])
+
         # null filter match by default
         if len(filters) == 0:
             return True
-        # apply filter to an attribute of a document
-        _filter = lambda attribute, pattern: \
-            str(pattern) in str(self.attributes[attribute])
+
         # apply all filters to this document
-        return all(_filter(attribute, pattern) for attribute, pattern in filters)
+        return all(
+            _filter_attr(attribute, pattern) for attribute, pattern in filters
+        )
 
     def match_jq(self, jq_strings):
         """
@@ -481,14 +517,15 @@ class Document():
             return True
 
         # all jq expressions must produce output
-        return all(
-            [ any(
-                jq.compile(jq_string) \
-                    .input(text=self.toJSON()) \
-                    .all()) \
-                    for jq_string in jq_strings
-            ]
-        )
+        # false positive - pylint: disable=R1729
+        return all([
+            any(
+                jq.compile(jq_string)
+                .input(text=self.toJSON())
+                .all()
+            )
+            for jq_string in jq_strings
+        ])
 
     def match_regex(self, regexes):
         """
@@ -496,18 +533,23 @@ class Document():
         :result: True if all attributes match their regex, False
                  otherwise.
         """
+
+        def _match_attr(attribute, regex):
+            return re.match(regex, str(self.attributes[attribute]))
+
         # always match if there are no regexes
         if len(regexes) == 0:
             return True
-        _match = lambda attribute, regex: \
-            re.match(regex, str(self.attributes[attribute]))
+
         return all(
-            _match(attribute, regex) for attribute, regex in regexes
+            _match_attr(attribute, regex) for attribute, regex in regexes
         )
 
+    # we don't use camelCase here pylint: disable=C0103
     def toJSON(self):
+        """:result: json representation of document"""
         return json.dumps(
             self.attributes,
             sort_keys=True,
-            default=docdl.util.dateparser.json_encode
+            cls=docdl.util.dateparser.DateEncoder
         )

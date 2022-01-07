@@ -12,14 +12,16 @@ import docdl.util
 
 class O2(docdl.SeleniumWebPortal):
     """download documents from o2online.de"""
-    URL_LOGIN="https://login.o2online.de/auth/login"
-    URL_LOGOUT="https://login.o2online.de/auth/logout"
-    URL_INVOICES="https://www.o2online.de/mein-o2/rechnung/"
-    URL_MY_MESSAGES="https://www.o2online.de/ecareng/my-messages"
-    URL_INVOICE_INFO="https://www.o2online.de/vt-billing/api/invoiceinfo"
-    URL_INVOICE="https://www.o2online.de/vt-billing/api/billdocument"
-    URL_INVOICE_OVERVIEW="https://www.o2online.de/vt-billing/api/invoiceoverview"
-    URL_VALUE_ADDED_INVOICE="https://www.o2online.de/vt-billing/api/value-added-services-invoices"
+    URL_BASE = "https://www.o2online.de"
+    URL_BILLING = f"{URL_BASE}/vt-billing/api"
+    URL_LOGIN = "https://login.o2online.de/auth/login"
+    URL_LOGOUT = "https://login.o2online.de/auth/logout"
+    URL_INVOICES = f"{URL_BASE}/mein-o2/rechnung/"
+    URL_MY_MESSAGES = f"{URL_BASE}/ecareng/my-messages"
+    URL_INVOICE_INFO = f"{URL_BILLING}/invoiceinfo"
+    URL_INVOICE = f"{URL_BILLING}/billdocument"
+    URL_INVOICE_OVERVIEW = f"{URL_BILLING}/api/invoiceoverview"
+    URL_VALUE_ADDED_INVOICE = f"{URL_BILLING}/value-added-services-invoices"
 
     def login(self):
         """authenticate"""
@@ -41,11 +43,11 @@ class O2(docdl.SeleniumWebPortal):
         username.submit()
         # wait for either password prompt or failure message
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located(
-                (By.XPATH,
-                "//input[contains(@type, 'password')] | " \
-                "//div[contains(@data-test-id, 'unified-login-error')]")
-            )
+            EC.presence_of_element_located((
+                By.XPATH,
+                "//input[contains(@type, 'password')] | "
+                "//div[contains(@data-test-id, 'unified-login-error')]"
+            ))
         )
         # find entry field
         password = self.webdriver.find_element(
@@ -64,11 +66,11 @@ class O2(docdl.SeleniumWebPortal):
         current_url = self.wait_for_urlchange(current_url)
         # wait for either login success, failure or "accept" button
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located(
-                (By.XPATH,
-                "//a[contains(@href, 'auth/logout')] | " \
-                "//div[contains(@data-test-id, 'unified-login-error')]")
-            )
+            EC.presence_of_element_located((
+                By.XPATH,
+                "//a[contains(@href, 'auth/logout')] | "
+                "//div[contains(@data-test-id, 'unified-login-error')]"
+            ))
         )
         # click "accept" button if there is one
         acceptbutton = self.webdriver.find_elements(
@@ -113,7 +115,7 @@ class O2(docdl.SeleniumWebPortal):
         for year in years:
             yield docdl.Document(
                 url=f"{self.URL_INVOICE_OVERVIEW}?statementYear={year}",
-                request_headers={ "Accept": "application/pdf" },
+                request_headers={"Accept": "application/pdf"},
                 attributes={
                     'category': "invoice_overview",
                     'year': year,
@@ -127,7 +129,7 @@ class O2(docdl.SeleniumWebPortal):
         # save current URL
         current_url = self.webdriver.current_url
         # fetch normal invoices
-        req = self.webdriver.get(self.URL_INVOICES)
+        self.webdriver.get(self.URL_INVOICES)
         # wait for page to load
         current_url = self.wait_for_urlchange(current_url)
         # copy cookies to request session
@@ -161,8 +163,8 @@ class O2(docdl.SeleniumWebPortal):
             for document in invoice['billDocuments']:
                 category = document['documentType'].lower()
                 yield docdl.Document(
-                    url=f"{self.URL_INVOICE}?" \
-                        f"billNumber={document['billNumber']}&" \
+                    url=f"{self.URL_INVOICE}?"
+                        f"billNumber={document['billNumber']}&"
                         f"documentType={document['documentType']}",
                     attributes={
                         **attributes,
@@ -172,9 +174,10 @@ class O2(docdl.SeleniumWebPortal):
                     }
                 )
 
+
 @click.command()
 @click.pass_context
 # pylint: disable=C0103
 def o2(ctx):
-    """o2online.de (invoices/postbox)"""
+    """o2online.de (invoices, call log, postbox)"""
     docdl.cli.run(ctx, O2)
