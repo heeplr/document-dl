@@ -1,0 +1,80 @@
+#!/bin/bash
+
+# ---------------------------------------------------------------------
+#
+# document-dl wrapper script for a specific document-dl configuration
+# ===================================================================
+#
+# An arbitrary name can be chosen by symlinking this file to "document-dl-$SERVICE".
+# Executing the symlink will load config from "~/.config/document-dl-$SERVICE.conf"
+# which contains a list of environment variables.
+
+# Mandatory config variables are:
+# * DOCDL_PLUGIN to specify the plugin to use
+#
+# Optional config variables are:
+# * DOCDL_DSTPATH - destionation path to store downloaded files
+#
+#
+# For example
+#  symlink: "document-dl-vodafone" would load
+#  config:  "~/.config/document-dl-vodafone.conf"
+#
+# which could look like:
+#
+# DOCDL_PLUGIN='vodafone'
+# DOCDL_DSTPATH='/mnt/docs/vodafone'
+# DOCDL_USERNAME='myusername'
+# DOCDL_PASSWORD='mysecretpassword'
+# DOCDL_ACTION='download'
+# DOCDL_TIMEOUT='30'
+#
+# All DOCDL_* env vars can be used. Plugin specific commandline arguments
+# can be passed, e.g.:
+#
+# $ document-dl-amazon --limit-year=2005
+#
+# ---------------------------------------------------------------------
+
+# error handler
+error() {
+    echo "error: $1" >&2
+    exit 1
+}
+
+
+# use last word of filename as servicename
+SERVICE="${0##*-}"
+# build config filename
+CONFIG="${HOME}/.config/document-dl-${SERVICE}.conf"
+
+# validate arguments
+[[ -n "${SERVICE}" ]] || error "need a servicename. (don't call script directly but create a link: document-dl-SERVICENAME)"
+
+# check for config file
+[[ -f "${CONFIG}" ]] || error "${CONFIG} not found"
+# check for secure permission of config file
+permission="$(stat -c '%a' "${CONFIG}")"
+[[ "${permission}" != "600" ]] || error "${CONFIG} has ${permission} but needs 600"
+# load config
+set -a
+# shellcheck source=/dev/null # (no config to check during QA)
+. "${CONFIG}" || error "parsing config ${CONFIG}"
+set +a
+
+# validate mandatory config settings
+[[ -n "${DOCDL_PLUGIN}" ]] || error "DOCDL_PLUGIN not set"
+
+# validate optional config settings
+if [[ -n "${DOCDL_DSTPATH}" ]] ; then
+    # create destionation directory if not existing, yet
+    [[ -d "${DOCDL_DSTPATH}" ]] || mkdir -p "${DOCDL_DSTPATH}" || error "mkdir ${DOCDL_DSTPATH}"
+    # cd to target dir
+    cd "${DOCDL_DSTPATH}" || error "cd ${DOCDL_DSTPATH}"
+fi
+
+# download documents
+document-dl "${DOCDL_PLUGIN}" "$@"
+
+# cd back to previous directory
+[[ -n "${DOCDL_DSTPATH}" ]] && { cd - >/dev/null || error "cd -" ; }
