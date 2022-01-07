@@ -138,6 +138,22 @@ class DKB(docdl.SeleniumWebPortal):
         # ~ pass
 
     def _inbox(self):
+
+        def get_catlinks(table):
+            """get links of all categories and return them as list of tuples"""
+            catlinks = []
+            for row in table.find_elements(
+                By.XPATH, "//table[@id='welcomeMboTable']/tbody/tr"
+            ):
+                # get category
+                category = row.get_attribute("id").lower()
+                # get link to open category
+                subject = row.find_element(By.CSS_SELECTOR, "td.subject")
+                catlink = subject.find_element(By.CSS_SELECTOR, "a")
+                url = catlink.get_attribute("href")
+                catlinks += [(category, url)]
+            return catlinks
+
         # load inbox
         self.webdriver.get(self.URL_INBOX)
         # wait for table
@@ -147,7 +163,7 @@ class DKB(docdl.SeleniumWebPortal):
             ))
         )
         # iterate all category rows and collect links to categories
-        catlinks = self._get_catlinks(table)
+        catlinks = get_catlinks(table)
 
         # iterate all categories
         for category, catlink in catlinks:
@@ -188,23 +204,6 @@ class DKB(docdl.SeleniumWebPortal):
                 if not self._nextbutton():
                     # quit
                     break
-
-    def _get_catlinks(self, table):
-        """
-        get links of all categories and return them as list of tuples
-        """
-        catlinks = []
-        for row in table.find_elements(
-            By.XPATH, "//table[@id='welcomeMboTable']/tbody/tr"
-        ):
-            # get category
-            category = row.get_attribute("id").lower()
-            # get link to open category
-            subject = row.find_element(By.CSS_SELECTOR, "td.subject")
-            catlink = subject.find_element(By.CSS_SELECTOR, "a")
-            url = catlink.get_attribute("href")
-            catlinks += [(category, url)]
-        return catlinks
 
     def _nextbutton(self):
         """
