@@ -132,10 +132,10 @@ class DKB(docdl.SeleniumWebPortal):
             # return document
             yield document
 
-    def accounts_csv(self):
-        """get transactions of each account as csv"""
-        # @todo
-        pass
+    # ~ def accounts_csv(self):
+        # ~ """get transactions of each account as csv"""
+        # ~ # @todo
+        # ~ pass
 
     def inbox(self):
         # load inbox
