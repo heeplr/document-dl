@@ -67,10 +67,7 @@ class Handyvertrag(docdl.SeleniumWebPortal):
         )
 
     def logout(self):
-        # logoutbutton = self.webdriver.find_element(
-        #       By.XPATH, '//span[@id, "logoutLink"]/a')
-        # logoutbutton.click()
-        self.webdirver.get(self.URL_LOGOUT)
+        self.webdriver.get(self.URL_LOGOUT)
 
     def documents(self):
         """fetch invoices"""
@@ -98,7 +95,7 @@ class Handyvertrag(docdl.SeleniumWebPortal):
                         'subject': description,
                     })
 
-            # type connection report
+            # type call log
             link = row.parent.find_elements(
                     By.LINK_TEXT, 'Einzelverbindungsnachweis')
             if len(link) == 1:
@@ -109,7 +106,7 @@ class Handyvertrag(docdl.SeleniumWebPortal):
                     attributes={
                         'id': idn,
                         'date': docdl.util.parse_date(date),
-                        'category': 'connection_report',
+                        'category': 'call_log',
                         'subject': description,
                     })
 
@@ -118,5 +115,5 @@ class Handyvertrag(docdl.SeleniumWebPortal):
 @click.pass_context
 # pylint: disable=C0103
 def handyvertrag(ctx):
-    """service.handyvertrag.de (invoices/postbox)"""
+    """service.handyvertrag.de (invoices, call logs)"""
     docdl.cli.run(ctx, Handyvertrag)

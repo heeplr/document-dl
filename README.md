@@ -111,7 +111,7 @@ Commands:
   elster    elster.de with path to .pfx certfile as username (postbox)
   ing       banking.ing.de with photoTAN (postbox)
   handyvertrag
-            handyvertrag.de (invoices)
+            handyvertrag.de (invoices, call logs)
   o2        o2online.de (invoices/postbox)
   strato    strato.de (invoices)
   vodafone  kabel.vodafone.de (postbox, invoices)
