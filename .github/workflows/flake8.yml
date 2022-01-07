@@ -1,0 +1,11 @@
+name: flake8
+on: [push,pull_request]
+  workflow_dispatch:
+
+jobs:  
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Flake8 action
+        uses: suo/flake8-github-action@v1
