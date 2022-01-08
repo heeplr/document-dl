@@ -10,13 +10,15 @@ import docdl
     pkg_resources.iter_entry_points('docdl_plugins')
 )
 @click.group(
-    context_settings=dict(help_option_names=['-h', '--help'])
+    context_settings={
+        "help_option_names": ['-h', '--help'],
+        "auto_envvar_prefix": "DOCDL"
+    }
 )
 @click.option(
     "-u",
     "--username",
     prompt=True,
-    envvar="DOCDL_USERNAME",
     show_envvar=True,
     help="login id"
 )
@@ -25,7 +27,6 @@ import docdl
     "--password",
     prompt=True,
     hide_input=True,
-    envvar="DOCDL_PASSWORD",
     show_envvar=True,
     help="secret password"
 )
@@ -36,7 +37,6 @@ import docdl
     type=click.Tuple([str, str]),
     metavar="<ATTRIBUTE PATTERN>...",
     multiple=True,
-    envvar="DOCDL_MATCH",
     show_envvar=True,
     help="only output documents where attribute contains pattern string"
 )
@@ -47,7 +47,6 @@ import docdl
     type=click.Tuple([str, str]),
     metavar="<ATTRIBUTE REGEX>...",
     multiple=True,
-    envvar="DOCDL_REGEX",
     show_envvar=True,
     help="only output documents where attribute value matches regex"
 )
@@ -57,7 +56,6 @@ import docdl
     "jq_matches",
     metavar="JQ_EXPRESSION",
     multiple=True,
-    envvar="DOCDL_JQ",
     show_envvar=True,
     help="only output documents if json query matches document's "
          "attributes (see https://stedolan.github.io/jq/manual/ )"
@@ -66,7 +64,6 @@ import docdl
     "--headless/--show",
     "-H/ ",
     type=bool,
-    envvar="DOCDL_HEADLESS",
     show_envvar=True,
     default=True,
     help="show/hide browser window",
@@ -79,7 +76,6 @@ import docdl
         "chrome", "edge", "firefox", "ie", "opera", "safari",
         "webkitgtk"
     ], case_sensitive=False),
-    envvar="DOCDL_BROWSER",
     show_envvar=True,
     default="chrome",
     help="webdriver to use for selenium based plugins",
@@ -90,7 +86,6 @@ import docdl
     "--timeout",
     type=int,
     default=15,
-    envvar="DOCDL_TIMEOUT",
     show_envvar=True,
     help="seconds to wait for data before terminating connection",
     show_default=True
@@ -100,7 +95,6 @@ import docdl
     "--image-loading",
     type=bool,
     default=False,
-    envvar="DOCDL_IMAGE_LOADING",
     show_envvar=True,
     help="Turn off image loading when False",
     show_default=True
@@ -110,7 +104,6 @@ import docdl
     "--action",
     type=click.Choice(["download", "list"]),
     default="list",
-    envvar="DOCDL_ACTION",
     show_envvar=True,
     help="download or just list documents",
     show_default=True
@@ -120,7 +113,6 @@ import docdl
     "--format",
     "output_format",
     type=click.Choice(["list", "dicts"], case_sensitive=False),
-    envvar="DOCDL_FORMAT",
     show_envvar=True,
     default="dicts",
     help="choose between line buffered output "

@@ -81,14 +81,15 @@ Options:
   -m, --match <ATTRIBUTE PATTERN>...
                                   only output documents where attribute
                                   contains pattern string  [env var:
-                                  DOCDL_MATCH]
+                                  DOCDL_STRING_MATCHES]
   -r, --regex <ATTRIBUTE REGEX>...
                                   only output documents where attribute value
-                                  matches regex  [env var: DOCDL_REGEX]
+                                  matches regex  [env var:
+                                  DOCDL_REGEX_MATCHES]
   -j, --jq JQ_EXPRESSION          only output documents if json query matches
                                   document's attributes (see
                                   https://stedolan.github.io/jq/manual/ )
-                                  [env var: DOCDL_JQ]
+                                  [env var: DOCDL_JQ_MATCHES]
   -H, --headless / --show         show/hide browser window  [env var:
                                   DOCDL_HEADLESS; default: headless]
   -b, --browser [chrome|edge|firefox|ie|opera|safari|webkitgtk]
@@ -103,7 +104,7 @@ Options:
                                   DOCDL_ACTION; default: list]
   -f, --format [list|dicts]       choose between line buffered output of json
                                   dicts or single json list  [env var:
-                                  DOCDL_FORMAT; default: dicts]
+                                  DOCDL_OUTPUT_FORMAT; default: dicts]
   -h, --help                      Show this message and exit.
 
 Commands:

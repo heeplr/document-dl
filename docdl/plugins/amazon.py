@@ -288,7 +288,6 @@ class Amazon(docdl.SeleniumWebPortal):
     "--tld",
     default="de",
     show_default=True,
-    envvar="DOCDL_AMAZON_TLD",
     show_envvar=True,
     help="toplevel domain to use"
 )
@@ -296,7 +295,6 @@ class Amazon(docdl.SeleniumWebPortal):
     "-y",
     "--limit-year",
     type=int,
-    envvar="DOCDL_AMAZON_LIMIT_YEAR",
     show_envvar=True,
     default=None,
     help="limit handling to documents of the given year",
