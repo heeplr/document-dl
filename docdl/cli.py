@@ -63,13 +63,13 @@ import docdl
          "attributes (see https://stedolan.github.io/jq/manual/ )"
 )
 @click.option(
-    "-H",
-    "--headless",
+    "--headless/--show",
+    "-H/ ",
     type=bool,
     envvar="DOCDL_HEADLESS",
     show_envvar=True,
     default=True,
-    help="show browser window if false",
+    help="show/hide browser window",
     show_default=True
 )
 @click.option(

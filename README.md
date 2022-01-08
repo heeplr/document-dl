@@ -89,8 +89,8 @@ Options:
                                   document's attributes (see
                                   https://stedolan.github.io/jq/manual/ )
                                   [env var: DOCDL_JQ]
-  -H, --headless BOOLEAN          show browser window if false  [env var:
-                                  DOCDL_HEADLESS; default: True]
+  -H, --headless / --show         show/hide browser window  [env var:
+                                  DOCDL_HEADLESS; default: headless]
   -b, --browser [chrome|edge|firefox|ie|opera|safari|webkitgtk]
                                   webdriver to use for selenium based plugins
                                   [env var: DOCDL_BROWSER; default: chrome]
@@ -107,16 +107,15 @@ Options:
   -h, --help                      Show this message and exit.
 
 Commands:
-  amazon    Amazon (invoices)
-  conrad    conrad.de (invoices)
-  dkb       dkb.de with chipTAN QR (postbox)
-  elster    elster.de with path to .pfx certfile as username (postbox)
-  ing       banking.ing.de with photoTAN (postbox)
-  handyvertrag
-            handyvertrag.de (invoices, call record)
-  o2        o2online.de (invoices, call record, postbox)
-  strato    strato.de (invoices)
-  vodafone  kabel.vodafone.de (postbox, invoices)
+  amazon        Amazon (invoices)
+  conrad        conrad.de (invoices)
+  dkb           dkb.de with chipTAN QR (postbox)
+  elster        elster.de with path to .pfx certfile as username (postbox)
+  handyvertrag  service.handyvertrag.de (invoices, call record)
+  ing           banking.ing.de with photoTAN (postbox)
+  o2            o2online.de (invoices, call record, postbox)
+  strato        strato.de (invoices)
+  vodafone      kabel.vodafone.de (postbox, invoices)
 ```
 
 Display plugin-specific help:
@@ -144,7 +143,7 @@ $ document-dl vodafone
 
 Same, but show browser window this time:
 ```sh
-$ document-dl --headless=false vodafone
+$ document-dl --show vodafone
 ```
 
 Download all documents from conrad.de, pass credentials as commandline arguments:
