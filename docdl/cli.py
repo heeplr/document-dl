@@ -100,12 +100,22 @@ import docdl
     show_default=True
 )
 @click.option(
-    "-a",
-    "--action",
-    type=click.Choice(["download", "list"]),
-    default="list",
+    "-l",
+    "--list",
+    "action",
+    flag_value="list",
+    default=True,
     show_envvar=True,
-    help="download or just list documents",
+    help="list documents",
+    show_default=True
+)
+@click.option(
+    "-d",
+    "--download",
+    "action",
+    flag_value="download",
+    show_envvar=True,
+    help="download documents",
     show_default=True
 )
 @click.option(
