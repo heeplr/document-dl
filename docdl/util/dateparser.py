@@ -47,8 +47,10 @@ def parse(date, date_format=None):
        :param date_format: datetime.strptime() format string.
                            If none is given, fuzzy matching will be used
                            to parse the date
-       :result: datetime object or None
+       :result: datetime object or input date upon parsing failure
        @todo: handle timezone"""
+    # remember input
+    input_date = date
 
     # got nothing?
     if date is None:
@@ -63,7 +65,7 @@ def parse(date, date_format=None):
     if isinstance(date, str):
         # empty string ?
         if date == "":
-            raise ValueError("Failed to parse datetime: Empty string")
+            return input_date
 
         # massage string
         date = date.lower().strip()
@@ -157,13 +159,7 @@ def parse(date, date_format=None):
         except ValueError:
             pass
 
-        raise ValueError(f"Failed to parse date: {date}")
-
-    # unknown type
-    raise TypeError(
-        "Need <type 'datetime'>, <type 'str'> or <type 'unicode'>. "
-        f"Got {type(date)}"
-    )
+    return input_date
 
 
 def replace_months(date):
