@@ -357,6 +357,7 @@ class SeleniumWebPortal(WebPortal):
             # copy cookies from selenium to requests session
             self.copy_to_requests_session()
             filename = self.download_with_requests(document)
+            self.copy_from_requests_session()
         # don't attempt download
         else:
             return None
@@ -402,14 +403,18 @@ class SeleniumWebPortal(WebPortal):
     def copy_to_requests_session(self):
         """copy current selenium session to requests session"""
         # copy cookies
-        cookies = self.webdriver.get_cookies()
-        for cookie in cookies:
+        for cookie in self.webdriver.get_cookies():
             self.session.cookies.set(cookie['name'], cookie['value'])
         # copy user agent
         user_agent = self.webdriver.execute_script(
             "return navigator.userAgent;"
         )
         self.session.headers['User-Agent'] = user_agent
+
+    def copy_from_requests_session(self):
+        """copy current requests session to selenium session"""
+        for name, value in self.session.cookies.items():
+            self.webdriver.add_cookie({"name": name, "value": value})
 
     def captcha(self, image, entry, prompt="please enter captcha: "):
         """handle captcha"""
