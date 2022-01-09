@@ -87,6 +87,9 @@ class WebPortal():
 
     def download(self, document):
         """download document url"""
+        # don't attempt download without url
+        if not document.url:
+            return None
         filename = self.download_with_requests(document)
         return document.rename_after_download(filename)
 
@@ -223,7 +226,6 @@ class SeleniumWebPortal(WebPortal):
                         'profile.managed_default_content_settings.images': 2
                     }
                 )
-
             # enable incognito mode
             webdriver_options.add_argument("--incognito")
             # set preferences
@@ -243,8 +245,7 @@ class SeleniumWebPortal(WebPortal):
                 )
             # ~ # debugging
             # ~ webdriver_options.add_argument("--remote-debugging-port=9222")
-            # set preference options
-            # init webdriver
+            # set preference options & init webdriver
             return webdriver.Chrome(options=webdriver_options)
 
         def _init_edge():
@@ -348,16 +349,17 @@ class SeleniumWebPortal(WebPortal):
 
     def download(self, document):
         """download a document"""
+        # click download element to trigger download ?
         if document.download_element:
             filename = self.download_with_selenium(document)
+        # GET url?
         elif document.url:
             # copy cookies from selenium to requests session
             self.copy_to_requests_session()
             filename = self.download_with_requests(document)
+        # don't attempt download
         else:
-            raise RuntimeError(
-                "can't download: document has neither url or download_element"
-            )
+            return None
         return document.rename_after_download(filename)
 
     def download_with_selenium(self, document):
