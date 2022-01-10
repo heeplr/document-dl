@@ -11,8 +11,9 @@ from .dateparser import parse as parse_date  # noqa: F401 (import as shortcut)
 def parse_decimal(decimal):
     """massage string with decimal number"""
     decimal = decimal.split()[0]
-    decimal = decimal.replace(',','.')
+    decimal = decimal.replace(',', '.')
     return decimal
+
 
 def show_image(filename, name="image"):
     """attempt to show image"""
