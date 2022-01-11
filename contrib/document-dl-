@@ -14,7 +14,7 @@
 # * DOCDL_PLUGIN to specify the plugin to use
 #
 # Optional config variables are:
-# * DOCDL_DSTPATH - destionation path to store downloaded files
+# * DOCDL_DSTPATH - destination path to store downloaded files
 #
 #
 # For example
