@@ -14,6 +14,7 @@ setup(
     keywords='scrape office documents bills',
     py_modules=['docdl'],
     install_requires=[
+        'imaplib2',
         'click',
         'click-plugins',
         'jq',
@@ -25,6 +26,7 @@ setup(
     packages=find_packages(exclude=['tests*']),
     entry_points={
         'docdl_plugins': [
+            'imap=docdl.plugins.imap:imap',
             'amazon=docdl.plugins.amazon:amazon',
             'conrad=docdl.plugins.conrad:conrad',
             'dkb=docdl.plugins.dkb:dkb',
