@@ -20,7 +20,7 @@ class O2(docdl.SeleniumWebPortal):
     URL_MY_MESSAGES = f"{URL_BASE}/ecareng/my-messages"
     URL_INVOICE_INFO = f"{URL_BILLING}/invoiceinfo"
     URL_INVOICE = f"{URL_BILLING}/billdocument"
-    URL_INVOICE_OVERVIEW = f"{URL_BILLING}/api/invoiceoverview"
+    URL_INVOICE_OVERVIEW = f"{URL_BILLING}/invoiceoverview"
     URL_VALUE_ADDED_INVOICE = f"{URL_BILLING}/value-added-services-invoices"
 
     def login(self):
