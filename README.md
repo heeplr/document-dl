@@ -92,7 +92,7 @@ Options:
                                   [env var: DOCDL_JQ_MATCHES]
   -H, --headless / --show         show/hide browser window  [env var:
                                   DOCDL_HEADLESS; default: headless]
-  -b, --browser [chrome|edge|firefox|ie|opera|safari|webkitgtk]
+  -b, --browser [chrome|edge|firefox|ie|safari|webkitgtk]
                                   webdriver to use for selenium based plugins
                                   [env var: DOCDL_BROWSER; default: chrome]
   -t, --timeout INTEGER           seconds to wait for data before terminating
