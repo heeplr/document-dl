@@ -188,10 +188,6 @@ class SeleniumWebPortal(WebPortal):
             # pylint: disable=C0415
             from selenium.webdriver.ie.options import Options
 
-        elif self.WEBDRIVER == "opera":
-            # pylint: disable=C0415,E0611,E0401
-            from selenium.webdriver.opera.options import Options
-
         elif self.WEBDRIVER == "safari":
             # pylint: disable=C0415,E0611,E0401
             from selenium.webdriver.safari.options import Options
@@ -314,10 +310,6 @@ class SeleniumWebPortal(WebPortal):
         def _init_ie():
             return webdriver.Ie(options=webdriver_options)
 
-        def _init_opera():
-            # pylint: disable=E0611
-            return webdriver.Opera(options=webdriver_options)
-
         def _init_safari():
             # pylint: disable=E1123
             return webdriver.Safari(options=webdriver_options)
@@ -331,7 +323,6 @@ class SeleniumWebPortal(WebPortal):
             'edge': _init_edge,
             'firefox': _init_firefox,
             'ie': _init_ie,
-            'opera': _init_opera,
             'safari': _init_safari,
             'webkitgtk': _init_webkitgtk
         }
