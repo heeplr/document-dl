@@ -73,7 +73,7 @@ import docdl
     "-b",
     "--browser",
     type=click.Choice([
-        "chrome", "edge", "firefox", "ie", "opera", "safari",
+        "chrome", "edge", "firefox", "ie", "safari",
         "webkitgtk"
     ], case_sensitive=False),
     show_envvar=True,
