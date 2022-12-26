@@ -19,7 +19,7 @@ setup(
         'jq',
         'python-dateutil',
         'requests',
-        'selenium',
+        'selenium<4.3.0',
         'watchdog'
     ],
     packages=find_packages(exclude=['tests*']),
