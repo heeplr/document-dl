@@ -200,9 +200,15 @@ Roughly, you have to:
     ```self.session``` that's initialized for you
   * if you need selenium, inherit from ```docdl.SeleniumWebPortal``` and use
     ```self.webdriver``` that's initialized for you
-  * add a *login()*, *logout()* and *documents()* method.
+  * add a 
+    * login() method,
+    * logout() method and 
+    * documents() generator that yields ```docdl.Document()``` instances
+    * optional: download() method if you need to do more fancy stuff than downloading an URLs and saving it to a file
 * add click glue code
 * add your plugin to setup.py docdl_plugins registry
+
+Checkout other plugins as example.
 
 ### requests plugin example
 
