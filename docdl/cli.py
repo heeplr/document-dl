@@ -1,5 +1,6 @@
 """download documents from web portals"""
 
+import os
 import pkg_resources
 import click
 import click_plugins
@@ -82,6 +83,16 @@ import docdl
     show_default=True
 )
 @click.option(
+    "-T",
+    "--time-preserve",
+    type=bool,
+    default=True,
+    envvar="DOCDL_TIME_PRESERVE",
+    show_envvar=True,
+    help="preserve the document creation time for the downloaded file",
+    show_default=True
+)
+@click.option(
     "-t",
     "--timeout",
     type=int,
@@ -133,7 +144,7 @@ import docdl
 # pylint: disable=W0613,C0103,R0913
 def documentdl(
     ctx, username, password, string_matches, regex_matches, jq_matches,
-    headless, browser, timeout, image_loading, action, output_format
+    headless, browser, time_preserve, timeout, image_loading, action, output_format
 ):
     """download documents from web portals"""
     # set browser that SeleniumWebPortal plugins should use
@@ -181,7 +192,10 @@ def run(ctx, plugin_class):
                 continue
             # download ?
             if root_params['action'] == "download":
-                portal.download(document)
+                filename = portal.download(document)
+                if root_params['time_preserve']:
+                    timest = document.attributes['date'].timestamp()
+                    os.utime(filename, (timest, timest))
             # line buffered dict output?
             if root_params['output_format'] == "dicts":
                 # always output as json dict
