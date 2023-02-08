@@ -15,8 +15,8 @@ class ING(docdl.SeleniumWebPortal):
 
     URL_LOGIN = "https://banking.ing.de"
     URL_LOGOUT = "https://banking.ing.de/app/logout"
-    URL_POSTBOX = "https://banking.ing.de/app/postbox"
-    URL_TRANSACTIONS = "https://banking.ing.de/app/umsatzanzeige"
+    URL_POSTBOX = "https://banking.ing.de/app/obligo/postbox"
+    URL_TRANSACTIONS = "https://banking.ing.de/app/obligo/umsatzanzeige"
 
     def __init__(self, login_id, password, useragent=None, arguments=None):
         # don't use headless user agent to avoid ing.de mistaking us for a bot
