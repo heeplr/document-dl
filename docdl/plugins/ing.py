@@ -32,10 +32,13 @@ class ING(docdl.SeleniumWebPortal):
         # load login page
         self.webdriver.get(self.URL_LOGIN)
         # wait for cookie accept button
-        cookie_button = WebDriverWait(self.webdriver, self.TIMEOUT).until(
+        dialog = WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.visibility_of_element_located((
-                By.XPATH, "//button[contains(text(), 'Annehmen')]"
+                By.XPATH, ".//*[@data-tag-name='ing-cc-dialog-level0']"
             ))
+        )
+        cookie_button = dialog.shadow_root.find_element(
+            By.CSS_SELECTOR, '.cc-l0__button__more'
         )
         cookie_button.click()
         # sign in
@@ -51,9 +54,13 @@ class ING(docdl.SeleniumWebPortal):
             By.XPATH, "//button[@name='view:next-inline']"
         )
         nextbutton.click()
-        # wait for success or failure
+
+        # wait for banking key keypad or photoTAN
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             lambda d:
+                d.find_elements(
+                    By.CSS_SELECTOR, "img.thumbnail__image"
+                ) or
                 d.find_elements(
                     By.CSS_SELECTOR, "div.diba-keypad"
                 ) or
@@ -65,54 +72,52 @@ class ING(docdl.SeleniumWebPortal):
                 )
         )
         # get DiBa Key digits
-        if not (digits := self.webdriver.find_elements(
+        if digits := self.webdriver.find_elements(
             By.XPATH,
             "//div[contains(@class, 'diba-keypad')]/"
             "div[contains(@class, 'notification')]/"
             "p[@role='heading']/b/span"
-        )):
-            # login error
-            return False
-        # get requested digits from html
-        digits = [e.get_attribute('textContent').strip() for e in digits]
-        # click numbers on keypad
-        for digit in digits:
-            number = self.arguments['diba_key'][int(digit)-1]
-            self.webdriver.find_element_by_link_text(number).click()
-        # get "next" button
-        nextbutton = self.webdriver.find_element(
-            By.XPATH, "//button[@name='buttons:next']"
-        )
-        nextbutton.click()
-        # wait for photoTAN
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d:
-                d.find_elements(
-                    By.CSS_SELECTOR, "img.thumbnail__image"
-                ) or
-                d.find_elements(
-                    By.CSS_SELECTOR, "div.notification--warning"
-                ) or
-                d.find_elements(
-                    By.CSS_SELECTOR, "small.form-group__error"
-                )
-        )
-        # handle photoTAN
-        if not (qrcode := self.webdriver.find_element(
-            By.CSS_SELECTOR, "img.thumbnail__image"
-        )):
-            # login error
-            return False
-        tan_entry = self.webdriver.find_element(
-            By.CSS_SELECTOR, "input.input-field"
-        )
+        ):
+            # get requested digits from html
+            digits = [e.get_attribute('textContent').strip() for e in digits]
+            # click numbers on keypad
+            for digit in digits:
+                number = self.arguments['diba_key'][int(digit)-1]
+                self.webdriver.find_element_by_link_text(number).click()
+            # get "next" button
+            nextbutton = self.webdriver.find_element(
+                By.XPATH, "//button[@name='buttons:next']"
+            )
+            nextbutton.click()
+            # wait for photoTAN or error
+            WebDriverWait(self.webdriver, self.TIMEOUT).until(
+                lambda d:
+                    d.find_elements(
+                        By.CSS_SELECTOR, "img.thumbnail__image"
+                    ) or
+                    d.find_elements(
+                        By.CSS_SELECTOR, "div.notification--warning"
+                    ) or
+                    d.find_elements(
+                        By.CSS_SELECTOR, "small.form-group__error"
+                    )
+            )
 
-        self.captcha(qrcode, tan_entry, "please enter photoTAN: ")
-        # submit photoTAN
-        nextbutton = self.webdriver.find_element(
-            By.XPATH, "//button[@name='buttons:next']"
-        )
-        nextbutton.click()
+        # handle photoTAN
+        if qrcode := self.webdriver.find_element(
+            By.CSS_SELECTOR, "img.thumbnail__image"
+        ):
+            tan_entry = self.webdriver.find_element(
+                By.CSS_SELECTOR, "input.input-field"
+            )
+
+            self.captcha(qrcode, tan_entry, "please enter photoTAN: ")
+            # submit photoTAN
+            nextbutton = self.webdriver.find_element(
+                By.XPATH, "//button[@name='buttons:next']"
+            )
+            nextbutton.click()
+
         # wait for logout button (success) or tan input (failure) or
         # some ad modal (success)
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
