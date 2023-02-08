@@ -129,11 +129,22 @@ import docdl
          "of json dicts or single json list",
     show_default=True
 )
+@click.option(
+    "-D",
+    "--debug",
+    type=bool,
+    is_flag=True,
+    default=False,
+    show_envvar=True,
+    help="use selenium remote debugging on port 9222",
+    show_default=True
+)
 @click.pass_context
 # pylint: disable=W0613,C0103,R0913
 def documentdl(
     ctx, username, password, string_matches, regex_matches, jq_matches,
-    headless, browser, timeout, image_loading, action, output_format
+    headless, browser, timeout, image_loading, action, output_format,
+    debug
 ):
     """download documents from web portals"""
     # set browser that SeleniumWebPortal plugins should use

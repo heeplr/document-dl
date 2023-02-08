@@ -239,8 +239,9 @@ class SeleniumWebPortal(WebPortal):
                 webdriver_options.add_argument(
                     f"user-agent='{self.useragent}'"
                 )
-            # ~ # debugging
-            # ~ webdriver_options.add_argument("--remote-debugging-port=9222")
+            # enable debugging
+            if 'debug' in options:
+                webdriver_options.add_argument("--remote-debugging-port=9222")
             # set preference options & init webdriver
             return webdriver.Chrome(options=webdriver_options)
 
