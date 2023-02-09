@@ -64,21 +64,36 @@ class O2(docdl.SeleniumWebPortal):
         password.submit()
         # wait for page to load
         current_url = self.wait_for_urlchange(current_url)
-        # wait for either login success, failure or "accept" button
+        # wait for cookie-banner container
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.presence_of_element_located((
                 By.XPATH,
-                "//a[contains(@href, 'auth/logout')] | "
+                "//div[@id='usercentrics-root'] | "
                 "//div[contains(@data-test-id, 'unified-login-error')]"
             ))
         )
-        # click "accept" button if there is one
-        acceptbutton = self.webdriver.find_elements(
-            By.XPATH,
-            "//button[contains(text(), 'Akzeptieren')]"
-        )
-        if acceptbutton:
-            acceptbutton.click()
+        # get cookie-banner container
+        if container := self.webdriver.find_element(
+            By.XPATH, "//div[@id='usercentrics-root']"
+        ):
+            # get inside DOM element so we can use XPATH
+            container = container.shadow_root.find_element(
+                By.CSS_SELECTOR, 'section'
+            )
+
+            # wait for cookie banner
+            WebDriverWait(container, self.TIMEOUT).until(
+                EC.visibility_of_element_located((
+                    By.XPATH, ".//button[contains(text(), 'Verweigern')]"
+                ))
+            )
+            # click "reject" button if there is one
+            button = container.find_element(
+                By.XPATH,
+                ".//button[contains(text(), 'Verweigern')]"
+            )
+            button.click()
+
         # click "close" button if there is one
         closebutton = self.webdriver.find_elements(
             By.XPATH,
