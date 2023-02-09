@@ -100,11 +100,15 @@ Options:
                                   default: 15]
   -i, --image-loading BOOLEAN     Turn off image loading when False  [env var:
                                   DOCDL_IMAGE_LOADING; default: False]
-  -a, --action [download|list]    download or just list documents  [env var:
-                                  DOCDL_ACTION; default: list]
+  -l, --list                      list documents  [env var: DOCDL_ACTION;
+                                  default: list]
+  -d, --download                  download documents  [env var: DOCDL_ACTION;
+                                  default: list]
   -f, --format [list|dicts]       choose between line buffered output of json
                                   dicts or single json list  [env var:
                                   DOCDL_OUTPUT_FORMAT; default: dicts]
+  -D, --debug                     use selenium remote debugging on port 9222
+                                  [env var: DOCDL_DEBUG]
   -h, --help                      Show this message and exit.
 
 Commands:
@@ -177,6 +181,33 @@ Download document from elster.de with id == 15:
 $ document-dl --jq 'contains({id: 15})' --action download elster
 ```
 
+You can create a config file ```.o2_documentdlrc``` like so:
+```sh
+DOCDL_PLUGIN="o2"
+DOCDL_USERNAME="01771234567"
+DOCDL_PASSWORD="super-secret-password"
+DOCDL_ACTION="download"
+DOCDL_DSTPATH="${HOME}/Documents/o2"
+DOCDL_TIMEOUT="30"
+```
+
+then invoke document-dl in a script like so:
+
+```sh
+#!/bin/bash
+
+CONFIG="${HOME}/.config/.o2_documentdlrc"
+
+# load config
+set -a
+. "${CONFIG}" || error "parsing config ${CONFIG}"
+set +a
+# cd to target dir
+cd "${DOCDL_DSTPATH}"
+# download documents
+/usr/bin/document-dl "${DOCDL_PLUGIN}"
+```
+
 
 <br><br>
 ## Security
@@ -184,7 +215,7 @@ BEWARE that your login credentials are most probably **saved in your shell
 history when you pass them as commandline arguments**.
 You can use the input prompt to avoid that or set environment variables
 securely.
-
+Make sure to set secure permissions when saving credentials on a trusted system (e.g. ```chmod 0600 <file>```)
 
 <br><br>
 ## Writing a plugin
