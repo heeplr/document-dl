@@ -83,7 +83,7 @@ class ING(docdl.SeleniumWebPortal):
             # click numbers on keypad
             for digit in digits:
                 number = self.arguments['diba_key'][int(digit)-1]
-                self.webdriver.find_element_by_link_text(number).click()
+                self.webdriver.find_element("link text", number).click()
             # get "next" button
             nextbutton = self.webdriver.find_element(
                 By.XPATH, "//button[@name='buttons:next']"
