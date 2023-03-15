@@ -185,7 +185,7 @@ class O2(docdl.SeleniumWebPortal):
                     attributes={
                         **attributes,
                         'number': document['billNumber'],
-                        'doctype': document['documentType'],
+                        'category': document['documentType'],
                         'filename': f"o2-{year}-{month}-{day}-{category}.pdf"
                     }
                 )
