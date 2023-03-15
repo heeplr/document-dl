@@ -40,6 +40,7 @@ class Elster(docdl.SeleniumWebPortal):
             By.XPATH, "//button[@title='Login']"
         )
         loginbutton.click()
+
         # wait for either login error message box or success message
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.visibility_of_element_located((
