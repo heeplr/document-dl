@@ -51,7 +51,6 @@ def parse(date, date_format=None):
        @todo: handle timezone"""
     # remember input
     input_date = date
-
     # got nothing?
     if date is None:
         return None
@@ -84,6 +83,14 @@ def parse(date, date_format=None):
         # try american date format MM/DD/YYYY
         try:
             result = datetime.datetime.strptime(date, "%m/%d/%Y")
+            # remove timezone info
+            return result.replace(tzinfo=None)
+        except ValueError:
+            pass
+
+        # MM/DD/YYYY HH:MM:ss
+        try:
+            result = datetime.datetime.strptime(date, "%m/%d/%Y %H:%M:%S")
             # remove timezone info
             return result.replace(tzinfo=None)
         except ValueError:
