@@ -112,7 +112,8 @@ Options:
   -h, --help                      Show this message and exit.
 
 Commands:
-  amazon        Amazon (invoices)
+  amazon        amazon.com (invoices)
+  believe       believebackstage.com (financial reports + catalog export)
   conrad        conrad.de (invoices)
   dkb           dkb.de with chipTAN QR (postbox)
   elster        elster.de with path to .pfx certfile as username (postbox)
@@ -161,9 +162,9 @@ Download all documents from conrad.de, pass credentials as env vars:
 $ DOCDL_USERNAME='mylogin' DOCDL_PASSWORD='mypass' document-dl --action download conrad
 ```
 
-Download all documents from o2online.de where "doctype" attribute contains "BILL":
+Download all documents from o2online.de where "category" attribute contains "BILL":
 ```sh
-$ document-dl --match doctype BILL --action download o2
+$ document-dl --match category BILL --action download o2
 ```
 
 You can also use regular expressions to filter documents:
@@ -231,9 +232,9 @@ Roughly, you have to:
     ```self.session``` that's initialized for you
   * if you need selenium, inherit from ```docdl.SeleniumWebPortal``` and use
     ```self.webdriver``` that's initialized for you
-  * add a 
+  * add a
     * login() method,
-    * logout() method and 
+    * logout() method and
     * documents() generator that yields ```docdl.Document()``` instances
     * optional: download() method if you need to do more fancy stuff than downloading an URLs and saving it to a file
 * add click glue code
