@@ -303,5 +303,5 @@ class Amazon(docdl.SeleniumWebPortal):
 @click.pass_context
 # pylint: disable=W0613
 def amazon(ctx, *args, **kwargs):
-    """Amazon (invoices)"""
+    """amazon.com (invoices)"""
     docdl.cli.run(ctx, Amazon)
