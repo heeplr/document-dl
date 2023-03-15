@@ -11,6 +11,8 @@ import docdl
 
 
 class BelieveBackstage(docdl.SeleniumWebPortal):
+    """download documents from believebackstage.com"""
+
     URL_ROOT = "https://believebackstage.com"
     URL_LOGOUT = f"{URL_ROOT}/?logout=1"
     URL_REPORTS = f"{URL_ROOT}/royalties/reportmanager"
@@ -62,7 +64,8 @@ class BelieveBackstage(docdl.SeleniumWebPortal):
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.visibility_of_element_located((
                 By.XPATH,
-                "//p[contains(text(),'The username or password provided in the request are invalid')] | "
+                "//p[contains(text(),'The username or password provided "
+                "in the request are invalid')] | "
                 "//*[contains(text(), 'Kundennummer')]"
             ))
         )
@@ -76,6 +79,7 @@ class BelieveBackstage(docdl.SeleniumWebPortal):
         return itertools.chain(self.financial_reports(), self.catalog())
 
     def catalog(self):
+        """catalog CSV export"""
         yield docdl.Document(
             url="https://believebackstage.com/catalog/manager/catalogExport",
             attributes={
@@ -84,6 +88,7 @@ class BelieveBackstage(docdl.SeleniumWebPortal):
         )
 
     def financial_reports(self):
+        """quarterly/monthly financial reports"""
         # fetch report overview
         self.webdriver.get(self.URL_REPORTS)
         # wait for modal
