@@ -85,7 +85,7 @@ import docdl
     "-t",
     "--timeout",
     type=int,
-    default=15,
+    default=25,
     show_envvar=True,
     help="seconds to wait for data before terminating connection",
     show_default=True

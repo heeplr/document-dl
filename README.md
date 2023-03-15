@@ -97,7 +97,7 @@ Options:
                                   [env var: DOCDL_BROWSER; default: chrome]
   -t, --timeout INTEGER           seconds to wait for data before terminating
                                   connection  [env var: DOCDL_TIMEOUT;
-                                  default: 15]
+                                  default: 25]
   -i, --image-loading BOOLEAN     Turn off image loading when False  [env var:
                                   DOCDL_IMAGE_LOADING; default: False]
   -l, --list                      list documents  [env var: DOCDL_ACTION;
