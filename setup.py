@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='document-dl',
-    version='0.1.1',
+    version='0.2.1',
     description='download documents from web portals',
     long_description=open("README.md").read(),
     url='',
@@ -26,6 +26,7 @@ setup(
     entry_points={
         'docdl_plugins': [
             'amazon=docdl.plugins.amazon:amazon',
+            'believe=docdl.plugins.believe:believe',
             'conrad=docdl.plugins.conrad:conrad',
             'dkb=docdl.plugins.dkb:dkb',
             'elster=docdl.plugins.elster:elster',
