@@ -36,7 +36,9 @@ class BelieveBackstage(docdl.SeleniumWebPortal):
         )
         # wait form to become interactive
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.element_to_be_clickable(username)
+            EC.element_to_be_clickable((
+                By.XPATH, "//input[@id='signInName']"
+            ))
         )
         # move mouse over username input
         ActionChains(self.webdriver) \
