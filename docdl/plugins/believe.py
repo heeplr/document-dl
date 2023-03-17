@@ -34,16 +34,16 @@ class BelieveBackstage(docdl.SeleniumWebPortal):
         password = self.webdriver.find_element(
             By.XPATH, "//input[@id='password']"
         )
-        # move mouse over username input
-        ActionChains(self.webdriver) \
-            .move_to_element(username) \
-            .perform()
         # wait form to become interactive
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
             EC.element_to_be_clickable((
                 By.XPATH, "//input[@id='signInName']"
             ))
         )
+        # move mouse over username input
+        ActionChains(self.webdriver) \
+            .move_to_element(username) \
+            .perform()
         # fill in form
         username.send_keys(self.login_id)
         password.send_keys(self.password)
@@ -70,7 +70,7 @@ class BelieveBackstage(docdl.SeleniumWebPortal):
             ))
         )
         # login successful
-        return self.webdriver.find_element(By.XPATH, "//div[@id='bs-main-header']")
+        return self.webdriver.find_element(By.XPATH, "//*[contains(text(), 'Kundennummer')]")
 
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)
@@ -83,6 +83,7 @@ class BelieveBackstage(docdl.SeleniumWebPortal):
         yield docdl.Document(
             url="https://believebackstage.com/catalog/manager/catalogExport",
             attributes={
+                "id": "catalog",
                 "category": "catalog export"
             }
         )
