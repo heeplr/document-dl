@@ -27,18 +27,18 @@ class BelieveBackstage(docdl.SeleniumWebPortal):
                 By.XPATH, "//input[@id='signInName']"
             ))
         )
+        # wait form to become interactive
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.element_to_be_clickable((
+                By.XPATH, "//input[@id='signInName']"
+            ))
+        )
         # find input fields
         username = self.webdriver.find_element(
             By.XPATH, "//input[@id='signInName']"
         )
         password = self.webdriver.find_element(
             By.XPATH, "//input[@id='password']"
-        )
-        # wait form to become interactive
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.element_to_be_clickable((
-                By.XPATH, "//input[@id='signInName']"
-            ))
         )
         # move mouse over username input
         ActionChains(self.webdriver) \
