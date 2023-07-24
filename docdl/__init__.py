@@ -302,9 +302,8 @@ class SeleniumWebPortal(WebPortal):
             gecko_path = shutil.which("geckodriver")
             # initialize driver
             return webdriver.Firefox(
-                executable_path=gecko_path,
-                firefox_binary=FirefoxBinary(ff_path),
-                firefox_profile=firefox_profile,
+                binary=FirefoxBinary(os.path.join(gecko_path, ff_path)),
+                profile=firefox_profile,
                 options=webdriver_options
             )
 
