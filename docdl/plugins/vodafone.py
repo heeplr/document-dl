@@ -1,6 +1,5 @@
 """download documents from www.vodafone.de"""
 
-import itertools
 import click
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -15,58 +14,34 @@ class Vodafone(docdl.SeleniumWebPortal):
     download documents from https://kabel.vodafone.de
     """
 
-    URL_BASE = "https://kabel.vodafone.de"
-    URL_MYCABLE = f"{URL_BASE}/meinkabel"
-    URL_MY_DOCUMENTS = f"{URL_MYCABLE}/meine_kundendaten/meine_dokumente"
-    URL_INVOICES = f"{URL_MYCABLE}/rechnungen/rechnung"
-    URL_LOGOUT = "https://www.vodafone.de/mint/saml/logout"
+    URL_BASE = "https://www.vodafone.de"
+    URL_MYVODAFONE = f"{URL_BASE}/meinvodafone"
+    URL_LOGIN = f"{URL_MYVODAFONE}/account/login"
+    URL_MY_DOCUMENTS = f"{URL_MYVODAFONE}/services/notifizierung/dokumente"
+    URL_LOGOUT = f"{URL_BASE}/logout"
 
     def login(self):
         """authenticate"""
-        # load main page
-        self.webdriver.get(self.URL_BASE)
-        # wait for cookie banner or login button
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d:
-                d.find_elements(By.CSS_SELECTOR, "div.login-btn") or
-                d.find_elements(By.CSS_SELECTOR, "div.red-btn")
-        )
-        # cookie banner?
-        if cookiebutton := self.webdriver.find_elements(
-            By.CSS_SELECTOR, "div.red-btn"
-        ):
-            # accept
-            cookiebutton[0].click()
-        # press login button to show login form
-        loginbutton = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "div.login-btn"))
-        )
-        loginbutton.click()
-        # clicking two times makes it work in firefox
-        if self.WEBDRIVER == "firefox":
-            loginbutton.click()
+        # load login page
+        self.webdriver.get(self.URL_LOGIN)
         # fill out login form when it appears
-        username = self.webdriver.find_element(
-            By.XPATH, "//input[@name='username']"
+        username = WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.element_to_be_clickable((By.XPATH, "//input[@id='txtUsername']"))
         )
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of(username)
-        )
-        password = self.webdriver.find_element(
-            By.XPATH, "//input[@name='password']"
+        password = WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.element_to_be_clickable((By.XPATH, "//input[@id='txtPassword']"))
         )
         username.send_keys(self.login_id)
         password.send_keys(self.password)
         password.submit()
-        # wait for page to load
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d:
-                d.find_elements(By.CSS_SELECTOR, "a.logout-btn") or
-                d.find_elements(By.CSS_SELECTOR, "div.error")
-        )
-        # if there's a password prompt element found, login failed
+        # wait for page element indicating success or error
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(EC.any_of(
+            EC.presence_of_element_located((By.CSS_SELECTOR, ".contract-info")),
+            EC.element_to_be_clickable((By.XPATH, "//input[@id='txtUsername']"))
+        ))
+        # if there's a logout element found, login was successful
         return len(
-            self.webdriver.find_elements(By.CSS_SELECTOR, "a.logout-btn")
+            self.webdriver.find_elements(By.CSS_SELECTOR, ".contract-info")
         ) != 0
 
     def logout(self):
@@ -75,93 +50,58 @@ class Vodafone(docdl.SeleniumWebPortal):
     def documents(self):
         """fetch list of documents"""
         # chain all document types
-        docs = enumerate(
-            itertools.chain(self.my_documents(), self.invoices())
-        )
+        docs = enumerate(self.invoices())
         for i, document in docs:
             # set an id
             document.attributes['id'] = i
             # return document
             yield document
 
-    def my_documents(self):
-        """iterate "Meine Dokumente"""
+    def invoices(self):
+        """iterate "Rechnungen"""
         # go to documents site
         self.webdriver.get(self.URL_MY_DOCUMENTS)
-        # iterate all document elements
-        for element in self.webdriver.find_elements(
-                By.CSS_SELECTOR, "div.dataTable-row"
+        # wait for documents
+        documents = WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.element_to_be_clickable((By.XPATH, "//ul[contains(@class, 'documents-inbox-container')]"))
+        )
+        # iterate all pages
+        while next_button := WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.element_to_be_clickable((By.XPATH, "//div[@id='pagination']/ol/li[3]/a[1]"))
         ):
-            # 1st cell is date
-            date = element.find_element(By.CSS_SELECTOR, ":nth-child(1)") \
-                .get_attribute("textContent") \
-                .strip()
-            # 2nd cell is topic
-            title = element.find_element(By.CSS_SELECTOR, ":nth-child(2)") \
-                .get_attribute("textContent") \
-                .strip()
-            # 4th cell contains link
-            url = element.find_element(By.CSS_SELECTOR, ":nth-child(4)") \
-                .find_element(By.CSS_SELECTOR, "a") \
-                .get_attribute("href") \
-                .strip()
-            # generate document
-            yield docdl.Document(
-                url=url,
-                attributes={
-                    'title': title,
-                    'date': docdl.util.parse_date(date),
-                    'category': "postbox"
-                }
-            )
-
-    def invoices(self):
-        """iterate invoices"""
-        # go to bills overview
-        self.webdriver.get(self.URL_INVOICES)
-        for table in self.webdriver.find_elements(
-            By.CSS_SELECTOR, "div.dataTable"
-        ):
-            rows = table.find_elements(By.CSS_SELECTOR, "div.dataTable-row")
-            for i, element in enumerate(rows):
-                # first row is a title row, skip it
-                if i == 0:
-                    continue
-                cells = element.find_elements(By.XPATH, ".//div")
-                # skip empty rows
-                if len(cells) < 2:
-                    continue
-                # get type
-                doctype = cells[0] \
-                    .get_attribute("title") \
-                    .strip()
+            # iterate all document elements
+            for element in documents.find_elements(
+                    By.CSS_SELECTOR, "li"
+            ):
                 # get date
-                date = cells[1] \
+                date = element.find_element(By.XPATH, ".//*[@automation-id='documentsInboxes_date_tv']") \
                     .get_attribute("textContent") \
                     .strip()
                 # get title
-                title = cells[2] \
+                title = element.find_element(By.XPATH, ".//*[@automation-id='documentsInboxes_type_tv']") \
                     .get_attribute("textContent") \
                     .strip()
-                # get url
-                url = cells[5] \
-                    .find_element(By.CSS_SELECTOR, "a") \
-                    .get_attribute("href") \
-                    .strip()
+                # get download link
+                dl_button = element.find_element(By.XPATH, ".//*[@automation-id='documentsInboxes_download_btn']")
                 # generate document
                 yield docdl.Document(
-                    url=url,
+                    download_element=dl_button,
                     attributes={
-                        'type': doctype,
                         'title': title,
                         'date': docdl.util.parse_date(date),
                         'category': "invoice"
                     }
                 )
+            # last page?
+            if "inactive" in next_button.get_attribute("class"):
+                # exit
+                break
+            # go to next page
+            next_button.click()
 
 
 @click.command()
 @click.pass_context
 def vodafone(ctx):
-    """kabel.vodafone.de (postbox, invoices)"""
+    """www.vodafone.de (invoices)"""
     docdl.cli.run(ctx, Vodafone)
