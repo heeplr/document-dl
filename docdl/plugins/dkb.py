@@ -21,9 +21,8 @@ class DKB(docdl.SeleniumWebPortal):
 
     def __init__(self, login_id, password, useragent=None, arguments=None):
         """use custom init to force image loading (for photoTAN)"""
-        if arguments and \
-           "load_images" in arguments and not arguments['load_images']:
-            arguments['load_images'] = True
+        if arguments and "load_images" in arguments and not arguments["load_images"]:
+            arguments["load_images"] = True
         super().__init__(login_id, password, useragent, arguments)
 
     def login(self):
@@ -31,13 +30,8 @@ class DKB(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_LOGIN)
         # wait for username entry
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d:
-                d.find_elements(
-                    By.XPATH, "//input[@id='loginInputSelector']"
-                ) or
-                d.find_elements(
-                    By.XPATH, "//button[contains(text(), 'annehmen')]"
-                )
+            lambda d: d.find_elements(By.XPATH, "//input[@id='loginInputSelector']")
+            or d.find_elements(By.XPATH, "//button[contains(text(), 'annehmen')]")
         )
         # cookiebanner?
         if cookiebutton := self.webdriver.find_elements(
@@ -58,11 +52,14 @@ class DKB(docdl.SeleniumWebPortal):
         password.submit()
         # wait for photoTAN or "confirm with TAN" button
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH, "//img[@alt='QR-Code'] | "
-                          "//button[@id='next'] | "
-                          "//div[contains(@class, 'errorMessage')]"
-            ))
+            EC.visibility_of_element_located(
+                (
+                    By.XPATH,
+                    "//img[@alt='QR-Code'] | "
+                    "//button[@id='next'] | "
+                    "//div[contains(@class, 'errorMessage')]",
+                )
+            )
         )
         # wrong password?
         if self.webdriver.find_elements(
@@ -72,42 +69,36 @@ class DKB(docdl.SeleniumWebPortal):
             return False
         # sometimes QR code is not displayed instantly but one has
         # to press the next-button first
-        if not (qrcode := self.webdriver.find_elements(
-            By.XPATH, "//img[@alt='QR-Code']"
-        )):
-            nextbutton = self.webdriver.find_element(
-                By.XPATH, "//button[@id='next']"
-            )
+        if not (
+            qrcode := self.webdriver.find_elements(By.XPATH, "//img[@alt='QR-Code']")
+        ):
+            nextbutton = self.webdriver.find_element(By.XPATH, "//button[@id='next']")
             nextbutton.click()
             # get qrcode
             qrcode = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-                EC.visibility_of_element_located((
-                    By.XPATH, "//img[@alt='QR-Code']"
-                ))
+                EC.visibility_of_element_located((By.XPATH, "//img[@alt='QR-Code']"))
             )
         # got qrcode
         else:
             qrcode = qrcode[0]
         # wait for QR code to be fully loaded
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of(qrcode)
-        )
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(EC.visibility_of(qrcode))
         # save current url
         current_url = self.webdriver.current_url
         # startcode
-        startcode = self.webdriver.find_element(
-            By.XPATH, "//b[contains(text(), 'Startcode')]"
-        ).get_attribute("textContent").strip()
+        startcode = (
+            self.webdriver.find_element(By.XPATH, "//b[contains(text(), 'Startcode')]")
+            .get_attribute("textContent")
+            .strip()
+        )
         startcode = re.match(r"[^\d]*(\d+)[^\d]*", startcode)[1]
         # tan entry
-        tan = self.webdriver.find_element(
-            By.XPATH, "//input[@id='tanInputSelector']"
-        )
+        tan = self.webdriver.find_element(By.XPATH, "//input[@id='tanInputSelector']")
         # treat QR code as captcha
         print(
             f"Überprüfen Sie den Startcode {startcode} "
             f"bestätigen Sie mit der Taste OK.",
-            file=sys.stderr
+            file=sys.stderr,
         )
         self.captcha(qrcode, tan, prompt="please enter chipTAN: ")
         tan.submit()
@@ -115,9 +106,9 @@ class DKB(docdl.SeleniumWebPortal):
         self.wait_for_urlchange(current_url)
         # wait for logout button
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: "financialstatus" in d.current_url or
-                      "LoginWithTan" in d.current_url or
-                      d.current_url.endswith("banking")
+            lambda d: "financialstatus" in d.current_url
+            or "LoginWithTan" in d.current_url
+            or d.current_url.endswith("banking")
         )
         # login successful?
         return "financialstatus" in self.webdriver.current_url
@@ -128,17 +119,16 @@ class DKB(docdl.SeleniumWebPortal):
     def documents(self):
         for i, document in enumerate(itertools.chain(self._inbox())):
             # set an id
-            document.attributes['id'] = i
+            document.attributes["id"] = i
             # return document
             yield document
 
     # ~ def accounts_csv(self):
-        # ~ """get transactions of each account as csv"""
-        # ~ # @todo
-        # ~ pass
+    # ~ """get transactions of each account as csv"""
+    # ~ # @todo
+    # ~ pass
 
     def _inbox(self):
-
         def get_catlinks(table):
             """get links of all categories and return them as list of tuples"""
             catlinks = []
@@ -158,9 +148,9 @@ class DKB(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_INBOX)
         # wait for table
         table = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH, "//table[@id='welcomeMboTable']"
-            ))
+            EC.visibility_of_element_located(
+                (By.XPATH, "//table[@id='welcomeMboTable']")
+            )
         )
         # iterate all category rows and collect links to categories
         catlinks = get_catlinks(table)
@@ -179,9 +169,11 @@ class DKB(docdl.SeleniumWebPortal):
                     unread = "mbo-messageState-read" not in classes
 
                     # get date
-                    date = row.find_element(
-                        By.CSS_SELECTOR, "div.show-for-small-down"
-                    ).get_attribute("textContent").strip()
+                    date = (
+                        row.find_element(By.CSS_SELECTOR, "div.show-for-small-down")
+                        .get_attribute("textContent")
+                        .strip()
+                    )
 
                     # get link to document
                     link = row.find_element(
@@ -196,8 +188,8 @@ class DKB(docdl.SeleniumWebPortal):
                             "date": docdl.util.parse_date(date),
                             "category": category,
                             "subject": topic,
-                            "unread": unread
-                        }
+                            "unread": unread,
+                        },
                     )
 
                 # is there a next-button for pagination?
@@ -218,9 +210,9 @@ class DKB(docdl.SeleniumWebPortal):
             self.webdriver.get(nextbutton.get_attribute("href"))
             # wait for new folderview
             WebDriverWait(self.webdriver, self.TIMEOUT).until(
-                EC.visibility_of_element_located((
-                    By.CSS_SELECTOR, "table.expandableTable tbody"
-                ))
+                EC.visibility_of_element_located(
+                    (By.CSS_SELECTOR, "table.expandableTable tbody")
+                )
             )
             return True
         return False

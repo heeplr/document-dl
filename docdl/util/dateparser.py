@@ -11,6 +11,7 @@ class DateEncoder(json.JSONEncoder):
     custom json encoder that converts datetime
     objects to ISO format string
     """
+
     def default(self, o):
         # treat datetime objects specially
         if isinstance(o, datetime.datetime):
@@ -43,12 +44,12 @@ def check_for_keywords(date):
 # pylint: disable=R0911,R0912,R0915
 def parse(date, date_format=None):
     """convert input to datetime object
-       :param date: either datetime string or datetime object
-       :param date_format: datetime.strptime() format string.
-                           If none is given, fuzzy matching will be used
-                           to parse the date
-       :result: datetime object or input date upon parsing failure
-       @todo: handle timezone"""
+    :param date: either datetime string or datetime object
+    :param date_format: datetime.strptime() format string.
+                        If none is given, fuzzy matching will be used
+                        to parse the date
+    :result: datetime object or input date upon parsing failure
+    @todo: handle timezone"""
     # remember input
     input_date = date
     # got nothing?
@@ -71,7 +72,7 @@ def parse(date, date_format=None):
         # replace month names
         date = replace_months(date)
         # remove whitespace before and after .
-        date = re.sub(r'\s*\.\s', '.', date)
+        date = re.sub(r"\s*\.\s", ".", date)
         # check for keywords
         if result := check_for_keywords(date):
             return result

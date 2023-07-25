@@ -23,54 +23,44 @@ class BelieveBackstage(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_ROOT)
         # wait for page to load
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH, "//input[@id='signInName']"
-            ))
+            EC.visibility_of_element_located((By.XPATH, "//input[@id='signInName']"))
         )
         # wait form to become interactive
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.element_to_be_clickable((
-                By.XPATH, "//input[@id='signInName']"
-            ))
+            EC.element_to_be_clickable((By.XPATH, "//input[@id='signInName']"))
         )
         # find input fields
-        username = self.webdriver.find_element(
-            By.XPATH, "//input[@id='signInName']"
-        )
-        password = self.webdriver.find_element(
-            By.XPATH, "//input[@id='password']"
-        )
+        username = self.webdriver.find_element(By.XPATH, "//input[@id='signInName']")
+        password = self.webdriver.find_element(By.XPATH, "//input[@id='password']")
         # move mouse over username input
-        ActionChains(self.webdriver) \
-            .move_to_element(username) \
-            .perform()
+        ActionChains(self.webdriver).move_to_element(username).perform()
         # fill in form
         username.send_keys(self.login_id)
         password.send_keys(self.password)
 
         # click login button
-        loginbutton = self.webdriver.find_element(
-            By.XPATH, "//button[@id='next']"
-        )
+        loginbutton = self.webdriver.find_element(By.XPATH, "//button[@id='next']")
         # move mouse over login button
-        ActionChains(self.webdriver) \
-            .move_to_element(loginbutton) \
-            .perform()
+        ActionChains(self.webdriver).move_to_element(loginbutton).perform()
         password.submit()
         loginbutton.click()
         loginbutton.click()
 
         # wait for either login error message box or success message
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH,
-                "//p[contains(text(),'The username or password provided "
-                "in the request are invalid')] | "
-                "//*[contains(text(), 'Kundennummer')]"
-            ))
+            EC.visibility_of_element_located(
+                (
+                    By.XPATH,
+                    "//p[contains(text(),'The username or password provided "
+                    "in the request are invalid')] | "
+                    "//*[contains(text(), 'Kundennummer')]",
+                )
+            )
         )
         # login successful
-        return self.webdriver.find_element(By.XPATH, "//*[contains(text(), 'Kundennummer')]")
+        return self.webdriver.find_element(
+            By.XPATH, "//*[contains(text(), 'Kundennummer')]"
+        )
 
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)
@@ -82,10 +72,7 @@ class BelieveBackstage(docdl.SeleniumWebPortal):
         """catalog CSV export"""
         yield docdl.Document(
             url="https://believebackstage.com/catalog/manager/catalogExport",
-            attributes={
-                "id": "catalog",
-                "category": "catalog export"
-            }
+            attributes={"id": "catalog", "category": "catalog export"},
         )
 
     def financial_reports(self):
@@ -94,9 +81,12 @@ class BelieveBackstage(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_REPORTS)
         # wait for modal
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH, "//div[contains(@class,'modal-footer')]/a[@data-dismiss='modal']"
-            ))
+            EC.visibility_of_element_located(
+                (
+                    By.XPATH,
+                    "//div[contains(@class,'modal-footer')]/a[@data-dismiss='modal']",
+                )
+            )
         )
         # close modal
         closebutton = self.webdriver.find_element(
@@ -106,37 +96,39 @@ class BelieveBackstage(docdl.SeleniumWebPortal):
             closebutton.click()
         # wait for a download button
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH, "//a[contains(@class, 'fa-download')]"
-            ))
+            EC.visibility_of_element_located(
+                (By.XPATH, "//a[contains(@class, 'fa-download')]")
+            )
         )
 
         # walk all pages
         while True:
             # get table
-            tbody = self.webdriver\
-                .find_element(By.XPATH, "//table[contains(@class,'table')]") \
-                .find_element(By.XPATH, ".//tbody")
+            tbody = self.webdriver.find_element(
+                By.XPATH, "//table[contains(@class,'table')]"
+            ).find_element(By.XPATH, ".//tbody")
             # iterate all rows
             for row in tbody.find_elements(By.XPATH, ".//tr"):
                 elements = list(row.find_elements(By.XPATH, ".//td"))
                 ident = elements[0].text
                 report_type = elements[1].text
                 amount = elements[2].text
-                date = elements[3].text.replace('\n', ' ')
-                url = elements[5].find_element(
-                    By.XPATH, ".//a[contains(@class, 'fa-download')]"
-                ).get_attribute("href")
+                date = elements[3].text.replace("\n", " ")
+                url = (
+                    elements[5]
+                    .find_element(By.XPATH, ".//a[contains(@class, 'fa-download')]")
+                    .get_attribute("href")
+                )
 
                 yield docdl.Document(
-                        url=url,
-                        attributes={
-                            'date': docdl.util.parse_date(date),
-                            'category': report_type,
-                            'id': ident,
-                            'amount': amount
-                        }
-                    )
+                    url=url,
+                    attributes={
+                        "date": docdl.util.parse_date(date),
+                        "category": report_type,
+                        "id": ident,
+                        "amount": amount,
+                    },
+                )
 
             # next page
             pagination = self.webdriver.find_element(

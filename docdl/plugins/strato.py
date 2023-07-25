@@ -20,9 +20,7 @@ class Strato(docdl.SeleniumWebPortal):
         self.webdriver.get("https://www.strato.de/apps/CustomerService")
         # accept cookies
         accept_cookies = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located(
-                (By.XPATH, "//button[@id='consentAgree']")
-            )
+            EC.visibility_of_element_located((By.XPATH, "//button[@id='consentAgree']"))
         )
         accept_cookies.click()
         # find fields
@@ -32,9 +30,7 @@ class Strato(docdl.SeleniumWebPortal):
             )
         )
         password = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, "input#jss_ksb_password")
-            )
+            EC.presence_of_element_located((By.CSS_SELECTOR, "input#jss_ksb_password"))
         )
         # enter credentials
         username.send_keys(self.login_id)
@@ -42,18 +38,18 @@ class Strato(docdl.SeleniumWebPortal):
 
         # submit form
         submit = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located(
-                (By.XPATH, "//input[@type='submit']")
-            )
+            EC.presence_of_element_located((By.XPATH, "//input[@type='submit']"))
         )
         submit.click()
         # wait for either login success or failure
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located((
-                By.XPATH,
-                "//p[contains(@class,'err-login')] | "
-                "//*[contains(text(), 'Service-PIN')]"
-            ))
+            EC.presence_of_element_located(
+                (
+                    By.XPATH,
+                    "//p[contains(@class,'err-login')] | "
+                    "//*[contains(text(), 'Service-PIN')]",
+                )
+            )
         )
         # login successful
         return re.match(r".*(Ü|ü)bersicht.*", self.webdriver.title)
@@ -86,9 +82,7 @@ class Strato(docdl.SeleniumWebPortal):
                 )
             )
             # iterate all invoices
-            for invoice in invoice_table.find_elements(
-                By.XPATH, ".//tr"
-            ):
+            for invoice in invoice_table.find_elements(By.XPATH, ".//tr"):
                 # hidden row ?
                 if "hidden" in invoice.get_attribute("class"):
                     # skip
@@ -99,37 +93,30 @@ class Strato(docdl.SeleniumWebPortal):
                     # skip
                     continue
                 # get attributes
-                date = columns[1] \
-                    .get_attribute("data-sortvalue") \
-                    .strip()
-                status = columns[2] \
-                    .get_attribute("textContent") \
-                    .lower() \
-                    .strip()
+                date = columns[1].get_attribute("data-sortvalue").strip()
+                status = columns[2].get_attribute("textContent").lower().strip()
                 invoice_link = columns[3].find_element(
                     By.XPATH, ".//a[contains(@href,'action=pdf')]"
                 )
-                title = invoice_link \
-                    .get_attribute("textContent") \
+                title = invoice_link.get_attribute("textContent").strip()
+                amount = (
+                    columns[4]
+                    .find_element(By.XPATH, ".//span[@class='jss_price']")
+                    .get_attribute("textContent")
                     .strip()
-                amount = columns[4].find_element(
-                        By.XPATH,
-                        ".//span[@class='jss_price']"
-                    ) \
-                    .get_attribute("textContent") \
-                    .strip()
+                )
 
                 # create document
                 yield docdl.Document(
                     download_element=invoice_link,
                     attributes={
-                        'date': docdl.util.parse_date(date),
-                        'doctype': 'invoice',
-                        'status': status,
-                        'amount': amount,
-                        'id': i,
-                        'filename': f"strato-{title}.pdf"
-                    }
+                        "date": docdl.util.parse_date(date),
+                        "doctype": "invoice",
+                        "status": status,
+                        "amount": amount,
+                        "id": i,
+                        "filename": f"strato-{title}.pdf",
+                    },
                 )
                 # increment counter
                 i += 1

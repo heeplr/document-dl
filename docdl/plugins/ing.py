@@ -25,7 +25,7 @@ class ING(docdl.SeleniumWebPortal):
             password=password,
             arguments=arguments,
             useragent="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) "
-                      "Gecko/20100101 Firefox/91.0"
+            "Gecko/20100101 Firefox/91.0",
         )
 
     def login(self):
@@ -33,12 +33,12 @@ class ING(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_LOGIN)
         # wait for cookie accept button
         dialog = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH, ".//*[@data-tag-name='ing-cc-dialog-level0']"
-            ))
+            EC.visibility_of_element_located(
+                (By.XPATH, ".//*[@data-tag-name='ing-cc-dialog-level0']")
+            )
         )
         cookie_button = dialog.shadow_root.find_element(
-            By.CSS_SELECTOR, '.cc-l0__button__more'
+            By.CSS_SELECTOR, ".cc-l0__button__more"
         )
         cookie_button.click()
         # sign in
@@ -57,32 +57,23 @@ class ING(docdl.SeleniumWebPortal):
 
         # wait for banking key keypad or photoTAN
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d:
-                d.find_elements(
-                    By.CSS_SELECTOR, "img.thumbnail__image"
-                ) or
-                d.find_elements(
-                    By.CSS_SELECTOR, "div.diba-keypad"
-                ) or
-                d.find_elements(
-                    By.CSS_SELECTOR, "div.notification--warning"
-                ) or
-                d.find_elements(
-                    By.CSS_SELECTOR, "small.form-group__error"
-                )
+            lambda d: d.find_elements(By.CSS_SELECTOR, "img.thumbnail__image")
+            or d.find_elements(By.CSS_SELECTOR, "div.diba-keypad")
+            or d.find_elements(By.CSS_SELECTOR, "div.notification--warning")
+            or d.find_elements(By.CSS_SELECTOR, "small.form-group__error")
         )
         # get DiBa Key digits
         if digits := self.webdriver.find_elements(
             By.XPATH,
             "//div[contains(@class, 'diba-keypad')]/"
             "div[contains(@class, 'notification')]/"
-            "p[@role='heading']/b/span"
+            "p[@role='heading']/b/span",
         ):
             # get requested digits from html
-            digits = [e.get_attribute('textContent').strip() for e in digits]
+            digits = [e.get_attribute("textContent").strip() for e in digits]
             # click numbers on keypad
             for digit in digits:
-                number = self.arguments['diba_key'][int(digit)-1]
+                number = self.arguments["diba_key"][int(digit) - 1]
                 self.webdriver.find_element("link text", number).click()
             # get "next" button
             nextbutton = self.webdriver.find_element(
@@ -91,16 +82,9 @@ class ING(docdl.SeleniumWebPortal):
             nextbutton.click()
             # wait for photoTAN or error
             WebDriverWait(self.webdriver, self.TIMEOUT).until(
-                lambda d:
-                    d.find_elements(
-                        By.CSS_SELECTOR, "img.thumbnail__image"
-                    ) or
-                    d.find_elements(
-                        By.CSS_SELECTOR, "div.notification--warning"
-                    ) or
-                    d.find_elements(
-                        By.CSS_SELECTOR, "small.form-group__error"
-                    )
+                lambda d: d.find_elements(By.CSS_SELECTOR, "img.thumbnail__image")
+                or d.find_elements(By.CSS_SELECTOR, "div.notification--warning")
+                or d.find_elements(By.CSS_SELECTOR, "small.form-group__error")
             )
 
         # handle photoTAN
@@ -121,21 +105,12 @@ class ING(docdl.SeleniumWebPortal):
         # wait for logout button (success) or tan input (failure) or
         # some ad modal (success)
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d:
-                d.find_elements(
-                    By.XPATH, "//button[@aria-label='Logout']"
-                ) or
-                d.find_elements(
-                    By.CSS_SELECTOR, "input.input-field"
-                ) or
-                d.find_elements(
-                    By.CSS_SELECTOR, "section.insight-modal"
-                )
+            lambda d: d.find_elements(By.XPATH, "//button[@aria-label='Logout']")
+            or d.find_elements(By.CSS_SELECTOR, "input.input-field")
+            or d.find_elements(By.CSS_SELECTOR, "section.insight-modal")
         )
         # login successful ?
-        return self.webdriver.find_elements(
-            By.XPATH, "//button[@aria-label='Logout']"
-        )
+        return self.webdriver.find_elements(By.XPATH, "//button[@aria-label='Logout']")
 
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)
@@ -145,7 +120,7 @@ class ING(docdl.SeleniumWebPortal):
         docs = itertools.chain(self.postbox(), self.csv())
         for i, document in enumerate(docs):
             # set an id
-            document.attributes['id'] = i
+            document.attributes["id"] = i
             # return document
             yield document
 
@@ -154,9 +129,9 @@ class ING(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_TRANSACTIONS)
         # open filter menu
         filterbutton = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH, "//button[contains(@class, 'filters')]"
-            ))
+            EC.visibility_of_element_located(
+                (By.XPATH, "//button[contains(@class, 'filters')]")
+            )
         )
         filterbutton.click()
         # find button to select whole year
@@ -174,16 +149,16 @@ class ING(docdl.SeleniumWebPortal):
         self.scroll_to_bottom()
         # wait for export button
         exportbutton = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located((
-                By.XPATH, "//a[contains(text(),'Exportieren')]"
-            ))
+            EC.presence_of_element_located(
+                (By.XPATH, "//a[contains(text(),'Exportieren')]")
+            )
         )
         exportbutton.click()
         # wait for CSV radio button
         csvspan = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH, "//span[contains(text(),'CSV')]"
-            ))
+            EC.visibility_of_element_located(
+                (By.XPATH, "//span[contains(text(),'CSV')]")
+            )
         )
         # select CSV format
         csvspan.click()
@@ -195,8 +170,8 @@ class ING(docdl.SeleniumWebPortal):
         yield docdl.Document(
             download_element=downloadbutton,
             attributes={
-                'category': "csv_export",
-            }
+                "category": "csv_export",
+            },
         )
 
     def postbox(self):
@@ -205,14 +180,10 @@ class ING(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_POSTBOX)
         # wait for table
         table = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.CSS_SELECTOR, "div.ibbr-table"
-            ))
+            EC.visibility_of_element_located((By.CSS_SELECTOR, "div.ibbr-table"))
         )
         # iterate rows
-        for row in table.find_elements(
-            By.CSS_SELECTOR, "div.ibbr-table-row"
-        ):
+        for row in table.find_elements(By.CSS_SELECTOR, "div.ibbr-table-row"):
             # the next spans contain our document data
             cell = row.find_element(
                 By.XPATH, ".//span[contains(@class,'ibbr-table-cell')]"
@@ -228,19 +199,17 @@ class ING(docdl.SeleniumWebPortal):
             # subject
             subject = spans[3].get_attribute("textContent").strip()
             # download button
-            download = row.find_element(
-                By.XPATH, ".//a[contains(text(),'Download')]"
-            )
+            download = row.find_element(By.XPATH, ".//a[contains(text(),'Download')]")
             url = download.get_attribute("href")
             # create document
             yield docdl.Document(
                 url=url,
                 attributes={
-                    'date': docdl.util.parse_date(date),
-                    'category': category,
-                    'subject': subject,
-                    'unread': unread
-                }
+                    "date": docdl.util.parse_date(date),
+                    "category": category,
+                    "subject": subject,
+                    "unread": unread,
+                },
             )
 
 
@@ -252,7 +221,7 @@ class ING(docdl.SeleniumWebPortal):
     hide_input=True,
     envvar="DOCDL_DIBA_KEY",
     show_envvar=True,
-    help="DiBa Key"
+    help="DiBa Key",
 )
 @click.pass_context
 # pylint: disable=W0613

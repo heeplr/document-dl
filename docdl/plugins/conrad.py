@@ -12,6 +12,7 @@ import docdl.util
 
 class Conrad(docdl.SeleniumWebPortal):
     """download documents from conrad.de"""
+
     URL_LOGIN = "https://www.conrad.de/de/account.html"
     URL_LOGOUT = "https://api.conrad.de/session/1/logout"
     URL_INVOICES = "https://www.conrad.de/de/account.html#/invoices"
@@ -21,14 +22,10 @@ class Conrad(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_LOGIN)
         # find fields
         username = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, "input#username")
-            )
+            EC.presence_of_element_located((By.CSS_SELECTOR, "input#username"))
         )
         password = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located(
-                (By.CSS_SELECTOR, "input#password")
-            )
+            EC.presence_of_element_located((By.CSS_SELECTOR, "input#password"))
         )
         # enter credentials
         username.send_keys(self.login_id)
@@ -41,8 +38,7 @@ class Conrad(docdl.SeleniumWebPortal):
         current_url = self.wait_for_urlchange(current_url)
         # wait for either login success or failure
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: "Mein Konto" in d.title or
-                      "Conrad" in d.title
+            lambda d: "Mein Konto" in d.title or "Conrad" in d.title
         )
         # Login failed
         if "Conrad" in self.webdriver.title:
@@ -62,9 +58,7 @@ class Conrad(docdl.SeleniumWebPortal):
     def documents(self):
         # wait for loader icon to disappear
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.invisibility_of_element_located(
-                (By.CSS_SELECTOR, "div.vld-icon")
-            )
+            EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.vld-icon"))
         )
         # load list of invoices
         self.webdriver.get(self.URL_INVOICES)
@@ -79,41 +73,43 @@ class Conrad(docdl.SeleniumWebPortal):
         time_period_select.select_by_visible_text("Alle Rechnungen")
         # wait for loader icon to disappear
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.invisibility_of_element_located(
-                (By.CSS_SELECTOR, "div.vld-icon")
-            )
+            EC.invisibility_of_element_located((By.CSS_SELECTOR, "div.vld-icon"))
         )
         # iterate all invoices
-        for i, invoice in enumerate(self.webdriver.find_elements(
-            By.XPATH, "//a[@data-e2e='invoiceList-item']"
-        )):
+        for i, invoice in enumerate(
+            self.webdriver.find_elements(By.XPATH, "//a[@data-e2e='invoiceList-item']")
+        ):
             # get attributes
-            title = invoice.find_element(
-                    By.XPATH,
-                    ".//div[@data-e2e='invoiceListItem-title']"
-                ) \
-                .get_attribute("textContent") \
+            title = (
+                invoice.find_element(
+                    By.XPATH, ".//div[@data-e2e='invoiceListItem-title']"
+                )
+                .get_attribute("textContent")
                 .strip()
+            )
             date = re.match(r".*(\d{2}\.\d{2}\.\d{4})", title)[1]
-            number = invoice.find_element(
-                    By.XPATH,
-                    ".//div[@data-e2e='invoiceListItem-invoiceNumber']"
-                ) \
-                .get_attribute("textContent") \
+            number = (
+                invoice.find_element(
+                    By.XPATH, ".//div[@data-e2e='invoiceListItem-invoiceNumber']"
+                )
+                .get_attribute("textContent")
                 .strip()
-            doctype = invoice.find_element(
-                    By.XPATH,
-                    ".//div[@data-e2e='invoiceListItem-type']"
-                ) \
-                .get_attribute("textContent") \
-                .strip() \
+            )
+            doctype = (
+                invoice.find_element(
+                    By.XPATH, ".//div[@data-e2e='invoiceListItem-type']"
+                )
+                .get_attribute("textContent")
+                .strip()
                 .lower()
-            amount = invoice.find_element(
-                    By.XPATH,
-                    ".//div[@data-e2e='invoiceListItem-amount']"
-                ) \
-                .get_attribute("textContent") \
+            )
+            amount = (
+                invoice.find_element(
+                    By.XPATH, ".//div[@data-e2e='invoiceListItem-amount']"
+                )
+                .get_attribute("textContent")
                 .strip()
+            )
             # strip currency symbol
             amount = re.match(r"[^\d]*(\d+,\d+).*", amount)[1]
             # create filename
@@ -122,14 +118,14 @@ class Conrad(docdl.SeleniumWebPortal):
             yield docdl.Document(
                 download_element=invoice,
                 attributes={
-                    'date': docdl.util.parse_date(date),
-                    'number': number,
-                    'doctype': doctype,
-                    'amount': amount,
-                    'id': i,
-                    'filename': filename,
-                    'category': 'invoice'
-                }
+                    "date": docdl.util.parse_date(date),
+                    "number": number,
+                    "doctype": doctype,
+                    "amount": amount,
+                    "id": i,
+                    "filename": filename,
+                    "category": "invoice",
+                },
             )
 
 

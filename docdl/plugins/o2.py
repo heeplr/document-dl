@@ -12,6 +12,7 @@ import docdl.util
 
 class O2(docdl.SeleniumWebPortal):
     """download documents from o2online.de"""
+
     URL_BASE = "https://www.o2online.de"
     URL_BILLING = f"{URL_BASE}/vt-billing/api"
     URL_LOGIN = "https://login.o2online.de/auth/login"
@@ -27,14 +28,9 @@ class O2(docdl.SeleniumWebPortal):
         """authenticate"""
         self.webdriver.get(self.URL_LOGIN)
         # find entry field
-        username = self.webdriver.find_element(
-            By.XPATH,
-            "//input[@name='IDToken1']"
-        )
+        username = self.webdriver.find_element(By.XPATH, "//input[@name='IDToken1']")
         # wait for entry field
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of(username)
-        )
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(EC.visibility_of(username))
         # send username
         username.send_keys(self.login_id)
         # save current URL
@@ -43,21 +39,20 @@ class O2(docdl.SeleniumWebPortal):
         username.submit()
         # wait for either password prompt or failure message
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located((
-                By.XPATH,
-                "//input[contains(@type, 'password')] | "
-                "//div[contains(@data-test-id, 'unified-login-error')]"
-            ))
+            EC.presence_of_element_located(
+                (
+                    By.XPATH,
+                    "//input[contains(@type, 'password')] | "
+                    "//div[contains(@data-test-id, 'unified-login-error')]",
+                )
+            )
         )
         # find entry field
         password = self.webdriver.find_element(
-            By.XPATH,
-            "//input[contains(@type, 'password')]"
+            By.XPATH, "//input[contains(@type, 'password')]"
         )
         # wait for entry field
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of(password)
-        )
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(EC.visibility_of(password))
         # send password
         password.send_keys(self.password)
         # submit form
@@ -66,38 +61,36 @@ class O2(docdl.SeleniumWebPortal):
         current_url = self.wait_for_urlchange(current_url)
         # wait for cookie-banner container
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located((
-                By.XPATH,
-                "//div[@id='usercentrics-root'] | "
-                "//div[contains(@data-test-id, 'unified-login-error')]"
-            ))
+            EC.presence_of_element_located(
+                (
+                    By.XPATH,
+                    "//div[@id='usercentrics-root'] | "
+                    "//div[contains(@data-test-id, 'unified-login-error')]",
+                )
+            )
         )
         # get cookie-banner container
         if container := self.webdriver.find_element(
             By.XPATH, "//div[@id='usercentrics-root']"
         ):
             # get inside DOM element so we can use XPATH
-            container = container.shadow_root.find_element(
-                By.CSS_SELECTOR, 'section'
-            )
+            container = container.shadow_root.find_element(By.CSS_SELECTOR, "section")
 
             # wait for cookie banner
             WebDriverWait(container, self.TIMEOUT).until(
-                EC.visibility_of_element_located((
-                    By.XPATH, ".//button[contains(text(), 'Verweigern')]"
-                ))
+                EC.visibility_of_element_located(
+                    (By.XPATH, ".//button[contains(text(), 'Verweigern')]")
+                )
             )
             # click "reject" button if there is one
             button = container.find_element(
-                By.XPATH,
-                ".//button[contains(text(), 'Verweigern')]"
+                By.XPATH, ".//button[contains(text(), 'Verweigern')]"
             )
             button.click()
 
         # click "close" button if there is one
         closebutton = self.webdriver.find_elements(
-            By.XPATH,
-            "//button[contains(text(), 'Schließen')]"
+            By.XPATH, "//button[contains(text(), 'Schließen')]"
         )
         if closebutton:
             closebutton.click()
@@ -116,7 +109,7 @@ class O2(docdl.SeleniumWebPortal):
             itertools.chain(self.invoices(), self.invoice_overview())
         ):
             # set an id
-            document.attributes['id'] = i
+            document.attributes["id"] = i
             # return document
             yield document
 
@@ -127,17 +120,17 @@ class O2(docdl.SeleniumWebPortal):
         req = self.session.get(self.URL_INVOICE_OVERVIEW)
         assert req.status_code == 200
         invoiceoverview = req.json()
-        years = invoiceoverview['invoices'].keys()
+        years = invoiceoverview["invoices"].keys()
         for year in years:
             yield docdl.Document(
                 url=f"{self.URL_INVOICE_OVERVIEW}?statementYear={year}",
                 request_headers={"Accept": "application/pdf"},
                 attributes={
-                    'category': "invoice_overview",
-                    'year': year,
-                    'date': docdl.util.parse_date(f"{year}-01-01"),
-                    'filename': f"o2-{year}-rechnungsübersicht.pdf"
-                }
+                    "category": "invoice_overview",
+                    "year": year,
+                    "date": docdl.util.parse_date(f"{year}-01-01"),
+                    "filename": f"o2-{year}-rechnungsübersicht.pdf",
+                },
             )
 
     def invoices(self):
@@ -153,41 +146,41 @@ class O2(docdl.SeleniumWebPortal):
         # load invoice info json
         req = self.session.get(self.URL_INVOICE_INFO)
         for document in self.parse_invoices_json(req.json()):
-            document.attributes['category'] = "invoice"
+            document.attributes["category"] = "invoice"
             yield document
         # fetch value added invoices
         req = self.session.get(self.URL_VALUE_ADDED_INVOICE)
         for document in self.parse_invoices_json(req.json()):
-            document.attributes['category'] = "value_added_invoice"
+            document.attributes["category"] = "value_added_invoice"
             yield document
 
     def parse_invoices_json(self, invoices):
         """parse all documents in invoiceinfo json"""
         # iterate all invoices
-        for invoice in invoices['invoices']:
-            year = invoice['date'][0]
-            month = invoice['date'][1]
-            day = invoice['date'][2]
-            amount = invoice['total']['amount']
+        for invoice in invoices["invoices"]:
+            year = invoice["date"][0]
+            month = invoice["date"][1]
+            day = invoice["date"][2]
+            amount = invoice["total"]["amount"]
             # ~ currency = invoice['total']['currency']
             # collect attributes
             attributes = {
-                'amount': f"{amount}",
-                'date': docdl.util.parse_date(f"{year}-{month}-{day}")
+                "amount": f"{amount}",
+                "date": docdl.util.parse_date(f"{year}-{month}-{day}"),
             }
             # iterate documents in this invoice
-            for document in invoice['billDocuments']:
-                category = document['documentType'].lower()
+            for document in invoice["billDocuments"]:
+                category = document["documentType"].lower()
                 yield docdl.Document(
                     url=f"{self.URL_INVOICE}?"
-                        f"billNumber={document['billNumber']}&"
-                        f"documentType={document['documentType']}",
+                    f"billNumber={document['billNumber']}&"
+                    f"documentType={document['documentType']}",
                     attributes={
                         **attributes,
-                        'number': document['billNumber'],
-                        'category': document['documentType'],
-                        'filename': f"o2-{year}-{month}-{day}-{category}.pdf"
-                    }
+                        "number": document["billNumber"],
+                        "category": document["documentType"],
+                        "filename": f"o2-{year}-{month}-{day}-{category}.pdf",
+                    },
                 )
 
 

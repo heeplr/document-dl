@@ -27,14 +27,13 @@ class DownloadError(Exception):
 
 
 # ---------------------------------------------------------------------
-class WebPortal():
+class WebPortal:
     """base class for service portal to download documents from"""
 
     # default timeout (seconds)
     TIMEOUT = 15
 
-    def __init__(self,
-                 login_id, password, useragent=None, arguments=None):
+    def __init__(self, login_id, password, useragent=None, arguments=None):
         """
         plugins inheriting from WebPortal can use self.session for scraping
 
@@ -53,7 +52,7 @@ class WebPortal():
         self.session = requests.Session()
         # set user agent
         if useragent:
-            self.session.headers['User-Agent'] = useragent
+            self.session.headers["User-Agent"] = useragent
 
     def __enter__(self):
         # login to service
@@ -67,23 +66,17 @@ class WebPortal():
 
     def login(self):
         """authenticate to service"""
-        raise NotImplementedError(
-            f"{ self.__class__} needs a login() method"
-        )
+        raise NotImplementedError(f"{ self.__class__} needs a login() method")
 
     def logout(self):
         """deauthenticate to service"""
-        raise NotImplementedError(
-            f"{ self.__class__} needs a logout() method"
-        )
+        raise NotImplementedError(f"{ self.__class__} needs a logout() method")
 
     def documents(self):
         """
         generator that iterates all available and yields docdl.Documents()
         """
-        raise NotImplementedError(
-            f"{ self.__class__} needs a documents() generator"
-        )
+        raise NotImplementedError(f"{ self.__class__} needs a documents() generator")
 
     def download(self, document):
         """download document url"""
@@ -100,36 +93,33 @@ class WebPortal():
             document.url, stream=True, headers=document.request_headers
         )
         if not req.ok:
-            raise DownloadError(
-                f"\"{document.url}\" status code: {req.status_code}"
-            )
+            raise DownloadError(f'"{document.url}" status code: {req.status_code}')
 
         # filename not already set?
         if "filename" in document.attributes:
-            filename = document.attributes['filename']
+            filename = document.attributes["filename"]
         # get filename from header
-        elif 'content-disposition' in req.headers:
+        elif "content-disposition" in req.headers:
             # @todo properly parse rfc6266
             filename = re.findall(
-                "filename=([^; ]+)[;]?.*",
-                req.headers['content-disposition']
+                "filename=([^; ]+)[;]?.*", req.headers["content-disposition"]
             )[0]
         else:
             filename = None
 
         # protect against empty filenames
         if not filename:
-            if 'title' in document.attributes:
-                filename = document.attributes['title']
-            elif 'id' in document.attributes:
+            if "title" in document.attributes:
+                filename = document.attributes["title"]
+            elif "id" in document.attributes:
                 filename = f"document-dl.{document.attributes['id']}"
             else:
                 raise RuntimeError("no suitable filename")
 
         # massage filename
-        filename = filename.replace('"', '').strip()
+        filename = filename.replace('"', "").strip()
         # save file
-        with open(os.path.join(os.getcwd(), filename), 'wb') as doc:
+        with open(os.path.join(os.getcwd(), filename), "wb") as doc:
             for chunk in req.iter_content(chunk_size=4096):
                 doc.write(chunk)
 
@@ -155,7 +145,7 @@ class SeleniumWebPortal(WebPortal):
 
         # initialize selenium
         webdriver_opts = self._init_webdriver_options()
-        self._init_webdriver(webdriver_opts, arguments['webdriver'])
+        self._init_webdriver(webdriver_opts, arguments["webdriver"])
 
     def __enter__(self):
         super().__enter__()
@@ -197,9 +187,7 @@ class SeleniumWebPortal(WebPortal):
             from selenium.webdriver.webkitgtk.options import Options
 
         else:
-            raise AttributeError(
-                "unknown webdriver: \"{self.WEBDRIVER}\""
-            )
+            raise AttributeError('unknown webdriver: "{self.WEBDRIVER}"')
         return Options()
 
     def _init_webdriver(self, webdriver_options, options):
@@ -210,17 +198,17 @@ class SeleniumWebPortal(WebPortal):
         def _init_chrome():
             # add prefs
             # selenium webdriver specific options
-            if 'headless' in options:
+            if "headless" in options:
                 # set headless mode
-                webdriver_options.headless = options['headless']
-            if 'load_images' in options and options['load_images']:
+                webdriver_options.headless = options["headless"]
+            if "load_images" in options and options["load_images"]:
                 # disable image loading
                 webdriver_options.add_experimental_option(
-                    'prefs',
+                    "prefs",
                     {
-                        'profile.default_content_settings.images': 2,
-                        'profile.managed_default_content_settings.images': 2
-                    }
+                        "profile.default_content_settings.images": 2,
+                        "profile.managed_default_content_settings.images": 2,
+                    },
                 )
             # enable incognito mode
             webdriver_options.add_argument("--incognito")
@@ -232,15 +220,13 @@ class SeleniumWebPortal(WebPortal):
                     "plugins.always_open_pdf_externally": True,
                     # set default download directory to CWD
                     "download.default_directory": os.getcwd(),
-                }
+                },
             )
             # set user agent
             if self.useragent:
-                webdriver_options.add_argument(
-                    f"user-agent='{self.useragent}'"
-                )
+                webdriver_options.add_argument(f"user-agent='{self.useragent}'")
             # enable debugging
-            if 'debug' in options:
+            if "debug" in options:
                 webdriver_options.add_argument("--remote-debugging-port=9222")
             # set preference options & init webdriver
             return webdriver.Chrome(options=webdriver_options)
@@ -252,6 +238,7 @@ class SeleniumWebPortal(WebPortal):
         def _init_firefox():
             # pylint: disable=C0415
             from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+
             # create custom profile
             firefox_profile = webdriver.FirefoxProfile()
             # webdriver.get_cookies() won't work in private browsing mode :(
@@ -261,12 +248,13 @@ class SeleniumWebPortal(WebPortal):
             # ~ )
             # set default download directory to CWD
             firefox_profile.set_preference("browser.download.folderList", 2)
-            firefox_profile.set_preference("browser.download.manager.showWhenStarting", False)
+            firefox_profile.set_preference(
+                "browser.download.manager.showWhenStarting", False
+            )
             firefox_profile.set_preference("browser.download.dir", os.getcwd())
             # save PDFs by default (don't preview)
             firefox_profile.set_preference(
-                "browser.helperApps.neverAsk.saveToDisk",
-                "application/pdf"
+                "browser.helperApps.neverAsk.saveToDisk", "application/pdf"
             )
             firefox_profile.set_preference("pdfjs.disabled", True)
             firefox_profile.set_preference("plugin.scan.Acrobat", "999.0")
@@ -274,16 +262,16 @@ class SeleniumWebPortal(WebPortal):
             # turn off image loading by default
             firefox_profile.set_preference("permissions.default.image", 2)
             # headless mode
-            if 'headless' in options:
+            if "headless" in options:
                 # set headless mode
-                webdriver_options.headless = options['headless']
+                webdriver_options.headless = options["headless"]
             # set user agent
             if self.useragent:
                 firefox_profile.set_preference(
                     "general.useragent.override", self.useragent
                 )
             # find binary
-            if platform.machine() in ['x86_64', 's390x', 'sparc64']:
+            if platform.machine() in ["x86_64", "s390x", "sparc64"]:
                 moz_lib_dir = "/usr/lib64"
                 secondary_lib_dir = "/usr/lib"
             else:
@@ -293,9 +281,7 @@ class SeleniumWebPortal(WebPortal):
             ff_path = f"{moz_lib_dir}/firefox/firefox"
             if not (os.path.isfile(ff_path) and os.access(ff_path, os.X_OK)):
                 ff_path = f"{secondary_lib_dir}/firefox/firefox"
-                if not (
-                    os.path.isfile(ff_path) and os.access(ff_path, os.X_OK)
-                ):
+                if not (os.path.isfile(ff_path) and os.access(ff_path, os.X_OK)):
                     raise RuntimeError(
                         f"firefox binary not found in {moz_lib_dir} "
                         "or {secondary_lib_dir}"
@@ -321,12 +307,12 @@ class SeleniumWebPortal(WebPortal):
 
         # webdriver registry
         webdrivers = {
-            'chrome': _init_chrome,
-            'edge': _init_edge,
-            'firefox': _init_firefox,
-            'ie': _init_ie,
-            'safari': _init_safari,
-            'webkitgtk': _init_webkitgtk
+            "chrome": _init_chrome,
+            "edge": _init_edge,
+            "firefox": _init_firefox,
+            "ie": _init_ie,
+            "safari": _init_safari,
+            "webkitgtk": _init_webkitgtk,
         }
 
         # init webdriver
@@ -336,9 +322,7 @@ class SeleniumWebPortal(WebPortal):
         """
         generator that iterates all available and yields docdl.Documents()
         """
-        raise NotImplementedError(
-            f"{ self.__class__} needs a documents() generator"
-        )
+        raise NotImplementedError(f"{ self.__class__} needs a documents() generator")
 
     def download(self, document):
         """download a document"""
@@ -358,12 +342,12 @@ class SeleniumWebPortal(WebPortal):
 
     def download_with_selenium(self, document):
         """download a file using the selenium webdriver"""
-        class DownloadFileCreatedHandler(
-            watchdog.events.PatternMatchingEventHandler
-        ):
+
+        class DownloadFileCreatedHandler(watchdog.events.PatternMatchingEventHandler):
             """
             directory watchdog to store filename of newly created file
             """
+
             filename = None
 
             def on_created(self, event):
@@ -377,7 +361,7 @@ class SeleniumWebPortal(WebPortal):
         OBSERVER = watchdog.observers.Observer()
         # ignore temporary download files
         handler = DownloadFileCreatedHandler(
-            ignore_patterns=['*.crdownload', '*.part', '.com.google.Chrome.*']
+            ignore_patterns=["*.crdownload", "*.part", ".com.google.Chrome.*"]
         )
         OBSERVER.schedule(handler, os.getcwd(), recursive=False)
 
@@ -399,12 +383,10 @@ class SeleniumWebPortal(WebPortal):
         """copy current selenium session to requests session"""
         # copy cookies
         for cookie in self.webdriver.get_cookies():
-            self.session.cookies.set(cookie['name'], cookie['value'])
+            self.session.cookies.set(cookie["name"], cookie["value"])
         # copy user agent
-        user_agent = self.webdriver.execute_script(
-            "return navigator.userAgent;"
-        )
-        self.session.headers['User-Agent'] = user_agent
+        user_agent = self.webdriver.execute_script("return navigator.userAgent;")
+        self.session.headers["User-Agent"] = user_agent
 
     def copy_from_requests_session(self):
         """copy current requests session to selenium session"""
@@ -418,10 +400,7 @@ class SeleniumWebPortal(WebPortal):
         # save screenshot
         image.screenshot("captcha.png")
         # present image to the user
-        docdl.util.show_image(
-            os.path.join(os.getcwd(), "captcha.png"),
-            "captcha"
-        )
+        docdl.util.show_image(os.path.join(os.getcwd(), "captcha.png"), "captcha")
         # ask for interactive captcha input
         sys.stderr.write(prompt)
         sys.stderr.flush()
@@ -432,30 +411,26 @@ class SeleniumWebPortal(WebPortal):
     def scroll_to_element(self, element):
         """scroll WebElement into center view"""
         self.webdriver.execute_script(
-            "arguments[0].scrollIntoView(true); window.scrollBy(0, -window.innerHeight/2);", element
+            "arguments[0].scrollIntoView(true); window.scrollBy(0, -window.innerHeight/2);",
+            element,
         )
 
     def scroll_to_bottom(self):
         """scroll to bottom of page"""
-        self.webdriver.execute_script(
-            "window.scrollTo(0, document.body.scrollHeight)"
-        )
+        self.webdriver.execute_script("window.scrollTo(0, document.body.scrollHeight)")
 
     def wait_for_urlchange(self, current_url):
         """wait until current URL changes"""
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.url_changes(current_url)
-        )
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(EC.url_changes(current_url))
         # return new url
         return self.webdriver.current_url
 
 
-class Document():
+class Document:
     """a document"""
 
     def __init__(
-        self, url=None, attributes=None, request_headers=None,
-        download_element=None
+        self, url=None, attributes=None, request_headers=None, download_element=None
     ):
         # default custom request headers
         if request_headers is None:
@@ -471,7 +446,7 @@ class Document():
         self.attributes = attributes
 
     def __repr__(self):
-        return f"class {self.__class__.__name__}(url=\"{self.url}\", attributes={self.attributes})"
+        return f'class {self.__class__.__name__}(url="{self.url}", attributes={self.attributes})'
 
     def rename_after_download(self, filename):
         """
@@ -482,10 +457,10 @@ class Document():
         # got a predefined filename?
         if "filename" in self.attributes:
             # rename file to predefined name
-            os.rename(filename, self.attributes['filename'])
+            os.rename(filename, self.attributes["filename"])
         else:
             # save new filename
-            self.attributes['filename'] = filename
+            self.attributes["filename"] = filename
         return filename
 
     def match_string(self, filters):
@@ -504,9 +479,7 @@ class Document():
             return True
 
         # apply all filters to this document
-        return all(
-            _filter_attr(attribute, pattern) for attribute, pattern in filters
-        )
+        return all(_filter_attr(attribute, pattern) for attribute, pattern in filters)
 
     def match_jq(self, jq_strings):
         """
@@ -520,14 +493,12 @@ class Document():
 
         # all jq expressions must produce output
         # false positive - pylint: disable=R1729
-        return all([
-            any(
-                jq.compile(jq_string)
-                .input(text=self.toJSON())
-                .all()
-            )
-            for jq_string in jq_strings
-        ])
+        return all(
+            [
+                any(jq.compile(jq_string).input(text=self.toJSON()).all())
+                for jq_string in jq_strings
+            ]
+        )
 
     def match_regex(self, regexes):
         """
@@ -543,15 +514,11 @@ class Document():
         if len(regexes) == 0:
             return True
 
-        return all(
-            _match_attr(attribute, regex) for attribute, regex in regexes
-        )
+        return all(_match_attr(attribute, regex) for attribute, regex in regexes)
 
     # we don't use camelCase here pylint: disable=C0103
     def toJSON(self):
         """:result: json representation of document"""
         return json.dumps(
-            self.attributes,
-            sort_keys=True,
-            cls=docdl.util.dateparser.DateEncoder
+            self.attributes, sort_keys=True, cls=docdl.util.dateparser.DateEncoder
         )

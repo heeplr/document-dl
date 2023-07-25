@@ -35,14 +35,14 @@ class Vodafone(docdl.SeleniumWebPortal):
         password.send_keys(self.password)
         password.submit()
         # wait for page element indicating success or error
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(EC.any_of(
-            EC.presence_of_element_located((By.CSS_SELECTOR, ".contract-info")),
-            EC.element_to_be_clickable((By.XPATH, "//input[@id='txtUsername']"))
-        ))
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(
+            EC.any_of(
+                EC.presence_of_element_located((By.CSS_SELECTOR, ".contract-info")),
+                EC.element_to_be_clickable((By.XPATH, "//input[@id='txtUsername']")),
+            )
+        )
         # if there's a logout element found, login was successful
-        return len(
-            self.webdriver.find_elements(By.CSS_SELECTOR, ".contract-info")
-        ) != 0
+        return len(self.webdriver.find_elements(By.CSS_SELECTOR, ".contract-info")) != 0
 
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)
@@ -53,7 +53,7 @@ class Vodafone(docdl.SeleniumWebPortal):
         docs = enumerate(self.invoices())
         for i, document in docs:
             # set an id
-            document.attributes['id'] = i
+            document.attributes["id"] = i
             # return document
             yield document
 
@@ -63,34 +63,46 @@ class Vodafone(docdl.SeleniumWebPortal):
         self.webdriver.get(self.URL_MY_DOCUMENTS)
         # wait for documents
         documents = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.element_to_be_clickable((By.XPATH, "//ul[contains(@class, 'documents-inbox-container')]"))
+            EC.element_to_be_clickable(
+                (By.XPATH, "//ul[contains(@class, 'documents-inbox-container')]")
+            )
         )
         # iterate all pages
         while next_button := WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.element_to_be_clickable((By.XPATH, "//div[@id='pagination']/ol/li[3]/a[1]"))
+            EC.element_to_be_clickable(
+                (By.XPATH, "//div[@id='pagination']/ol/li[3]/a[1]")
+            )
         ):
             # iterate all document elements
-            for element in documents.find_elements(
-                    By.CSS_SELECTOR, "li"
-            ):
+            for element in documents.find_elements(By.CSS_SELECTOR, "li"):
                 # get date
-                date = element.find_element(By.XPATH, ".//*[@automation-id='documentsInboxes_date_tv']") \
-                    .get_attribute("textContent") \
+                date = (
+                    element.find_element(
+                        By.XPATH, ".//*[@automation-id='documentsInboxes_date_tv']"
+                    )
+                    .get_attribute("textContent")
                     .strip()
+                )
                 # get title
-                title = element.find_element(By.XPATH, ".//*[@automation-id='documentsInboxes_type_tv']") \
-                    .get_attribute("textContent") \
+                title = (
+                    element.find_element(
+                        By.XPATH, ".//*[@automation-id='documentsInboxes_type_tv']"
+                    )
+                    .get_attribute("textContent")
                     .strip()
+                )
                 # get download link
-                dl_button = element.find_element(By.XPATH, ".//*[@automation-id='documentsInboxes_download_btn']")
+                dl_button = element.find_element(
+                    By.XPATH, ".//*[@automation-id='documentsInboxes_download_btn']"
+                )
                 # generate document
                 yield docdl.Document(
                     download_element=dl_button,
                     attributes={
-                        'title': title,
-                        'date': docdl.util.parse_date(date),
-                        'category': "invoice"
-                    }
+                        "title": title,
+                        "date": docdl.util.parse_date(date),
+                        "category": "invoice",
+                    },
                 )
             # last page?
             if "inactive" in next_button.get_attribute("class"):

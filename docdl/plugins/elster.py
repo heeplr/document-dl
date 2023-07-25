@@ -25,29 +25,25 @@ class Elster(docdl.SeleniumWebPortal):
         certfile = self.webdriver.find_element(
             By.XPATH, "//input[@id='loginBox.file_cert']"
         )
-        password = self.webdriver.find_element(
-            By.XPATH, "//input[@id='password']"
-        )
+        password = self.webdriver.find_element(By.XPATH, "//input[@id='password']")
         # wait for entry field
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of(password)
-        )
+        WebDriverWait(self.webdriver, self.TIMEOUT).until(EC.visibility_of(password))
         # fill in form
         certfile.send_keys(self.login_id)
         password.send_keys(self.password)
         # click login button
-        loginbutton = self.webdriver.find_element(
-            By.XPATH, "//button[@title='Login']"
-        )
+        loginbutton = self.webdriver.find_element(By.XPATH, "//button[@title='Login']")
         loginbutton.click()
 
         # wait for either login error message box or success message
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH,
-                "//div[contains(@class,'messageBox--error')] | "
-                "//*[contains(text(), 'Erfolgreich eingeloggt')]"
-            ))
+            EC.visibility_of_element_located(
+                (
+                    By.XPATH,
+                    "//div[contains(@class,'messageBox--error')] | "
+                    "//*[contains(text(), 'Erfolgreich eingeloggt')]",
+                )
+            )
         )
         # login successful
         return "Mein ELSTER" in self.webdriver.title
@@ -67,13 +63,11 @@ class Elster(docdl.SeleniumWebPortal):
             # iterate all rows of table
             while True:
                 # wait for table
-                posteingang = WebDriverWait(
-                    self.webdriver, self.TIMEOUT
-                    ).until(
-                        EC.presence_of_element_located((
-                            By.CSS_SELECTOR, "#posteingangModel tbody"
-                        ))
+                posteingang = WebDriverWait(self.webdriver, self.TIMEOUT).until(
+                    EC.presence_of_element_located(
+                        (By.CSS_SELECTOR, "#posteingangModel tbody")
                     )
+                )
                 # find all rows on this page
                 rows = posteingang.find_elements(By.CSS_SELECTOR, "tr")
                 # last row?
@@ -84,47 +78,51 @@ class Elster(docdl.SeleniumWebPortal):
                 row = rows[i_page]
                 # get columns
                 downloadbutton = WebDriverWait(row, self.TIMEOUT).until(
-                    EC.presence_of_element_located((
-                        By.XPATH, ".//td[@data-rwd='Betreff']/*/button"
-                    ))
+                    EC.presence_of_element_located(
+                        (By.XPATH, ".//td[@data-rwd='Betreff']/*/button")
+                    )
                 )
-                betreff = downloadbutton \
-                    .get_attribute("textContent") \
-                    .strip()
+                betreff = downloadbutton.get_attribute("textContent").strip()
 
-                gelesen = row.find_element(
-                    By.CSS_SELECTOR, "span.icon"
-                )
+                gelesen = row.find_element(By.CSS_SELECTOR, "span.icon")
                 gelesen = gelesen.get_attribute("title") == "gelesen"
 
-                ordnungskriterium = row.find_element(
-                    By.XPATH, ".//td[@data-rwd='Ordnungskriterium']"
-                ).get_attribute("textContent").strip()
+                ordnungskriterium = (
+                    row.find_element(By.XPATH, ".//td[@data-rwd='Ordnungskriterium']")
+                    .get_attribute("textContent")
+                    .strip()
+                )
 
-                profil = row.find_element(
-                    By.XPATH, ".//td[@data-rwd='Profil']"
-                ).get_attribute("textContent").strip()
+                profil = (
+                    row.find_element(By.XPATH, ".//td[@data-rwd='Profil']")
+                    .get_attribute("textContent")
+                    .strip()
+                )
 
-                absender = row.find_element(
-                    By.XPATH, ".//td[@data-rwd='Absender']"
-                ).get_attribute("textContent").strip()
+                absender = (
+                    row.find_element(By.XPATH, ".//td[@data-rwd='Absender']")
+                    .get_attribute("textContent")
+                    .strip()
+                )
 
-                datum = row.find_element(
-                    By.XPATH, ".//td[@data-rwd='Datum']"
-                ).get_attribute("textContent").strip()
+                datum = (
+                    row.find_element(By.XPATH, ".//td[@data-rwd='Datum']")
+                    .get_attribute("textContent")
+                    .strip()
+                )
                 datum = re.sub(r"[\n\r\t]+", " ", datum)
 
                 yield docdl.Document(
                     download_element=downloadbutton,
                     attributes={
-                        'betreff': betreff,
-                        'ordnungskriterium': ordnungskriterium,
-                        'profil': profil,
-                        'absender': absender,
-                        'date': docdl.util.parse_date(datum),
-                        'unread': not gelesen,
-                        'id': i
-                    }
+                        "betreff": betreff,
+                        "ordnungskriterium": ordnungskriterium,
+                        "profil": profil,
+                        "absender": absender,
+                        "date": docdl.util.parse_date(datum),
+                        "unread": not gelesen,
+                        "id": i,
+                    },
                 )
                 # increase counter
                 i += 1
@@ -132,8 +130,7 @@ class Elster(docdl.SeleniumWebPortal):
 
             # last page?
             next_button = self.webdriver.find_element(
-                By.ID,
-                "MeinPosteingangTable_pagination_next_page"
+                By.ID, "MeinPosteingangTable_pagination_next_page"
             )
             if not next_button.is_enabled():
                 # quit
@@ -150,24 +147,22 @@ class Elster(docdl.SeleniumWebPortal):
         document.download_element.click()
         # wait for "save as PDF" button
         savebutton = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH, "//button[@id='alsPDFSpeichern']"
-            ))
+            EC.visibility_of_element_located(
+                (By.XPATH, "//button[@id='alsPDFSpeichern']")
+            )
         )
         # click savebutton
         savebutton.click()
         # wait for password dialog
         password = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.visibility_of_element_located((
-                By.XPATH, "//input[@id='passwortEingeben']"
-            ))
+            EC.visibility_of_element_located(
+                (By.XPATH, "//input[@id='passwortEingeben']")
+            )
         )
         # enter password
         password.send_keys(self.password)
         # get new save button
-        savebutton = self.webdriver.find_element(
-            By.XPATH, "//button[@id='openButton']"
-        )
+        savebutton = self.webdriver.find_element(By.XPATH, "//button[@id='openButton']")
         # store "save" button as new download_element
         document.download_element = savebutton
         # download file
