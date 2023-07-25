@@ -260,6 +260,8 @@ class SeleniumWebPortal(WebPortal):
             # ~     "browser.privatebrowsing.autostart", True
             # ~ )
             # set default download directory to CWD
+            firefox_profile.set_preference("browser.download.folderList", 2)
+            firefox_profile.set_preference("browser.download.manager.showWhenStarting", False)
             firefox_profile.set_preference("browser.download.dir", os.getcwd())
             # save PDFs by default (don't preview)
             firefox_profile.set_preference(
@@ -300,12 +302,12 @@ class SeleniumWebPortal(WebPortal):
                     )
             # get path to geckodriver executable
             gecko_path = shutil.which("geckodriver")
+            # set firefox profile
+            webdriver_options.profile = firefox_profile
+            # set firefox binary
+            webdriver_options.binary = FirefoxBinary(os.path.join(gecko_path, ff_path))
             # initialize driver
-            return webdriver.Firefox(
-                binary=FirefoxBinary(os.path.join(gecko_path, ff_path)),
-                profile=firefox_profile,
-                options=webdriver_options
-            )
+            return webdriver.Firefox(options=webdriver_options)
 
         def _init_ie():
             return webdriver.Ie(options=webdriver_options)
@@ -374,7 +376,9 @@ class SeleniumWebPortal(WebPortal):
         # pylint: disable=C0103
         OBSERVER = watchdog.observers.Observer()
         # ignore temporary download files
-        handler = DownloadFileCreatedHandler(ignore_patterns=['*.crdownload'])
+        handler = DownloadFileCreatedHandler(
+            ignore_patterns=['*.crdownload', '*.part', '.com.google.Chrome.*']
+        )
         OBSERVER.schedule(handler, os.getcwd(), recursive=False)
 
         # click element to start download
@@ -426,9 +430,9 @@ class SeleniumWebPortal(WebPortal):
         entry.send_keys(captcha)
 
     def scroll_to_element(self, element):
-        """scroll WebElement into view"""
+        """scroll WebElement into center view"""
         self.webdriver.execute_script(
-            "arguments[0].scrollIntoView(true);", element
+            "arguments[0].scrollIntoView(true); window.scrollBy(0, -window.innerHeight/2);", element
         )
 
     def scroll_to_bottom(self):
