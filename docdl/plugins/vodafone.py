@@ -11,7 +11,7 @@ import docdl.util
 
 class Vodafone(docdl.SeleniumWebPortal):
     """
-    download documents from https://kabel.vodafone.de
+    download documents from https://www.vodafone.de
     """
 
     URL_BASE = "https://www.vodafone.de"

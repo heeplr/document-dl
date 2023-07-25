@@ -31,7 +31,7 @@ regularly using a cron job so documents are downloaded automatically.
   * handyvertrag.de
   * dkb.de
   * o2.de
-  * kabel.vodafone.de
+  * www.vodafone.de
   * conrad.de
   * elster.de
   * strato.de
@@ -121,7 +121,7 @@ Commands:
   ing           banking.ing.de with photoTAN (postbox)
   o2            o2online.de (invoices, call record, postbox)
   strato        strato.de (invoices)
-  vodafone      kabel.vodafone.de (postbox, invoices)
+  vodafone      www.vodafone.de (invoices)
 ```
 
 Display plugin-specific help:
