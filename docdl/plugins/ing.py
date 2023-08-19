@@ -55,38 +55,6 @@ class ING(docdl.SeleniumWebPortal):
         )
         nextbutton.click()
 
-        # wait for banking key keypad or photoTAN
-        WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: d.find_elements(By.CSS_SELECTOR, "img.thumbnail__image")
-            or d.find_elements(By.CSS_SELECTOR, "div.diba-keypad")
-            or d.find_elements(By.CSS_SELECTOR, "div.notification--warning")
-            or d.find_elements(By.CSS_SELECTOR, "small.form-group__error")
-        )
-        # get DiBa Key digits
-        if digits := self.webdriver.find_elements(
-            By.XPATH,
-            "//div[contains(@class, 'diba-keypad')]/"
-            "div[contains(@class, 'notification')]/"
-            "p[@role='heading']/b/span",
-        ):
-            # get requested digits from html
-            digits = [e.get_attribute("textContent").strip() for e in digits]
-            # click numbers on keypad
-            for digit in digits:
-                number = self.arguments["diba_key"][int(digit) - 1]
-                self.webdriver.find_element("link text", number).click()
-            # get "next" button
-            nextbutton = self.webdriver.find_element(
-                By.XPATH, "//button[@name='buttons:next']"
-            )
-            nextbutton.click()
-            # wait for photoTAN or error
-            WebDriverWait(self.webdriver, self.TIMEOUT).until(
-                lambda d: d.find_elements(By.CSS_SELECTOR, "img.thumbnail__image")
-                or d.find_elements(By.CSS_SELECTOR, "div.notification--warning")
-                or d.find_elements(By.CSS_SELECTOR, "small.form-group__error")
-            )
-
         # handle photoTAN
         if qrcode := self.webdriver.find_element(
             By.CSS_SELECTOR, "img.thumbnail__image"
@@ -214,15 +182,6 @@ class ING(docdl.SeleniumWebPortal):
 
 
 @click.command()
-@click.option(
-    "-k",
-    "--diba-key",
-    prompt=True,
-    hide_input=True,
-    envvar="DOCDL_DIBA_KEY",
-    show_envvar=True,
-    help="DiBa Key",
-)
 @click.pass_context
 # pylint: disable=W0613
 def ing(ctx, *args, **kwargs):
