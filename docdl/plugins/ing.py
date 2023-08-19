@@ -73,12 +73,16 @@ class ING(docdl.SeleniumWebPortal):
         # wait for logout button (success) or tan input (failure) or
         # some ad modal (success)
         WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            lambda d: d.find_elements(By.XPATH, "//button[@aria-label='Logout']")
+            lambda d: d.find_elements(
+                By.XPATH, "//button[@class='session-button__logout-button']"
+            )
             or d.find_elements(By.CSS_SELECTOR, "input.input-field")
             or d.find_elements(By.CSS_SELECTOR, "section.insight-modal")
         )
         # login successful ?
-        return self.webdriver.find_elements(By.XPATH, "//button[@aria-label='Logout']")
+        return self.webdriver.find_elements(
+            By.XPATH, "//button[@class='session-button__logout-button']"
+        )
 
     def logout(self):
         self.webdriver.get(self.URL_LOGOUT)
