@@ -188,6 +188,10 @@ class Amazon(docdl.SeleniumWebPortal):
 
                 # generate invoices
                 for url in invoice_urls:
+                    filename = (
+                        f"amazon-{date.strftime('%Y%m%d')}-"
+                        f"{order_nr}-{slugify(product_name)}.pdf"
+                    )
                     yield docdl.Document(
                         url=url,
                         attributes={
@@ -195,7 +199,7 @@ class Amazon(docdl.SeleniumWebPortal):
                             "order": order_nr,
                             "id": i,
                             "product": product_name,
-                            "filename": f"amazon-{date.strftime('%Y%m%d')}-{order_nr}-{slugify(product_name)}.pdf",
+                            "filename": filename,
                         },
                     )
                     # increment counter
