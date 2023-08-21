@@ -20,6 +20,7 @@ setup(
         'python-dateutil',
         'requests',
         'selenium >4.9.0, <4.11.0',
+        'slugify',
         'watchdog'
     ],
     packages=find_packages(exclude=['tests*']),
