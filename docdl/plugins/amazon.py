@@ -6,6 +6,7 @@ download documents from Amazon
 
 import re
 import click
+from slugify import slugify
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait, Select
 from selenium.webdriver.support import expected_conditions as EC
@@ -150,10 +151,6 @@ class Amazon(docdl.SeleniumWebPortal):
                 )
                 # remove doubles
                 invoice_urls = set(e.get_attribute("href") for e in invoice_urls)
-                # some orders don't have invoices
-                if len(invoice_urls) == 0:
-                    # skip this order
-                    continue
                 # extract items that contain order number and order date
                 date_nr = self.webdriver.find_elements(
                     By.CSS_SELECTOR, "span.order-date-invoice-item"
@@ -162,18 +159,43 @@ class Amazon(docdl.SeleniumWebPortal):
                 order_nr = date_nr[1].get_attribute("textContent").strip()
                 # parse date
                 date = re.match(r"[^\d]*(.+)$", date)[1]
+                date = docdl.util.parse_date(date)
                 # parse order number
                 order_nr = re.match(r"[^\d]*(.+)$", order_nr)[1]
+                # get product name
+                product_name = (
+                    self.webdriver.find_element(
+                        By.XPATH,
+                        "//div[@class='a-row']/a[contains(@href, '/product/')]",
+                    )
+                    .get_attribute("textContent")
+                    .strip()
+                )
+                # some orders don't have invoices
+                if len(invoice_urls) == 0:
+                    # generate empty entry with warning
+                    yield docdl.Document(
+                        url=None,
+                        attributes={
+                            "date": date,
+                            "order": order_nr,
+                            "id": i,
+                            "product": product_name,
+                            "warning": "no invoice available!",
+                        },
+                    )
+                    continue
 
                 # generate invoices
                 for url in invoice_urls:
                     yield docdl.Document(
                         url=url,
                         attributes={
-                            "date": docdl.util.parse_date(date),
+                            "date": date,
                             "order": order_nr,
                             "id": i,
-                            "filename": f"amazon-invoice-{order_nr}.pdf",
+                            "product": product_name,
+                            "filename": f"amazon-{date.strftime('%Y%m%d')}-{order_nr}-{slugify(product_name)}.pdf",
                         },
                     )
                     # increment counter
@@ -183,7 +205,7 @@ class Amazon(docdl.SeleniumWebPortal):
         # wait for dropdown to select orders
         # (last months, years, archived)
         orderfilter = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "select#orderFilter"))
+            EC.presence_of_element_located((By.XPATH, ".//select[@name='orderFilter']"))
         )
         # extract values of year options
         options = [
@@ -203,12 +225,12 @@ class Amazon(docdl.SeleniumWebPortal):
     def _set_orderfilter(self, option):
         # find <select> for order filter
         orderfilter = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.presence_of_element_located((By.CSS_SELECTOR, "select#orderFilter"))
+            EC.presence_of_element_located((By.XPATH, ".//select[@name='orderFilter']"))
         )
         # move <select> to front
         self.webdriver.execute_script("arguments[0].style.zIndex='99'", orderfilter)
         orderfilter = WebDriverWait(self.webdriver, self.TIMEOUT).until(
-            EC.element_to_be_clickable((By.CSS_SELECTOR, "select#orderFilter"))
+            EC.element_to_be_clickable((By.XPATH, ".//select[@name='orderFilter']"))
         )
         # select current option
         orderfilter_select = Select(orderfilter)
