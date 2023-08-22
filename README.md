@@ -42,11 +42,12 @@ regularly using a cron job so documents are downloaded automatically.
 * [python](https://python.org)
 * [click](https://github.com/pallets/click)
 * [click-plugins](https://github.com/click-contrib/click-plugins)
-* [watchdog](https://github.com/gorakhargosh/watchdog)
 * [jq](https://github.com/mwilliamson/jq.py)
 * [python-dateutil](https://dateutil.readthedocs.io/en/stable/)
 * [requests](https://docs.python-requests.org/en/master/)
 * [selenium](https://selenium-python.readthedocs.io/) (default webdriver is "chrome")
+* [slugify](https://github.com/un33k/python-slugify)
+* [watchdog](https://github.com/gorakhargosh/watchdog)
 
 <br><br>
 ## Installation (for debian bullseye)
