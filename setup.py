@@ -19,7 +19,7 @@ setup(
         'jq',
         'python-dateutil',
         'requests',
-        'selenium >4.9.0, <4.12.0',
+        'selenium >4.9.0, <4.15.0',
         'slugify',
         'watchdog'
     ],
